@@ -105,6 +105,7 @@ def get_plant_info(genus, species=""):
         soil_text = description[soil_idx:description.find(".", soil_idx)]
         soils = re.findall(r"(light|medium|heavy)", soil_text)
 
+    # Extracting and correlating pH values
     if "pH:" in description_list:
         ph_idx = description_list.index("pH:") + 1
         ph_list = description_list[ph_idx:]
@@ -129,7 +130,9 @@ def get_plant_info(genus, species=""):
     family = table.find("span", id="ContentPlaceHolder1_lblFamily").text
     hardiness_range = table.find("span", id="ContentPlaceHolder1_lblUSDAhardiness").text
 
+    # Extract hardiness zones and correlate them
     hardiness_zones = []
+    zone_min, zone_max = None, None
     match = re.search(r'(\d+)\-(\d+)', hardiness_range)
     if match:
         zone_min, zone_max = match.groups()
@@ -150,7 +153,7 @@ def get_plant_info(genus, species=""):
             img_url = 'https://pfaf.org' + img_tag['src'][2:]
 
     return [
-        family, genus, species, common_name, growth_rate, hardiness_zones, height, width,
+        family, genus, species, common_name, growth_rate, f"{zone_min} to {zone_max}", height, width,
         plant_type, foliage, pollinators, leaf, flower, ripen_date, reproduction, soils, ph, ph_split, preferences,
         tolerances, habitats, habitat_range, edibility, medicinal_rating, other_uses, pfaf_url, img_url
     ]
@@ -202,7 +205,7 @@ def scrape_plant_data():
         for future in concurrent.futures.as_completed(futures):
             plant_data.extend(future.result())
 
-    with open('plant_data_test.csv', 'w', newline='', encoding='utf-8') as file:
+    with open('plant_data_debug.csv', 'w', newline='', encoding='utf-8') as file:
         writer = csv.writer(file, quoting=csv.QUOTE_MINIMAL)
         writer.writerow(attributes)
         for data in plant_data:

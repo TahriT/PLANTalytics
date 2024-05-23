@@ -30,12 +30,16 @@ Sparse data can occur please be aware.
 ## Power BI Integration
 The data is being hosted on this repo as a datasource
 
+## PowerBI Dashboard
+[![Power BI Report](Images\pfaf_logo_bg.jpg)](https://app.powerbi.com/view?r=eyJrIjoiYzI0ZmIyZmYtOWNjZS00NWIzLThjMmMtYmMyOTgwOThlYTUzIiwidCI6IjA5MmUzOThlLTIzYTktNGFjMS04MmJmLWIwMzQ2NTRlMGZjMyJ9)
+
+https://app.powerbi.com/view?r=eyJrIjoiYzI0ZmIyZmYtOWNjZS00NWIzLThjMmMtYmMyOTgwOThlYTUzIiwidCI6IjA5MmUzOThlLTIzYTktNGFjMS04MmJmLWIwMzQ2NTRlMGZjMyJ9
+
 I'm also using the zone data from Oregen State UI
 https://prism.oregonstate.edu/projects/plant_hardiness_zones.php
 
+[![image](Images\USDA_Hardiness_Map.jpg)
 
-## PowerBI Dashboard
-[![Power BI Report](https://app.powerbi.com/view?r=eyJrIjoiYjNiMWE4MjQtMzEyMC00Y2MwLWIzMGItYWExNDVmM2QyOWQ4IiwidCI6IjA5MmUzOThlLTIzYTktNGFjMS04MmJmLWIwMzQ2NTRlMGZjMyJ9)](https://app.powerbi.com/view?r=eyJrIjoiYjNiMWE4MjQtMzEyMC00Y2MwLWIzMGItYWExNDVmM2QyOWQ4IiwidCI6IjA5MmUzOThlLTIzYTktNGFjMS04MmJmLWIwMzQ2NTRlMGZjMyJ9)
 
 
 ## Contributing
