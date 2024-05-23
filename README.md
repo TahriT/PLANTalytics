@@ -31,14 +31,14 @@ Sparse data can occur please be aware.
 The data is being hosted on this repo as a datasource
 
 ## PowerBI Dashboard
-[![Power BI Report](Images\pfaf_logo_bg.jpg)](https://app.powerbi.com/view?r=eyJrIjoiYzI0ZmIyZmYtOWNjZS00NWIzLThjMmMtYmMyOTgwOThlYTUzIiwidCI6IjA5MmUzOThlLTIzYTktNGFjMS04MmJmLWIwMzQ2NTRlMGZjMyJ9)
+[![Power BI Report](https://github.com/TahriT/PLANTalytics/blob/main/Images/pfaf_logo_bg.jpg?raw=true)](https://app.powerbi.com/view?r=eyJrIjoiYzI0ZmIyZmYtOWNjZS00NWIzLThjMmMtYmMyOTgwOThlYTUzIiwidCI6IjA5MmUzOThlLTIzYTktNGFjMS04MmJmLWIwMzQ2NTRlMGZjMyJ9)
 
 https://app.powerbi.com/view?r=eyJrIjoiYzI0ZmIyZmYtOWNjZS00NWIzLThjMmMtYmMyOTgwOThlYTUzIiwidCI6IjA5MmUzOThlLTIzYTktNGFjMS04MmJmLWIwMzQ2NTRlMGZjMyJ9
 
 I'm also using the zone data from Oregen State UI
 https://prism.oregonstate.edu/projects/plant_hardiness_zones.php
 
-[![image](Images\USDA_Hardiness_Map.jpg)
+[![image](https://github.com/TahriT/PLANTalytics/blob/main/ImagesUSDA_Hardiness_Map.jpg?raw=true)
 
 
 
