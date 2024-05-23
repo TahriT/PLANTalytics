@@ -13,7 +13,7 @@ https://github.com/jwnigel/permaculture/
 
 ## Usage
 
-The python script will start scraping and saving the data to a CSV file. It can be easily modified or used to specifc a specifc set of Plant using 
+The python script will start scraping and saving the data to a CSV file. It can be easily modified or used to specifcy a specifc set of plants modifying the letters using the latin_alphabet variable in the script.
 
 
 Sparse data can occur please be aware.
