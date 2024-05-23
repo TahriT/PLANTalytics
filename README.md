@@ -38,7 +38,7 @@ https://app.powerbi.com/view?r=eyJrIjoiYzI0ZmIyZmYtOWNjZS00NWIzLThjMmMtYmMyOTgwO
 I'm also using the zone data from Oregen State UI
 https://prism.oregonstate.edu/projects/plant_hardiness_zones.php
 
-[![image](https://github.com/TahriT/PLANTalytics/blob/main/ImagesUSDA_Hardiness_Map.jpg?raw=true)
+[![image](https://github.com/TahriT/PLANTalytics/blob/main/Images/USDA_Hardiness_Map.jpg?raw=true)
 
 
 
