@@ -1,8 +1,10 @@
 # PLANTalytics
-A database to help better understand the data behind plant growth and synergies using data from pfaf.org
+A repository to help better understand the data behind plant growth and synergies using data from pfaf.org
 
 ## Plant Data Scraper
-This project scrapes plant data from the Plants For A Future (PFAF) website and saves it into a CSV file. The script fetches various plant characteristics, including family, genus, species, common name, growth rate, hardiness zones, height, width, type, foliage, pollinators, leaf, flower, ripening period, reproduction, soils, pH, preferences, tolerances, habitats, habitat range, edibility, medicinal rating, other uses, and image URL.
+This project scrapes plant data from the Plants For A Future (PFAF) website and saves it into a CSV file. 
+
+The script fetches various plant characteristics, including family, genus, species, common name, growth rate, hardiness zones, height, width, type, foliage, pollinators, leaf, flower, ripening period, reproduction, soils, pH, preferences, tolerances, habitats, habitat range, edibility, medicinal rating, other uses, and image URL.
 
 Please consider donating to them! https://pfaf.org/
 
