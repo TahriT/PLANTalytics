@@ -1,6 +1,14 @@
 # PLANTalytics
 A repository to help better understand the data behind plant growth and synergies using data from pfaf.org
 
+[![image](https://github.com/TahriT/PLANTalytics/blob/main/Images/Plantalytics.jpg?raw=true)
+
+
+## Videos
+
+[[Watch the video on YouTube](https://www.youtube.com/watch?v=Gl3eHfdakuo)
+
+
 ## Plant Data Scraper
 This project scrapes plant data from the Plants For A Future (PFAF) website and saves it into a CSV file. 
 
