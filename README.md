@@ -1,7 +1,7 @@
 # PLANTalytics
 A repository to help better understand the data behind plant growth and synergies using data from pfaf.org
 
-[![image](https://github.com/TahriT/PLANTalytics/blob/main/Images/Plantalytics.png?raw=true)
+![image](https://github.com/TahriT/PLANTalytics/blob/main/Images/Plantalytics.png?raw=true)
 
 
 ## Videos
