@@ -5,29 +5,49 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Plantalytics</title>
     <style>
+        /* General Styles */
         body {
             margin: 0;
-            font-family: Arial, sans-serif;
+            font-family: 'Arial', sans-serif;
             height: 100vh;
             display: flex;
             flex-direction: column;
+            background: linear-gradient(to bottom, #004d00, #66ff66); /* Dark to light green gradient */
         }
+        /* Header Styles */
         header {
-            background-color: #f8f9fa;
-            padding: 10px 20px;
+            background: rgba(255, 255, 255, 0.9); /* Semi-transparent white */
+            padding: 15px 20px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            border-bottom: 1px solid #ddd;
+            border-bottom: 2px solid #004d00; /* Green border */
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); /* Subtle shadow */
+        }
+        header h1 {
+            margin: 0;
+            font-size: 24px;
+            color: #004d00; /* Dark green text */
+            font-weight: bold;
+        }
+        header nav {
+            display: flex;
+            gap: 15px;
         }
         header a {
             text-decoration: none;
-            color: #007bff;
-            margin-right: 15px;
+            font-size: 16px;
+            color: #004d00; /* Dark green */
+            font-weight: bold;
+            padding: 5px 10px;
+            border-radius: 5px;
+            transition: all 0.3s ease;
         }
         header a:hover {
-            text-decoration: underline;
+            background: #004d00; /* Dark green */
+            color: #ffffff; /* White text */
         }
+        /* Iframe Styles */
         iframe {
             flex-grow: 1;
             border: none;
@@ -37,8 +57,11 @@
 </head>
 <body>
     <header>
-        <a href="https://tahrit.github.io/PLANTalytics/">Home</a>
-        <a href="https://github.com/tahrit" target="_blank">GitHub</a>
+        <h1>Plantalytics</h1>
+        <nav>
+            <a href="http://plantalytics.net/">Home</a>
+            <a href="https://github.com/tahrit" target="_blank">GitHub</a>
+        </nav>
     </header>
     <iframe
         src="https://app.powerbi.com/view?r=eyJrIjoiYzI0ZmIyZmYtOWNjZS00NWIzLThjMmMtYmMyOTgwOThlYTUzIiwidCI6IjA5MmUzOThlLTIzYTktNGFjMS04MmJmLWIwMzQ2NTRlMGZjMyJ9"
