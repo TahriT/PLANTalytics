@@ -4,13 +4,47 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Plantalytics</title>
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        header {
+            background-color: #f8f9fa;
+            padding: 10px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #ddd;
+        }
+        header a {
+            text-decoration: none;
+            color: #007bff;
+            margin-right: 15px;
+        }
+        header a:hover {
+            text-decoration: underline;
+        }
+        iframe {
+            flex-grow: 1;
+            border: none;
+            background: transparent;
+        }
+    </style>
 </head>
 <body>
+    <header>
+        <a href="https://tahrit.github.io/PLANTalytics/">Home</a>
+        <a href="https://github.com/tahrit" target="_blank">GitHub</a>
+    </header>
     <iframe
         src="https://app.powerbi.com/view?r=eyJrIjoiYzI0ZmIyZmYtOWNjZS00NWIzLThjMmMtYmMyOTgwOThlYTUzIiwidCI6IjA5MmUzOThlLTIzYTktNGFjMS04MmJmLWIwMzQ2NTRlMGZjMyJ9"
         width="100%"
-        height="500"
-        style="border:none;">
+        height="100%"
+        style="background: transparent;">
     </iframe>
 </body>
 </html>
