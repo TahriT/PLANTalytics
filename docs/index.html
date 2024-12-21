@@ -47,58 +47,27 @@
             background: #004d00; /* Dark green */
             color: #ffffff; /* White text */
         }
-        /* Report Container Styles */
-        #report-container {
+        /* Iframe Styles */
+        iframe {
             flex-grow: 1;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
-        #report {
-            width: 100%;
-            height: 100%;
+            border: none;
+            background: transparent;
         }
     </style>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/powerbi-client/2.19.1/powerbi.min.js"></script>
 </head>
 <body>
     <header>
         <h1>Plantalytics</h1>
         <nav>
             <a href="http://plantalytics.net/">Home</a>
-            <a href="https://github.com/tahrit" target="_blank">GitHub</a>
+            <a href="https://github.com/user" target="_blank">GitHub</a>
         </nav>
     </header>
-    <div id="report-container">
-        <div id="report"></div>
-    </div>
-    <script>
-        // Embed the Power BI report
-        (function () {
-            const embedUrl = "https://app.powerbi.com/reportEmbed?reportId=04ec1eaa-6879-4e76-adc7-d242834883d4&autoAuth=true&ctid=092e398e-23a9-4ac1-82bf-b034654e0fc3";
-            const reportId = "04ec1eaa-6879-4e76-adc7-d242834883d4";
-
-            const models = window['powerbi-client'].models;
-
-            const config = {
-                type: 'report',
-                embedUrl: embedUrl,
-                id: reportId,
-                settings: {
-                    panes: {
-                        filters: { visible: false }, // Hide filters pane
-                        pageNavigation: { visible: true } // Enable page navigation
-                    },
-                    layoutType: models.LayoutType.MobilePortrait, // Mobile-friendly layout
-                    background: models.BackgroundType.Transparent // Transparent background
-                }
-            };
-
-            // Embed the report into the #report div
-            const reportContainer = document.getElementById('report');
-            const powerbi = new window['powerbi-client'].PowerBI();
-            powerbi.embed(reportContainer, config);
-        })();
-    </script>
+    <iframe
+        src="https://app.powerbi.com/view?r=eyJrIjoiYzI0ZmIyZmYtOWNjZS00NWIzLThjMmMtYmMyOTgwOThlYTUzIiwidCI6IjA5MmUzOThlLTIzYTktNGFjMS04MmJmLWIwMzQ2NTRlMGZjMyJ9"
+        width="100%"
+        height="100%"
+        style="background: transparent;">
+    </iframe>
 </body>
 </html>
