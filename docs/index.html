@@ -9,9 +9,9 @@
         body {
             margin: 0;
             font-family: 'Arial', sans-serif;
-            height: 100vh;
             display: flex;
             flex-direction: column;
+            height: 100vh;
             background: linear-gradient(to bottom, #004d00, #66ff66); /* Dark to light green gradient */
         }
         /* Header Styles */
@@ -47,27 +47,91 @@
             background: #004d00; /* Dark green */
             color: #ffffff; /* White text */
         }
-        /* Iframe Styles */
-        iframe {
+        /* Report Container Styles */
+        #report-container {
             flex-grow: 1;
+            position: relative;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        #report {
+            width: 100%;
+            height: 100%;
             border: none;
-            background: transparent;
+        }
+        .fallback {
+            display: none;
         }
     </style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/powerbi-client/2.19.1/powerbi.min.js"></script>
 </head>
 <body>
     <header>
         <h1>Plantalytics</h1>
         <nav>
             <a href="http://plantalytics.net/">Home</a>
-            <a href="https://github.com/tahrit" target="_blank">GitHub</a>
+            <a href="https://github.com/tahrit" target="_blank">TahriT GitHub</a>
         </nav>
     </header>
-    <iframe
-        src="https://app.powerbi.com/view?r=eyJrIjoiYzI0ZmIyZmYtOWNjZS00NWIzLThjMmMtYmMyOTgwOThlYTUzIiwidCI6IjA5MmUzOThlLTIzYTktNGFjMS04MmJmLWIwMzQ2NTRlMGZjMyJ9&mobileView=true"
-        width="100%"
-        height="100%"
-        style="background: transparent;">
-    </iframe>
+    <div id="report-container">
+        <!-- Fallback iframe -->
+        <iframe 
+            id="fallback-report"
+            class="fallback"
+            src="https://app.powerbi.com/reportEmbed?reportId=04ec1eaa-6879-4e76-adc7-d242834883d4&autoAuth=true&ctid=092e398e-23a9-4ac1-82bf-b034654e0fc3&layout=mobile"
+            frameborder="0"
+            style="width: 100%; height: 100%;"
+        ></iframe>
+        <!-- Report container for JS SDK -->
+        <div id="report"></div>
+    </div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const reportContainer = document.getElementById("report");
+            const fallbackIframe = document.getElementById("fallback-report");
+
+            const embedConfig = {
+                type: "report",
+                embedUrl: "https://app.powerbi.com/reportEmbed?reportId=04ec1eaa-6879-4e76-adc7-d242834883d4",
+                id: "04ec1eaa-6879-4e76-adc7-d242834883d4",
+                settings: {
+                    layoutType: window.innerWidth < 768 ? "Mobile" : "Desktop",
+                    panes: {
+                        filters: {
+                            visible: false
+                        },
+                        pageNavigation: {
+                            visible: true
+                        }
+                    }
+                }
+            };
+
+            try {
+                const powerbi = new window["powerbi-client"].service.PowerBI();
+                const report = powerbi.embed(reportContainer, embedConfig);
+
+                // Report embedding success listener
+                report.on("loaded", function () {
+                    console.log("Report loaded successfully.");
+                    fallbackIframe.style.display = "none"; // Hide fallback iframe
+                    reportContainer.style.display = "block"; // Show JS SDK embed
+                });
+
+                // Error handling
+                report.on("error", function (event) {
+                    console.error("Power BI error:", event.detail);
+                    fallbackIframe.style.display = "block"; // Show fallback iframe
+                    reportContainer.style.display = "none"; // Hide JS SDK embed
+                });
+            } catch (error) {
+                console.error("Embedding failed:", error);
+                fallbackIframe.style.display = "block"; // Show fallback iframe
+                reportContainer.style.display = "none"; // Hide JS SDK embed
+            }
+        });
+    </script>
 </body>
 </html>
