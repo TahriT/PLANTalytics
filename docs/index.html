@@ -71,7 +71,7 @@
         <h1>Plantalytics</h1>
         <nav>
             <a href="http://plantalytics.net/">Home</a>
-            <a href="https://github.com/tahrit" target="_blank">TahriT GitHub</a>
+            <a href="https://github.com/user" target="_blank">TahriT GitHub</a>
         </nav>
     </header>
     <div id="report-container">
@@ -94,10 +94,11 @@
 
             const embedConfig = {
                 type: "report",
-                embedUrl: "https://app.powerbi.com/reportEmbed?reportId=04ec1eaa-6879-4e76-adc7-d242834883d4",
-                id: "04ec1eaa-6879-4e76-adc7-d242834883d4",
+                embedUrl: "https://app.powerbi.com/reportEmbed?reportId=04ec1eaa-6879-4e76-adc7-d242834883d4", // Your report URL
+                id: "04ec1eaa-6879-4e76-adc7-d242834883d4", // Your report ID
+                accessToken: "YOUR_ACCESS_TOKEN_HERE",  // Include the access token here
                 settings: {
-                    layoutType: window.innerWidth < 768 ? "Mobile" : "Desktop",
+                    layoutType: window.innerWidth < 768 ? 2 : 1,
                     panes: {
                         filters: {
                             visible: false
@@ -110,7 +111,7 @@
             };
 
             try {
-                const powerbi = new window["powerbi-client"].service.PowerBI();
+                // Embed the report directly using powerbi.embed without creating a PowerBI instance
                 const report = powerbi.embed(reportContainer, embedConfig);
 
                 // Report embedding success listener
