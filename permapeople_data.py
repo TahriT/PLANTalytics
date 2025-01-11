@@ -74,7 +74,7 @@ def save_to_csv(data, filename):
                 value = data_item.get('value', '')
 
                 # Check for range-like values and handle them
-                if "-" in value and key in {"soil_ph", "height", "width"}:  # Add other range keys as needed
+                if "-" in value and key in {"soil_ph", "height", "width","usda_hardiness_zone"}:  # Add other range keys as needed
                     min_value, max_value = parse_range(value)
                     data_details[f"{key}_min"] = min_value
                     data_details[f"{key}_max"] = max_value
