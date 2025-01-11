@@ -10,6 +10,22 @@ A repository to help better understand the data behind plant growth and synergie
 [Watch the video on YouTube](https://www.youtube.com/watch?v=Gl3eHfdakuo)
 
 
+## Plant Data Scraper v2
+Permapeople_data.py queires the API for all plants and saves them into a CSV file. 
+
+https://permapeople.org
+
+The script fetches various plant characteristics:
+ 
+| ID  | Name | Latin Name | Family | Synonyms | Edible Parts | Medicinal Parts | Uses | Toxicity | Growth Habit | Height | Spread | Growth Rate | Hardiness Zone | Sun Requirements | Water Requirements | Soil Requirements | Propagation Methods | Harvest Time | Bloom Time | Seed Viability | Preferred Climates | Ecosystem Services | Pollinators | Invasive Potential | Companion Planting | Pests/Diseases | Notes |
+|-----|------|------------|--------|----------|--------------|-----------------|------|----------|--------------|--------|--------|-------------|----------------|------------------|--------------------|-------------------|--------------------|--------------|-----------|----------------|--------------------|-------------------|------------|--------------------|--------------------|----------------|-------|
+
+
+
+
+
+
+
 ## Plant Data Scraper
 This project scrapes plant data from the Plants For A Future (PFAF) website and saves it into a CSV file. 
 
