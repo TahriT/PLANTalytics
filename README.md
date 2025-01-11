@@ -1,6 +1,6 @@
 # PLANTalytics - https://plantalytics.net/
 
-A repository to help better understand the data behind plant growth and synergies using data from pfaf.org
+A repository to help better understand the data behind plant growth and synergies using data from pfaf.org and permapeople.org
 
 ![image](https://github.com/TahriT/PLANTalytics/blob/main/Images/Plantalytics.png?raw=true)
 
