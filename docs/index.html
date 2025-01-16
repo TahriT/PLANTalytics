@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Plantalytics</title>
+    <title>Plantalytics - 3D Globe</title>
     <style>
         /* General Styles */
         body {
@@ -11,66 +11,49 @@
             font-family: 'Arial', sans-serif;
             height: 100vh;
             display: flex;
-            flex-direction: column;
-            background: linear-gradient(to bottom, #004d00, #66ff66); /* Dark to light green gradient */
-        }
-        /* Header Styles */
-        header {
-            background: rgba(255, 255, 255, 0.9); /* Semi-transparent white */
-            padding: 15px 20px;
-            display: flex;
-            justify-content: space-between;
+            justify-content: center;
             align-items: center;
-            border-bottom: 2px solid #004d00; /* Green border */
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); /* Subtle shadow */
+            background: transparent; /* Transparent background */
+            overflow: hidden; /* Hide overflow for the 3D globe */
         }
-        header h1 {
-            margin: 0;
-            font-size: 24px;
-            color: #004d00; /* Dark green text */
-            font-weight: bold;
-        }
-        header nav {
-            display: flex;
-            gap: 15px;
-        }
-        header a {
-            text-decoration: none;
-            font-size: 16px;
-            color: #004d00; /* Dark green */
-            font-weight: bold;
-            padding: 5px 10px;
-            border-radius: 5px;
-            transition: all 0.3s ease;
-        }
-        header a:hover {
-            background: #004d00; /* Dark green */
-            color: #ffffff; /* White text */
-        }
-        /* Iframe Styles */
-        iframe {
-            flex-grow: 1;
-            border: none;
-            background: transparent;
+
+        #main {
+            width: 100%;
+            height: 100%;
         }
     </style>
+    <!-- Include ECharts and ECharts-GL -->
+    <script src="https://cdn.jsdelivr.net/npm/echarts@5.3.0/dist/echarts.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/echarts-gl@2.0.0/dist/echarts-gl.min.js"></script>
 </head>
 <body>
-    <header>
-        <h1>Plantalytics</h1>
-        <nav>
-            <a href="http://plantalytics.net/">Home</a>
-            <a href="https://github.com/TahriT/PLANTalytics" target="_blank">TahriT GitHub</a>
-            <a href="https://app.powerbi.com/view?r=eyJrIjoiYWJkOTNmMjMtZDUxZC00MTc5LTk1MTktNDFiMjk5MzhlOGMwIiwidCI6IjA5MmUzOThlLTIzYTktNGFjMS04MmJmLWIwMzQ2NTRlMGZjMyJ9" target="_blank">Version 2</a>
-            <a href="https://app.powerbi.com/view?r=eyJrIjoiYzI0ZmIyZmYtOWNjZS00NWIzLThjMmMtYmMyOTgwOThlYTUzIiwidCI6IjA5MmUzOThlLTIzYTktNGFjMS04MmJmLWIwMzQ2NTRlMGZjMyJ9&mobileView=true" target="_blank">Version 1</a>
+    <div id="main"></div>
 
-        </nav>
-    </header>
-    <iframe
-        src="https://app.powerbi.com/view?r=eyJrIjoiYzI0ZmIyZmYtOWNjZS00NWIzLThjMmMtYmMyOTgwOThlYTUzIiwidCI6IjA5MmUzOThlLTIzYTktNGFjMS04MmJmLWIwMzQ2NTRlMGZjMyJ9&mobileView=true"
-        width="100%"
-        height="100%"
-        style="background: transparent;">
-    </iframe>
+    <script>
+        // Set up the chart container
+        var chartDom = document.getElementById('main');
+        var myChart = echarts.init(chartDom);
+
+        // Set the chart options for the 3D globe visualization
+        myChart.setOption({
+            backgroundColor: 'transparent', // Set the background to transparent
+            globe: {
+                baseTexture: 'https://echarts.apache.org/examples/data-gl/asset/world.topo.bathy.200401.jpg', // Globe base texture
+                heightTexture: 'https://echarts.apache.org/examples/data-gl/asset/bathymetry_bw_composite_4k.jpg', // Globe height texture
+                shading: 'lambert', // Apply shading for the globe
+                light: {
+                    ambient: {
+                        intensity: 0.4
+                    },
+                    main: {
+                        intensity: 0.4
+                    }
+                },
+                viewControl: {
+                    autoRotate: false // Disable auto-rotation of the globe
+                }
+            }
+        });
+    </script>
 </body>
 </html>
