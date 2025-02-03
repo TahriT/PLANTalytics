@@ -3,57 +3,190 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Plantalytics - 3D Globe</title>
-    <style>
-        /* General Styles */
-        body {
-            margin: 0;
-            font-family: 'Arial', sans-serif;
-            height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            background: transparent; /* Transparent background */
-            overflow: hidden; /* Hide overflow for the 3D globe */
-        }
-
-        #main {
-            width: 100%;
-            height: 100%;
-        }
-    </style>
-    <!-- Include ECharts and ECharts-GL -->
+    <title>Sunburst Chart with Filters</title>
+    <!-- Include ECharts -->
     <script src="https://cdn.jsdelivr.net/npm/echarts@5.3.0/dist/echarts.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/echarts-gl@2.0.0/dist/echarts-gl.min.js"></script>
+
+    <!-- Include Three.js and Vanta.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r134/three.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/vanta/0.5.21/vanta.cells.min.js"></script>
+
+    <!-- Include PapaParse -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
+
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+        }
+        #background {
+            position: fixed;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+        }
+        #filters {
+            padding: 10px;
+            display: flex;
+            gap: 15px;
+            background-color: rgba(255, 255, 255, 0.8);
+        }
+        #main {
+            width: 100%;
+            height: 80vh;
+        }
+        #commonNameFilter {
+            position: absolute;
+            top: 10%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: rgba(255, 255, 255, 0.5);
+            border: 1px solid white;
+            color: white;
+            padding: 10px;
+            border-radius: 5px;
+        }
+        #commonNameFilter input {
+            background-color: transparent;
+            border: none;
+            border-bottom: 1px solid white;
+            color: white;
+            outline: none;
+        }
+    </style>
 </head>
 <body>
+    <!-- Background Container -->
+    <div id="background"></div>
+
+    <!-- Common Name Filter -->
+    <div id="commonNameFilter">
+        <label for="commonNameInput">Common Name:</label>
+        <input type="text" id="commonNameInput" placeholder="Enter common name">
+    </div>
+
+    <!-- Filters -->
+    <div id="filters">
+        <select id="plantTypeFilter">
+            <option value="">Select Plant Type</option>
+        </select>
+        <select id="sunlightFilter">
+            <option value="">Select Sunlight Requirement</option>
+        </select>
+        <div id="growthRateSlider" style="width: 200px;"></div>
+        <label for="growthRateSlider">Growth Rate</label>
+    </div>
+
+    <!-- Chart Container -->
     <div id="main"></div>
 
     <script>
-        // Set up the chart container
-        var chartDom = document.getElementById('main');
-        var myChart = echarts.init(chartDom);
+        // Initialize Vanta Cells Background
+        VANTA.CELLS({
+            el: "#background",
+            mouseControls: true,
+            touchControls: true,
+            gyroControls: false,
+            scale: 1.0,
+            size: 0.4,
+            speed: 0.4
+        });
 
-        // Set the chart options for the 3D globe visualization
-        myChart.setOption({
-            backgroundColor: 'transparent', // Set the background to transparent
-            globe: {
-                baseTexture: 'https://echarts.apache.org/examples/data-gl/asset/world.topo.bathy.200401.jpg', // Globe base texture
-                heightTexture: 'https://echarts.apache.org/examples/data-gl/asset/bathymetry_bw_composite_4k.jpg', // Globe height texture
-                shading: 'lambert', // Apply shading for the globe
-                light: {
-                    ambient: {
-                        intensity: 0.4
-                    },
-                    main: {
-                        intensity: 0.4
-                    }
-                },
-                viewControl: {
-                    autoRotate: false // Disable auto-rotation of the globe
+        // Load CSV Data
+        const csvUrl = 'https://raw.githubusercontent.com/TahriT/PLANTalytics/refs/heads/main/permapeople_plants_expanded.csv';
+        let originalData = [];
+
+        Papa.parse(csvUrl, {
+            download: true,
+            header: true,
+            complete: function (results) {
+                if (!results || !results.data || results.data.length === 0) {
+                    console.error("CSV data is empty or malformed.");
+                    return;
                 }
+                originalData = results.data;
+                populateFilters(originalData);
+                initializeChart(originalData);
+            },
+            error: function (error) {
+                console.error("Error parsing CSV:", error);
             }
         });
+
+        // Populate Filters
+        function populateFilters(data) {
+            const plantTypes = [...new Set(data.map(d => d['Plant Type']))];
+            const sunlightRequirements = [...new Set(data.map(d => d['Sunlight Requirements']))];
+
+            const plantTypeFilter = document.getElementById('plantTypeFilter');
+            plantTypes.forEach(type => {
+                const option = document.createElement('option');
+                option.value = type;
+                option.textContent = type;
+                plantTypeFilter.appendChild(option);
+            });
+
+            const sunlightFilter = document.getElementById('sunlightFilter');
+            sunlightRequirements.forEach(req => {
+                const option = document.createElement('option');
+                option.value = req;
+                option.textContent = req;
+                sunlightFilter.appendChild(option);
+            });
+
+            // Initialize Growth Rate Slider
+            const slider = document.getElementById('growthRateSlider');
+            noUiSlider.create(slider, {
+                start: [0],
+                connect: [true, false],
+                range: {
+                    'min': 0,
+                    'max': 100
+                }
+            });
+
+            slider.noUiSlider.on('update', applyFilters);
+        }
+
+        // Apply Filters
+        function applyFilters() {
+            // Implement filter logic here
+            console.log('Filters applied');
+        }
+
+        // Initialize Chart
+        function initializeChart(data) {
+            const chartDom = document.getElementById('main');
+            const myChart = echarts.init(chartDom);
+            const option = {
+                series: {
+                    type: 'sunburst',
+                    data: transformData(data),
+                    radius: [0, '90%'],
+                    label: {
+                        rotate: 'radial'
+                    }
+                }
+            };
+            myChart.setOption(option);
+        }
+
+        // Transform Data for Sunburst Chart
+        function transformData(data) {
+            // Implement the transformation logic to convert CSV data to the format required by the sunburst chart
+            // This is a placeholder function and needs to be implemented based on your data structure
+            return data.map(d => ({
+                name: d['Plant Name'],
+                value: d['Growth Rate'],
+                children: [
+                    {
+                        name: d['Plant Type'],
+                        value: d['Growth Rate']
+                    }
+                ]
+            }));
+        }
     </script>
 </body>
 </html>
