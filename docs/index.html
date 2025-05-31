@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sunburst Chart with Filters</title>
+    <title>PLANTalytics - Plant Data Visualization</title>
     <!-- Include ECharts -->
     <script src="https://cdn.jsdelivr.net/npm/echarts@5.3.0/dist/echarts.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/echarts-gl@2.0.0/dist/echarts-gl.min.js"></script>
@@ -15,177 +15,524 @@
     <!-- Include PapaParse -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
 
+    <!-- Include GSAP for smooth animations -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+
+    <!-- Include our chart configurations -->
+    <script type="module" src="js/charts.js"></script>
+
     <style>
+        :root {
+            --primary-color: #2ecc71;
+            --secondary-color: #27ae60;
+            --text-color: #2c3e50;
+            --background-color: #f9f9f9;
+            --section-gap: 2rem;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
         body {
             margin: 0;
-            font-family: Arial, sans-serif;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            color: var(--text-color);
+            background-color: var(--background-color);
+            overflow-x: hidden;
         }
+
         #background {
             position: fixed;
             width: 100%;
             height: 100%;
             z-index: -1;
+            opacity: 0.2;
         }
-        #filters {
-            padding: 10px;
+
+        .main-container {
             display: flex;
-            gap: 15px;
-            background-color: rgba(255, 255, 255, 0.8);
+            min-height: 100vh;
+            position: relative;
         }
-        #main {
+
+        .content-section {
+            flex: 1;
+            padding: 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .section {
+            padding: var(--section-gap);
+            margin-bottom: var(--section-gap);
+            background-color: rgba(255, 255, 255, 0.9);
+            border-radius: 15px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .section-title {
+            font-size: 2.5rem;
+            margin-bottom: 2rem;
+            color: var(--primary-color);
+            text-align: center;
+        }
+
+        .plant-part-section {
             width: 100%;
-            height: 80vh;
+            background-color: rgba(255, 255, 255, 0.9);
+            border-radius: 15px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            padding: 2rem;
         }
-        #commonNameFilter {
-            position: absolute;
-            top: 10%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background-color: rgba(255, 255, 255, 0.5);
-            border: 1px solid white;
-            color: white;
-            padding: 10px;
+
+        .chart-container {
+            width: 100%;
+            height: 400px;
+            margin: 2rem 0;
+        }
+
+        .filter-group {
+            margin-bottom: 1rem;
+            position: relative;
+        }
+
+        .filter-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: var(--text-color);
+            font-weight: 500;
+        }
+
+        .filter-input {
+            width: 100%;
+            padding: 0.75rem;
+            border: 2px solid var(--primary-color);
             border-radius: 5px;
+            background-color: white;
+            color: var(--text-color);
+            font-size: 1rem;
+            transition: border-color 0.3s ease;
         }
-        #commonNameFilter input {
-            background-color: transparent;
-            border: none;
-            border-bottom: 1px solid white;
-            color: white;
+
+        .filter-input:focus {
             outline: none;
+            border-color: var(--secondary-color);
+        }
+
+        .filter-input::placeholder {
+            color: #999;
+        }
+
+        select.filter-input {
+            appearance: none;
+            background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+            background-repeat: no-repeat;
+            background-position: right 0.75rem center;
+            background-size: 1em;
+            padding-right: 2.5rem;
+        }
+
+        .search-container {
+            position: relative;
+            width: 100%;
+        }
+
+        .autocomplete-results {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: white;
+            border: 2px solid var(--primary-color);
+            border-top: none;
+            border-radius: 0 0 5px 5px;
+            max-height: 300px;
+            overflow-y: auto;
+            z-index: 1000;
+            display: none;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .autocomplete-results.active {
+            display: block;
+        }
+
+        .autocomplete-item {
+            padding: 0.75rem 1rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .autocomplete-item:last-child {
+            border-bottom: none;
+        }
+
+        .autocomplete-item:hover {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        .autocomplete-item .plant-info {
+            font-size: 0.9em;
+            color: #666;
+        }
+
+        .autocomplete-item:hover .plant-info {
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        @media (max-width: 768px) {
+            .content-section {
+                padding: 1rem;
+            }
+
+            .section {
+                padding: 1rem;
+            }
+
+            .section-title {
+                font-size: 2rem;
+            }
+
+            .chart-container {
+                height: 300px;
+            }
         }
     </style>
+    <script>
+        // Add error handling for script loading
+        window.addEventListener('error', function(e) {
+            console.error('Script loading error:', e);
+        });
+    </script>
 </head>
 <body>
-    <!-- Background Container -->
     <div id="background"></div>
 
-    <!-- Common Name Filter -->
-    <div id="commonNameFilter">
-        <label for="commonNameInput">Common Name:</label>
-        <input type="text" id="commonNameInput" placeholder="Enter common name">
+    <div class="main-container">
+        <div class="content-section">
+            <section id="globe" class="section">
+                <h2 class="section-title">Plant Distribution</h2>
+                <div class="plant-part-section">
+                    <div class="globe-filter">
+                        <h2>Plant Region Filter</h2>
+                        <div class="filter-group">
+                            <label for="regionSelect">Region:</label>
+                            <select id="regionSelect" class="filter-input">
+                                <option value="">All Regions</option>
+                            </select>
+                        </div>
+                        <div class="filter-group">
+                            <label for="zoneSelect">Hardiness Zone:</label>
+                            <select id="zoneSelect" class="filter-input">
+                                <option value="">All Zones</option>
+                            </select>
+                        </div>
+                        <div class="filter-group">
+                            <label for="plantSearch">Search Plants:</label>
+                            <div class="search-container">
+                                <input type="text" id="plantSearch" class="filter-input" placeholder="Search by plant name...">
+                                <div id="autocompleteResults" class="autocomplete-results"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div id="globe-chart" class="chart-container"></div>
+                </div>
+            </section>
+
+            <section id="plant-data" class="section">
+                <h2 class="section-title">Plant Data Analysis</h2>
+                <div class="plant-part-section">
+                    <div id="leaves-chart" class="chart-container"></div>
+                </div>
+            </section>
+
+            <section id="stem" class="section">
+                <h2 class="section-title">Stem & Growth Patterns</h2>
+                <div class="plant-part-section">
+                    <div id="stem-chart" class="chart-container"></div>
+                </div>
+            </section>
+
+            <section id="roots" class="section">
+                <h2 class="section-title">Root Systems & Soil Requirements</h2>
+                <div class="plant-part-section">
+                    <div id="roots-chart" class="chart-container"></div>
+                </div>
+            </section>
+
+            <section id="water" class="section">
+                <h2 class="section-title">Water Requirements & Climate</h2>
+                <div class="plant-part-section">
+                    <div id="water-chart" class="chart-container"></div>
+                </div>
+            </section>
+        </div>
     </div>
 
-    <!-- Filters -->
-    <div id="filters">
-        <select id="plantTypeFilter">
-            <option value="">Select Plant Type</option>
-        </select>
-        <select id="sunlightFilter">
-            <option value="">Select Sunlight Requirement</option>
-        </select>
-        <div id="growthRateSlider" style="width: 200px;"></div>
-        <label for="growthRateSlider">Growth Rate</label>
-    </div>
+    <script type="module">
+        // Add debugging logs
+        console.log('Initializing application...');
 
-    <!-- Chart Container -->
-    <div id="main"></div>
+        // Initialize variables in module scope
+        let plantData = null;
+        let filteredData = null;
+        let charts = null;
 
-    <script>
-        // Initialize Vanta Cells Background
-        VANTA.CELLS({
-            el: "#background",
-            mouseControls: true,
-            touchControls: true,
-            gyroControls: false,
-            scale: 1.0,
-            size: 0.4,
-            speed: 0.4
-        });
+        // Check if modules are loading
+        try {
+            const { chartConfigs, processPlantData, filterPlantData, updateGlobeRotation } = await import('./js/charts.js');
+            console.log('Successfully loaded charts.js module');
 
-        // Load CSV Data
-        const csvUrl = 'https://raw.githubusercontent.com/TahriT/PLANTalytics/refs/heads/main/permapeople_plants_expanded.csv';
-        let originalData = [];
+            // Initialize GSAP ScrollTrigger
+            gsap.registerPlugin(ScrollTrigger);
 
-        Papa.parse(csvUrl, {
-            download: true,
-            header: true,
-            complete: function (results) {
-                if (!results || !results.data || results.data.length === 0) {
-                    console.error("CSV data is empty or malformed.");
+            // Initialize charts
+            charts = {
+                globe: echarts.init(document.getElementById('globe-chart')),
+                leaves: echarts.init(document.getElementById('leaves-chart')),
+                stem: echarts.init(document.getElementById('stem-chart')),
+                roots: echarts.init(document.getElementById('roots-chart')),
+                water: echarts.init(document.getElementById('water-chart'))
+            };
+
+            // Initialize Vanta Cells Background
+            try {
+                VANTA.CELLS({
+                    el: "#background",
+                    mouseControls: true,
+                    touchControls: true,
+                    gyroControls: false,
+                    minHeight: 200.00,
+                    minWidth: 200.00,
+                    scale: 1.00,
+                    color1: 0x2ecc71,
+                    color2: 0x27ae60,
+                    size: 1.50,
+                    speed: 1.20
+                });
+                console.log('Successfully initialized Vanta background');
+            } catch (error) {
+                console.error('Error initializing Vanta:', error);
+            }
+
+            // Load and process data
+            try {
+                console.log('Fetching plant data...');
+                const response = await fetch('../plant_data_debug.csv');
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                const csvData = await response.text();
+                console.log('Successfully loaded CSV data');
+
+                const processedData = processPlantData(csvData);
+                console.log('Processed data:', processedData);
+                
+                plantData = processedData;
+                filteredData = processedData;
+
+                // Populate region select
+                const regionSelect = document.getElementById('regionSelect');
+                if (!regionSelect) {
+                    throw new Error('Region select element not found');
+                }
+                processedData.regions.forEach(region => {
+                    if (region) {
+                        const option = document.createElement('option');
+                        option.value = region;
+                        option.textContent = region;
+                        regionSelect.appendChild(option);
+                    }
+                });
+                console.log('Populated region select with', processedData.regions.length, 'regions');
+
+                // Populate hardiness zone select
+                const zoneSelect = document.getElementById('zoneSelect');
+                if (!zoneSelect) {
+                    throw new Error('Zone select element not found');
+                }
+                processedData.hardinessZones.forEach(zone => {
+                    const option = document.createElement('option');
+                    option.value = zone;
+                    option.textContent = `Zone ${zone}`;
+                    zoneSelect.appendChild(option);
+                });
+                console.log('Populated zone select with', processedData.hardinessZones.length, 'zones');
+
+                // Update the autocomplete initialization
+                const plantSearch = document.getElementById('plantSearch');
+                const autocompleteResults = document.getElementById('autocompleteResults');
+                if (!plantSearch || !autocompleteResults) {
+                    throw new Error('Search elements not found');
+                }
+
+                // Create a map of plant names to their full data
+                const plantDataMap = new Map();
+                processedData.globe.forEach(plant => {
+                    plantDataMap.set(plant.name, plant);
+                });
+
+                let searchTimeout;
+                plantSearch.addEventListener('input', () => {
+                    clearTimeout(searchTimeout);
+                    const searchTerm = plantSearch.value.toLowerCase();
+                    
+                    if (searchTerm.length < 2) {
+                        autocompleteResults.classList.remove('active');
+                        return;
+                    }
+
+                    searchTimeout = setTimeout(() => {
+                        const matches = Array.from(plantDataMap.entries())
+                            .filter(([name, data]) => 
+                                name.toLowerCase().includes(searchTerm) ||
+                                (data.properties.region && data.properties.region.toLowerCase().includes(searchTerm))
+                            )
+                            .slice(0, 10); // Limit to 10 results
+
+                        if (matches.length > 0) {
+                            autocompleteResults.innerHTML = matches
+                                .map(([name, data]) => `
+                                    <div class="autocomplete-item" data-plant="${name}">
+                                        <span class="plant-name">${name}</span>
+                                        <span class="plant-info">
+                                            ${data.properties.region ? data.properties.region : ''}
+                                            ${data.properties.hardinessZone ? `(Zone ${data.properties.hardinessZone})` : ''}
+                                        </span>
+                                    </div>
+                                `)
+                                .join('');
+                            autocompleteResults.classList.add('active');
+                        } else {
+                            autocompleteResults.classList.remove('active');
+                        }
+                    }, 150); // Debounce search
+                });
+
+                // Handle autocomplete selection
+                autocompleteResults.addEventListener('click', (e) => {
+                    const item = e.target.closest('.autocomplete-item');
+                    if (item) {
+                        const plantName = item.dataset.plant;
+                        plantSearch.value = plantName;
+                        autocompleteResults.classList.remove('active');
+                        applyFilters();
+                    }
+                });
+
+                // Close autocomplete when clicking outside
+                document.addEventListener('click', (e) => {
+                    if (!plantSearch.contains(e.target) && !autocompleteResults.contains(e.target)) {
+                        autocompleteResults.classList.remove('active');
+                    }
+                });
+
+                // Update charts with initial data
+                updateCharts(processedData);
+                console.log('Initial charts updated');
+
+            } catch (error) {
+                console.error('Error in data processing:', error);
+            }
+
+            // Function to update all charts with filtered data
+            function updateCharts(data) {
+                if (!data || !charts) {
+                    console.error('Invalid data or charts not initialized');
                     return;
                 }
-                originalData = results.data;
-                populateFilters(originalData);
-                initializeChart(originalData);
-            },
-            error: function (error) {
-                console.error("Error parsing CSV:", error);
+
+                try {
+                    charts.globe.setOption({
+                        ...chartConfigs.globe,
+                        series: [{
+                            ...chartConfigs.globe.series[0],
+                            data: data.globe
+                        }]
+                    });
+
+                    charts.leaves.setOption({
+                        ...chartConfigs.leaves,
+                        series: data.leaves
+                    });
+
+                    charts.stem.setOption({
+                        ...chartConfigs.stem,
+                        series: [
+                            {
+                                ...chartConfigs.stem.series[0],
+                                data: data.stem.height
+                            },
+                            {
+                                ...chartConfigs.stem.series[1],
+                                data: data.stem.spread
+                            }
+                        ]
+                    });
+
+                    charts.roots.setOption({
+                        ...chartConfigs.roots,
+                        series: [{
+                            ...chartConfigs.roots.series[0],
+                            data: data.roots
+                        }]
+                    });
+
+                    charts.water.setOption({
+                        ...chartConfigs.water,
+                        series: [{
+                            ...chartConfigs.water.series[0],
+                            data: [{
+                                value: data.water,
+                                name: 'Water Tolerance'
+                            }]
+                        }]
+                    });
+                } catch (error) {
+                    console.error('Error updating charts:', error);
+                }
             }
-        });
 
-        // Populate Filters
-        function populateFilters(data) {
-            const plantTypes = [...new Set(data.map(d => d['Plant Type']))];
-            const sunlightRequirements = [...new Set(data.map(d => d['Sunlight Requirements']))];
+            // Add event listeners for filters
+            document.getElementById('regionSelect').addEventListener('change', applyFilters);
+            document.getElementById('zoneSelect').addEventListener('change', applyFilters);
+            document.getElementById('plantSearch').addEventListener('input', applyFilters);
 
-            const plantTypeFilter = document.getElementById('plantTypeFilter');
-            plantTypes.forEach(type => {
-                const option = document.createElement('option');
-                option.value = type;
-                option.textContent = type;
-                plantTypeFilter.appendChild(option);
-            });
-
-            const sunlightFilter = document.getElementById('sunlightFilter');
-            sunlightRequirements.forEach(req => {
-                const option = document.createElement('option');
-                option.value = req;
-                option.textContent = req;
-                sunlightFilter.appendChild(option);
-            });
-
-            // Initialize Growth Rate Slider
-            const slider = document.getElementById('growthRateSlider');
-            noUiSlider.create(slider, {
-                start: [0],
-                connect: [true, false],
-                range: {
-                    'min': 0,
-                    'max': 100
+            function applyFilters() {
+                if (!plantData) {
+                    console.error('Plant data not initialized');
+                    return;
                 }
-            });
 
-            slider.noUiSlider.on('update', applyFilters);
-        }
+                const region = document.getElementById('regionSelect').value;
+                const zone = parseInt(document.getElementById('zoneSelect').value) || null;
+                const searchTerm = document.getElementById('plantSearch').value.toLowerCase();
 
-        // Apply Filters
-        function applyFilters() {
-            // Implement filter logic here
-            console.log('Filters applied');
-        }
-
-        // Initialize Chart
-        function initializeChart(data) {
-            const chartDom = document.getElementById('main');
-            const myChart = echarts.init(chartDom);
-            const option = {
-                series: {
-                    type: 'sunburst',
-                    data: transformData(data),
-                    radius: [0, '90%'],
-                    label: {
-                        rotate: 'radial'
-                    }
+                // Filter the data
+                const filtered = filterPlantData(plantData, region, zone);
+                
+                // Apply search filter if there's a search term
+                if (searchTerm) {
+                    filtered.globe = filtered.globe.filter(plant => 
+                        plant.name.toLowerCase().includes(searchTerm)
+                    );
                 }
-            };
-            myChart.setOption(option);
-        }
 
-        // Transform Data for Sunburst Chart
-        function transformData(data) {
-            // Implement the transformation logic to convert CSV data to the format required by the sunburst chart
-            // This is a placeholder function and needs to be implemented based on your data structure
-            return data.map(d => ({
-                name: d['Plant Name'],
-                value: d['Growth Rate'],
-                children: [
-                    {
-                        name: d['Plant Type'],
-                        value: d['Growth Rate']
-                    }
-                ]
-            }));
+                // Update charts with filtered data
+                updateCharts(filtered);
+            }
+
+        } catch (error) {
+            console.error('Error loading charts.js:', error);
         }
     </script>
 </body>

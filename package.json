@@ -1,10 +1,17 @@
 {
+  "name": "plantalytics",
+  "version": "1.0.0",
+  "description": "Plant data visualization",
+  "scripts": {
+    "start": "http-server docs -p 8080 -c-1"
+  },
   "dependencies": {
     "-": "^0.0.1",
     "echarts": "^5.6.0",
     "echarts-gl": "^2.0.9",
     "g": "^2.0.1",
     "npm": "^11.0.0",
-    "powerbi-client": "^2.23.1"
+    "powerbi-client": "^2.23.1",
+    "http-server": "^14.1.1"
   }
 }
