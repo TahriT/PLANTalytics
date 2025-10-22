@@ -59,11 +59,11 @@
         }
 
         .logo i {
-            font-size: 2.5rem;
+            font-size: 2rem;
         }
 
         .logo h1 {
-            font-size: 2rem;
+            font-size: 1.5rem;
             font-weight: 700;
         }
 
@@ -268,6 +268,19 @@
             line-height: 1.6;
         }
 
+        .compact-card i {
+            margin-bottom: 0.5rem;
+        }
+
+        .compact-card h3 {
+            margin-bottom: 0.3rem;
+        }
+
+        .compact-card p {
+            font-size: 0.85rem;
+            line-height: 1.4;
+        }
+
         /* Footer */
         footer {
             background: var(--primary-color);
@@ -305,6 +318,89 @@
                 height: 600px;
                 min-height: 600px;
             }
+
+            .logo i {
+                font-size: 1.5rem;
+            }
+
+            .logo h1 {
+                font-size: 1.2rem;
+            }
+
+            header {
+                padding: 1rem;
+            }
+
+            .header-links {
+                font-size: 0.9rem;
+            }
+
+            /* Rotation suggestion for mobile */
+            .rotation-hint {
+                display: block !important;
+                background: var(--accent-color);
+                color: white;
+                padding: 0.75rem;
+                text-align: center;
+                font-size: 0.9rem;
+                border-radius: 8px;
+                margin-bottom: 1rem;
+                animation: pulse 2s ease-in-out infinite;
+            }
+
+            /* Stack header and SproutCast card on mobile */
+            #overview > div:first-child {
+                grid-template-columns: 1fr !important;
+            }
+
+            /* Hide card descriptions on mobile - show only icons and titles */
+            .card-description {
+                display: none !important;
+            }
+
+            .compact-card {
+                padding: 0.75rem !important;
+                text-align: center;
+            }
+
+            .compact-card i {
+                font-size: 1.5rem !important;
+                margin-bottom: 0.3rem !important;
+            }
+
+            .compact-card h3 {
+                font-size: 0.85rem !important;
+                margin-bottom: 0 !important;
+            }
+
+            /* Collapse SproutCast card on mobile */
+            #overview > div:first-child > div:last-child {
+                padding: 0.75rem !important;
+                animation: none !important;
+            }
+
+            #overview > div:first-child > div:last-child > div:first-child {
+                justify-content: center !important;
+                margin-bottom: 0 !important;
+            }
+
+            #overview > div:first-child > div:last-child > div:first-child i {
+                font-size: 1.5rem !important;
+            }
+
+            #overview > div:first-child > div:last-child > div:first-child h3 {
+                font-size: 1rem !important;
+                font-weight: bold !important;
+            }
+
+            #overview > div:first-child > div:last-child > p,
+            #overview > div:first-child > div:last-child > a {
+                display: none !important;
+            }
+        }
+
+        .rotation-hint {
+            display: none;
         }
 
         /* Loading Animation */
@@ -371,6 +467,8 @@
         .header-links a:nth-child(1) { animation-delay: 0.1s; }
         .header-links a:nth-child(2) { animation-delay: 0.2s; }
         .header-links a:nth-child(3) { animation-delay: 0.3s; }
+        .header-links a:nth-child(4) { animation-delay: 0.4s; }
+        .header-links a:nth-child(5) { animation-delay: 0.5s; }
 
         .info-card i {
             transition: all 0.3s ease;
@@ -504,6 +602,14 @@
                     <i class="fas fa-users"></i>
                     <span>PermaPeople</span>
                 </a>
+                <a href="https://www.printables.com/search/models?q=hydroponics" target="_blank">
+                    <i class="fas fa-cube"></i>
+                    <span>3D Printed Hydroponics</span>
+                </a>
+                <a href="https://sproutcast.io" target="_blank">
+                    <i class="fas fa-broadcast-tower"></i>
+                    <span>SproutCast</span>
+                </a>
             </div>
         </div>
     </header>
@@ -528,32 +634,56 @@
     <div class="container">
         <!-- Overview Section -->
         <section id="overview" class="content-section active">
-            <div class="section-header">
-                <h2><i class="fas fa-chart-pie"></i> Welcome to PLANTalytics</h2>
-                <p>Comprehensive plant data analytics powered by PFAF and PermaPeople databases</p>
+            <div style="display: grid; grid-template-columns: 1fr 350px; gap: 1.5rem; margin-bottom: 1.5rem; align-items: stretch;">
+                <!-- Left side: Header + Info Cards -->
+                <div style="display: flex; flex-direction: column; gap: 1.5rem;">
+                    <div class="section-header" style="margin-bottom: 0;">
+                        <h2><i class="fas fa-chart-pie"></i> Welcome to PLANTalytics</h2>
+                        <p>Comprehensive plant data analytics powered by PFAF and PermaPeople databases</p>
+                    </div>
+                    
+                    <!-- Info Cards Inside Header Container -->
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
+                        <div class="info-card compact-card" style="margin-bottom: 0; padding: 1rem;">
+                            <i class="fas fa-database" style="font-size: 1.8rem;"></i>
+                            <h3 style="font-size: 1rem;">Comprehensive Data</h3>
+                            <p class="card-description">Thousands of plant records with growth habits and hardiness zones.</p>
+                        </div>
+                        <div class="info-card compact-card" style="margin-bottom: 0; padding: 1rem;">
+                            <i class="fas fa-chart-bar" style="font-size: 1.8rem;"></i>
+                            <h3 style="font-size: 1rem;">Interactive Visualizations</h3>
+                            <p class="card-description">Dynamic Power BI dashboards with filtering and drill-down.</p>
+                        </div>
+                        <div class="info-card compact-card" style="margin-bottom: 0; padding: 1rem;">
+                            <i class="fas fa-leaf" style="font-size: 1.8rem;"></i>
+                            <h3 style="font-size: 1rem;">Permaculture Insights</h3>
+                            <p class="card-description">Companion planting and sustainable growing practices.</p>
+                        </div>
+                        <div class="info-card compact-card" style="margin-bottom: 0; padding: 1rem;">
+                            <i class="fas fa-globe-americas" style="font-size: 1.8rem;"></i>
+                            <h3 style="font-size: 1rem;">Climate Analysis</h3>
+                            <p class="card-description">Filter by hardiness zones and climate preferences.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- SproutCast Standout Card -->
+                <div style="background: linear-gradient(135deg, #2196F3 0%, #1976D2 100%); color: white; padding: 1.5rem; border-radius: 12px; box-shadow: 0 8px 20px rgba(33, 150, 243, 0.4); animation: pulse 3s ease-in-out infinite; display: flex; flex-direction: column; justify-content: center;">
+                    <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.75rem;">
+                        <i class="fas fa-broadcast-tower" style="font-size: 1.8rem;"></i>
+                        <h3 style="font-size: 1.2rem; margin: 0;">SproutCast.io</h3>
+                    </div>
+                    <p style="line-height: 1.5; margin-bottom: 0.75rem; font-size: 0.9rem;">
+                        Real-time garden monitoring with live updates and intelligent insights.
+                    </p>
+                    <a href="https://sproutcast.io" target="_blank" style="display: inline-block; background: white; color: #1976D2; padding: 0.5rem 1rem; border-radius: 6px; text-decoration: none; font-weight: 600; transition: all 0.3s ease; box-shadow: 0 2px 8px rgba(0,0,0,0.2); font-size: 0.9rem;" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 4px 12px rgba(0,0,0,0.3)';" onmouseout="this.style.transform=''; this.style.boxShadow='0 2px 8px rgba(0,0,0,0.2)';">
+                        <i class="fas fa-external-link-alt"></i> Visit SproutCast
+                    </a>
+                </div>
             </div>
 
-            <div class="info-cards">
-                <div class="info-card">
-                    <i class="fas fa-database"></i>
-                    <h3>Comprehensive Data</h3>
-                    <p>Access thousands of plant records with detailed characteristics including growth habits, hardiness zones, and ecological relationships.</p>
-                </div>
-                <div class="info-card">
-                    <i class="fas fa-chart-bar"></i>
-                    <h3>Interactive Visualizations</h3>
-                    <p>Explore data through dynamic Power BI dashboards with filtering, sorting, and drill-down capabilities.</p>
-                </div>
-                <div class="info-card">
-                    <i class="fas fa-leaf"></i>
-                    <h3>Permaculture Insights</h3>
-                    <p>Discover companion planting opportunities, ecosystem services, and sustainable growing practices.</p>
-                </div>
-                <div class="info-card">
-                    <i class="fas fa-globe-americas"></i>
-                    <h3>Climate Analysis</h3>
-                    <p>Filter plants by hardiness zones, climate preferences, and geographical distribution patterns.</p>
-                </div>
+            <div class="rotation-hint">
+                <i class="fas fa-mobile-alt"></i> <strong>Tip:</strong> Rotate your device to landscape mode for a better viewing experience!
             </div>
 
             <div class="dashboard-container">
@@ -623,8 +753,8 @@
                 </div>
 
                 <!-- Data Table Container -->
-                <div style="overflow-x: auto; background: white; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
-                    <table id="dataTable" style="width: 100%; border-collapse: collapse; font-size: 0.9rem;">
+                <div style="overflow-x: auto; background: white; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); max-width: 100%;">
+                    <table id="dataTable" style="width: 100%; border-collapse: collapse; font-size: 0.9rem; min-width: 800px;">
                         <thead id="tableHead" style="background: linear-gradient(135deg, var(--secondary-color), var(--accent-color)); color: white; position: sticky; top: 0;">
                             <tr>
                                 <th style="padding: 1rem; text-align: left; font-weight: 600;">Loading...</th>
@@ -638,6 +768,10 @@
                             </tr>
                         </tbody>
                     </table>
+                </div>
+
+                <div style="margin-top: 1rem; text-align: center; color: #666; font-size: 0.9rem;">
+                    <i class="fas fa-arrows-alt-h"></i> Scroll horizontally to view all columns
                 </div>
 
                 <!-- Pagination -->
@@ -734,6 +868,15 @@
         </p>
         <p style="margin-top: 0.5rem; font-size: 0.9rem;">
             Built with passion for sustainable agriculture and permaculture
+        </p>
+        <p style="margin-top: 1rem; font-size: 0.9rem; border-top: 1px solid rgba(255,255,255,0.2); padding-top: 1rem;">
+            <i class="fas fa-user"></i> Created by <strong>Tahri</strong> | 
+            <a href="mailto:info@plantalytics.net" style="color: var(--accent-color); text-decoration: none;">
+                <i class="fas fa-envelope"></i> info@plantalytics.net
+            </a> | 
+            <a href="https://buymeacoffee.com/tahritech" target="_blank" style="color: var(--accent-color); text-decoration: none;">
+                <i class="fas fa-coffee"></i> Buy Me a Coffee
+            </a>
         </p>
     </footer>
 
