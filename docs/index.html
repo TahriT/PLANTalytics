@@ -3,57 +3,1068 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Plantalytics - 3D Globe</title>
+    <title>PLANTalytics - Plant Data Analytics Dashboard</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        /* General Styles */
-        body {
-            margin: 0;
-            font-family: 'Arial', sans-serif;
-            height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            background: transparent; /* Transparent background */
-            overflow: hidden; /* Hide overflow for the 3D globe */
+        :root {
+            --primary-color: #2d5016;
+            --secondary-color: #6b9e3e;
+            --accent-color: #9ec472;
+            --dark-bg: #1a1a1a;
+            --light-bg: #f5f5f5;
+            --text-dark: #333;
+            --text-light: #fff;
+            --shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            --transition: all 0.3s ease;
         }
 
-        #main {
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #2d5016 0%, #6b9e3e 50%, #9ec472 100%);
+            color: var(--text-dark);
+            overflow-x: hidden;
+        }
+
+        /* Header Styles */
+        header {
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+            color: var(--text-light);
+            padding: 1.5rem 2rem;
+            box-shadow: var(--shadow);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .header-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .logo i {
+            font-size: 2.5rem;
+        }
+
+        .logo h1 {
+            font-size: 2rem;
+            font-weight: 700;
+        }
+
+        .header-links {
+            display: flex;
+            gap: 1.5rem;
+            align-items: center;
+        }
+
+        .header-links a {
+            color: var(--text-light);
+            text-decoration: none;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .header-links a:hover {
+            color: var(--accent-color);
+            transform: translateY(-2px);
+        }
+
+        /* Navigation Tabs */
+        .nav-tabs {
+            background: white;
+            padding: 1rem 2rem;
+            box-shadow: var(--shadow);
+            display: flex;
+            gap: 1rem;
+            overflow-x: auto;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .nav-tab {
+            padding: 0.75rem 1.5rem;
+            background: var(--light-bg);
+            border: 2px solid transparent;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: var(--transition);
+            white-space: nowrap;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-weight: 500;
+        }
+
+        .nav-tab:hover {
+            background: var(--accent-color);
+            color: white;
+            transform: translateY(-2px);
+        }
+
+        .nav-tab.active {
+            background: var(--secondary-color);
+            color: white;
+            border-color: var(--primary-color);
+        }
+
+        /* Main Content */
+        .container {
+            max-width: 1600px;
+            margin: 2rem auto;
+            padding: 0 2rem;
+        }
+
+        .content-section {
+            display: none;
+            animation: fadeIn 0.5s ease;
+        }
+
+        .content-section.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .section-header {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 12px;
+            margin-bottom: 1.5rem;
+            box-shadow: var(--shadow);
+        }
+
+        .section-header h2 {
+            color: var(--primary-color);
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .section-header h2 i {
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        .section-header p {
+            color: #666;
+        }
+
+        /* Dashboard Container */
+        .dashboard-container {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            min-height: 800px;
+        }
+
+        .dashboard-iframe {
             width: 100%;
-            height: 100%;
+            height: 85vh;
+            min-height: 800px;
+            border: none;
+        }
+
+        /* Grid Layout for Individual Charts */
+        .charts-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+
+        .chart-card {
+            background: white;
+            border-radius: 12px;
+            box-shadow: var(--shadow);
+            overflow: hidden;
+            transition: var(--transition);
+        }
+
+        .chart-card:hover {
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+            transform: translateY(-4px);
+        }
+
+        .chart-header {
+            background: linear-gradient(135deg, var(--secondary-color) 0%, var(--accent-color) 100%);
+            color: white;
+            padding: 1rem 1.5rem;
+            font-weight: 600;
+        }
+
+        .chart-content {
+            padding: 1rem;
+            min-height: 400px;
+        }
+
+        .chart-iframe {
+            width: 100%;
+            height: 500px;
+            border: none;
+        }
+
+        /* Info Cards */
+        .info-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .info-card {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 12px;
+            box-shadow: var(--shadow);
+            transition: var(--transition);
+        }
+
+        .info-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
+        }
+
+        .info-card i {
+            font-size: 2.5rem;
+            color: var(--secondary-color);
+            margin-bottom: 1rem;
+        }
+
+        .info-card h3 {
+            color: var(--primary-color);
+            margin-bottom: 0.5rem;
+        }
+
+        .info-card p {
+            color: #666;
+            line-height: 1.6;
+        }
+
+        /* Footer */
+        footer {
+            background: var(--primary-color);
+            color: var(--text-light);
+            text-align: center;
+            padding: 2rem;
+            margin-top: 4rem;
+        }
+
+        footer a {
+            color: var(--accent-color);
+            text-decoration: none;
+        }
+
+        footer a:hover {
+            text-decoration: underline;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .header-content {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .nav-tabs {
+                flex-direction: column;
+            }
+
+            .charts-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .dashboard-iframe {
+                height: 600px;
+                min-height: 600px;
+            }
+        }
+
+        /* Loading Animation */
+        .loading {
+            text-align: center;
+            padding: 4rem;
+            color: var(--secondary-color);
+        }
+
+        .loading i {
+            font-size: 3rem;
+            animation: spin 2s linear infinite;
+        }
+
+        @keyframes spin {
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Subtle Animations */
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        @keyframes glow {
+            0%, 100% { 
+                box-shadow: 0 0 5px rgba(107, 158, 62, 0.5);
+            }
+            50% { 
+                box-shadow: 0 0 20px rgba(107, 158, 62, 0.8), 0 0 30px rgba(107, 158, 62, 0.6);
+            }
+        }
+
+        @keyframes rotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        /* Apply animations to elements */
+        .logo i {
+            animation: float 3s ease-in-out infinite;
+        }
+
+        .header-links a {
+            animation: slideIn 0.5s ease-out;
+        }
+
+        .header-links a:nth-child(1) { animation-delay: 0.1s; }
+        .header-links a:nth-child(2) { animation-delay: 0.2s; }
+        .header-links a:nth-child(3) { animation-delay: 0.3s; }
+
+        .info-card i {
+            transition: all 0.3s ease;
+        }
+
+        .info-card:hover i {
+            animation: pulse 0.6s ease-in-out;
+            color: var(--primary-color);
+        }
+
+        .nav-tab i {
+            transition: transform 0.3s ease;
+        }
+
+        .nav-tab:hover i {
+            transform: scale(1.2);
+        }
+
+        .nav-tab.active i {
+            animation: pulse 1s ease-in-out infinite;
+        }
+
+        .fullscreen-btn {
+            animation: glow 2s ease-in-out infinite;
+        }
+
+        .fullscreen-btn:hover {
+            animation: pulse 0.3s ease-in-out;
+        }
+
+        /* Loading spinner animation enhancement */
+        .loading i,
+        #loadingIndicator i {
+            animation: rotate 1s linear infinite;
+        }
+
+        /* Stat cards animation on load */
+        .info-card {
+            animation: fadeIn 0.6s ease-out;
+        }
+
+        .info-card:nth-child(1) { animation-delay: 0.1s; }
+        .info-card:nth-child(2) { animation-delay: 0.2s; }
+        .info-card:nth-child(3) { animation-delay: 0.3s; }
+        .info-card:nth-child(4) { animation-delay: 0.4s; }
+
+        /* Subtle background gradient animation */
+        body {
+            background: linear-gradient(135deg, #2d5016 0%, #6b9e3e 50%, #9ec472 100%);
+            background-size: 400% 400%;
+            animation: gradientShift 15s ease infinite;
+        }
+
+        @keyframes gradientShift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        /* Hover effect for table rows */
+        #dataTable tbody tr {
+            transition: all 0.2s ease;
+        }
+
+        #dataTable tbody tr:hover {
+            transform: scale(1.01);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        /* Button press animation */
+        button {
+            transition: all 0.2s ease;
+        }
+
+        button:active {
+            transform: scale(0.95);
+        }
+
+        /* Pagination buttons hover */
+        #pagination button:hover:not([disabled]) {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+
+        /* Full Screen Button */
+        .fullscreen-btn {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            background: var(--secondary-color);
+            color: white;
+            border: none;
+            padding: 1rem;
+            border-radius: 50%;
+            width: 60px;
+            height: 60px;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+            transition: var(--transition);
+            z-index: 999;
+        }
+
+        .fullscreen-btn:hover {
+            background: var(--primary-color);
+            transform: scale(1.1);
+        }
+
+        .fullscreen-btn i {
+            font-size: 1.5rem;
         }
     </style>
-    <!-- Include ECharts and ECharts-GL -->
-    <script src="https://cdn.jsdelivr.net/npm/echarts@5.3.0/dist/echarts.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/echarts-gl@2.0.0/dist/echarts-gl.min.js"></script>
 </head>
 <body>
-    <div id="main"></div>
+    <!-- Header -->
+    <header>
+        <div class="header-content">
+            <div class="logo">
+                <i class="fas fa-seedling"></i>
+                <h1>PLANTalytics</h1>
+            </div>
+            <div class="header-links">
+                <a href="https://github.com/TahriT/PLANTalytics" target="_blank">
+                    <i class="fab fa-github"></i>
+                    <span>GitHub</span>
+                </a>
+                <a href="https://pfaf.org/" target="_blank">
+                    <i class="fas fa-leaf"></i>
+                    <span>PFAF</span>
+                </a>
+                <a href="https://permapeople.org" target="_blank">
+                    <i class="fas fa-users"></i>
+                    <span>PermaPeople</span>
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <!-- Navigation Tabs -->
+    <nav class="nav-tabs">
+        <div class="nav-tab active" onclick="showSection('overview')">
+            <i class="fas fa-home"></i>
+            <span>Overview</span>
+        </div>
+        <div class="nav-tab" onclick="showSection('individual-charts')">
+            <i class="fas fa-table"></i>
+            <span>Raw Data</span>
+        </div>
+        <div class="nav-tab" onclick="showSection('about')">
+            <i class="fas fa-info-circle"></i>
+            <span>About</span>
+        </div>
+    </nav>
+
+    <!-- Main Container -->
+    <div class="container">
+        <!-- Overview Section -->
+        <section id="overview" class="content-section active">
+            <div class="section-header">
+                <h2><i class="fas fa-chart-pie"></i> Welcome to PLANTalytics</h2>
+                <p>Comprehensive plant data analytics powered by PFAF and PermaPeople databases</p>
+            </div>
+
+            <div class="info-cards">
+                <div class="info-card">
+                    <i class="fas fa-database"></i>
+                    <h3>Comprehensive Data</h3>
+                    <p>Access thousands of plant records with detailed characteristics including growth habits, hardiness zones, and ecological relationships.</p>
+                </div>
+                <div class="info-card">
+                    <i class="fas fa-chart-bar"></i>
+                    <h3>Interactive Visualizations</h3>
+                    <p>Explore data through dynamic Power BI dashboards with filtering, sorting, and drill-down capabilities.</p>
+                </div>
+                <div class="info-card">
+                    <i class="fas fa-leaf"></i>
+                    <h3>Permaculture Insights</h3>
+                    <p>Discover companion planting opportunities, ecosystem services, and sustainable growing practices.</p>
+                </div>
+                <div class="info-card">
+                    <i class="fas fa-globe-americas"></i>
+                    <h3>Climate Analysis</h3>
+                    <p>Filter plants by hardiness zones, climate preferences, and geographical distribution patterns.</p>
+                </div>
+            </div>
+
+            <div class="dashboard-container">
+                <iframe 
+                    class="dashboard-iframe"
+                    src="https://app.powerbi.com/view?r=eyJrIjoiYzI0ZmIyZmYtOWNjZS00NWIzLThjMmMtYmMyOTgwOThlYTUzIiwidCI6IjA5MmUzOThlLTIzYTktNGFjMS04MmJmLWIwMzQ2NTRlMGZjMyJ9"
+                    frameborder="0"
+                    allowFullScreen="true">
+                </iframe>
+            </div>
+        </section>
+
+        <!-- Raw Data Section -->
+        <section id="individual-charts" class="content-section">
+            <div class="section-header">
+                <h2><i class="fas fa-table"></i> Raw Plant Data</h2>
+                <p>Browse and search through the complete plant database</p>
+            </div>
+
+            <div class="dashboard-container" style="padding: 2rem;">
+                <!-- Data Source Selector -->
+                <div style="margin-bottom: 2rem;">
+                    <div style="display: flex; gap: 1rem; flex-wrap: wrap; align-items: center;">
+                        <div>
+                            <label style="font-weight: 600; margin-right: 0.5rem; color: var(--primary-color);">
+                                <i class="fas fa-database"></i> Select Dataset:
+                            </label>
+                            <select id="datasetSelector" onchange="loadDataset(this.value)" style="padding: 0.5rem 1rem; border: 2px solid var(--accent-color); border-radius: 6px; font-size: 0.95rem;">
+                                <option value="plant_data.csv">PFAF Plant Data (Main)</option>
+                                <option value="permapeople_plants_expanded.csv">PermaPeople Plants (Expanded)</option>
+                                <option value="phzm_us_zipcode_2023.csv">USDA Hardiness Zones by Zipcode</option>
+                            </select>
+                        </div>
+                        <div style="flex: 1;">
+                            <input type="text" id="searchInput" placeholder="Search all columns..." 
+                                   style="width: 100%; padding: 0.5rem 1rem; border: 2px solid var(--accent-color); border-radius: 6px; font-size: 0.95rem;">
+                        </div>
+                        <button onclick="exportToCSV()" style="padding: 0.5rem 1rem; background: var(--secondary-color); color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 500;">
+                            <i class="fas fa-download"></i> Export CSV
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Data Stats -->
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 1rem; margin-bottom: 2rem;">
+                    <div style="background: var(--light-bg); padding: 1rem; border-radius: 8px; text-align: center; transition: all 0.3s ease;" onmouseover="this.style.transform='translateY(-5px)'; this.style.boxShadow='0 8px 16px rgba(0,0,0,0.15)';" onmouseout="this.style.transform=''; this.style.boxShadow='';">
+                        <i class="fas fa-database" style="font-size: 1.5rem; color: var(--secondary-color); margin-bottom: 0.5rem; display: block;"></i>
+                        <div style="font-size: 1.5rem; font-weight: bold; color: var(--secondary-color);" id="totalRows">-</div>
+                        <div style="color: #666; font-size: 0.9rem;">Total Records</div>
+                    </div>
+                    <div style="background: var(--light-bg); padding: 1rem; border-radius: 8px; text-align: center; transition: all 0.3s ease;" onmouseover="this.style.transform='translateY(-5px)'; this.style.boxShadow='0 8px 16px rgba(0,0,0,0.15)';" onmouseout="this.style.transform=''; this.style.boxShadow='';">
+                        <i class="fas fa-filter" style="font-size: 1.5rem; color: var(--secondary-color); margin-bottom: 0.5rem; display: block;"></i>
+                        <div style="font-size: 1.5rem; font-weight: bold; color: var(--secondary-color);" id="visibleRows">-</div>
+                        <div style="color: #666; font-size: 0.9rem;">Visible Records</div>
+                    </div>
+                    <div style="background: var(--light-bg); padding: 1rem; border-radius: 8px; text-align: center; transition: all 0.3s ease;" onmouseover="this.style.transform='translateY(-5px)'; this.style.boxShadow='0 8px 16px rgba(0,0,0,0.15)';" onmouseout="this.style.transform=''; this.style.boxShadow='';">
+                        <i class="fas fa-columns" style="font-size: 1.5rem; color: var(--secondary-color); margin-bottom: 0.5rem; display: block;"></i>
+                        <div style="font-size: 1.5rem; font-weight: bold; color: var(--secondary-color);" id="totalColumns">-</div>
+                        <div style="color: #666; font-size: 0.9rem;">Columns</div>
+                    </div>
+                </div>
+
+                <!-- Loading Indicator -->
+                <div id="loadingIndicator" style="text-align: center; padding: 3rem; display: none;">
+                    <i class="fas fa-spinner fa-spin" style="font-size: 3rem; color: var(--secondary-color);"></i>
+                    <p style="margin-top: 1rem; color: #666;">Loading data...</p>
+                </div>
+
+                <!-- Data Table Container -->
+                <div style="overflow-x: auto; background: white; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+                    <table id="dataTable" style="width: 100%; border-collapse: collapse; font-size: 0.9rem;">
+                        <thead id="tableHead" style="background: linear-gradient(135deg, var(--secondary-color), var(--accent-color)); color: white; position: sticky; top: 0;">
+                            <tr>
+                                <th style="padding: 1rem; text-align: left; font-weight: 600;">Loading...</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tableBody">
+                            <tr>
+                                <td style="padding: 2rem; text-align: center; color: #999;">
+                                    Select a dataset and wait for it to load
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Pagination -->
+                <div id="pagination" style="margin-top: 1.5rem; display: flex; justify-content: center; gap: 0.5rem; flex-wrap: wrap;">
+                    <!-- Pagination will be generated dynamically -->
+                </div>
+
+                <!-- Download Links -->
+                <div style="margin-top: 2rem; padding: 1.5rem; background: var(--light-bg); border-radius: 8px;">
+                    <h4 style="color: var(--primary-color); margin-bottom: 1rem;">
+                        <i class="fas fa-file-download"></i> Download Raw Data Files
+                    </h4>
+                    <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
+                        <a href="https://raw.githubusercontent.com/TahriT/PLANTalytics/main/plant_data.csv" 
+                           download style="padding: 0.5rem 1rem; background: white; border: 2px solid var(--accent-color); border-radius: 6px; text-decoration: none; color: var(--primary-color); font-weight: 500; transition: all 0.3s ease; display: inline-flex; align-items: center; gap: 0.5rem;"
+                           onmouseover="this.style.transform='translateY(-3px)'; this.style.boxShadow='0 4px 12px rgba(0,0,0,0.2)'; this.style.background='var(--accent-color)'; this.style.color='white';"
+                           onmouseout="this.style.transform=''; this.style.boxShadow=''; this.style.background='white'; this.style.color='var(--primary-color)';">
+                            <i class="fas fa-leaf"></i> PFAF Plant Data
+                        </a>
+                        <a href="https://raw.githubusercontent.com/TahriT/PLANTalytics/main/permapeople_plants_expanded.csv" 
+                           download style="padding: 0.5rem 1rem; background: white; border: 2px solid var(--accent-color); border-radius: 6px; text-decoration: none; color: var(--primary-color); font-weight: 500; transition: all 0.3s ease; display: inline-flex; align-items: center; gap: 0.5rem;"
+                           onmouseover="this.style.transform='translateY(-3px)'; this.style.boxShadow='0 4px 12px rgba(0,0,0,0.2)'; this.style.background='var(--accent-color)'; this.style.color='white';"
+                           onmouseout="this.style.transform=''; this.style.boxShadow=''; this.style.background='white'; this.style.color='var(--primary-color)';">
+                            <i class="fas fa-users"></i> PermaPeople Data
+                        </a>
+                        <a href="https://raw.githubusercontent.com/TahriT/PLANTalytics/main/phzm_us_zipcode_2023.csv" 
+                           download style="padding: 0.5rem 1rem; background: white; border: 2px solid var(--accent-color); border-radius: 6px; text-decoration: none; color: var(--primary-color); font-weight: 500; transition: all 0.3s ease; display: inline-flex; align-items: center; gap: 0.5rem;"
+                           onmouseover="this.style.transform='translateY(-3px)'; this.style.boxShadow='0 4px 12px rgba(0,0,0,0.2)'; this.style.background='var(--accent-color)'; this.style.color='white';"
+                           onmouseout="this.style.transform=''; this.style.boxShadow=''; this.style.background='white'; this.style.color='var(--primary-color)';">
+                            <i class="fas fa-map-marker-alt"></i> Hardiness Zones
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- About Section -->
+        <section id="about" class="content-section">
+            <div class="section-header">
+                <h2><i class="fas fa-info-circle"></i> About PLANTalytics</h2>
+                <p>Understanding plant data for sustainable agriculture and permaculture</p>
+            </div>
+
+            <div class="dashboard-container" style="padding: 2rem;">
+                <h3 style="color: var(--primary-color); margin-bottom: 1rem;">Project Overview</h3>
+                <p style="line-height: 1.8; margin-bottom: 1.5rem;">
+                    PLANTalytics is a comprehensive data analytics project designed to help gardeners, farmers, 
+                    and permaculture enthusiasts better understand plant growth patterns, synergies, and characteristics. 
+                    By aggregating data from trusted sources like Plants For A Future (PFAF) and PermaPeople, 
+                    we provide actionable insights for sustainable growing practices.
+                </p>
+
+                <h3 style="color: var(--primary-color); margin-bottom: 1rem;">Data Sources</h3>
+                <ul style="line-height: 2; margin-bottom: 1.5rem; margin-left: 2rem;">
+                    <li><strong>PFAF.org:</strong> Comprehensive database of edible and useful plants</li>
+                    <li><strong>PermaPeople.org:</strong> Permaculture-focused plant database with ecological relationships</li>
+                    <li><strong>USDA Hardiness Zones:</strong> Climate and geographical data integration</li>
+                </ul>
+
+                <h3 style="color: var(--primary-color); margin-bottom: 1rem;">Features</h3>
+                <ul style="line-height: 2; margin-bottom: 1.5rem; margin-left: 2rem;">
+                    <li>Interactive Power BI dashboards with real-time filtering</li>
+                    <li>Comprehensive plant characteristic analysis (20+ attributes)</li>
+                    <li>Companion planting and ecosystem service insights</li>
+                    <li>Climate zone and habitat range mapping</li>
+                    <li>Edibility and medicinal use ratings</li>
+                </ul>
+
+                <h3 style="color: var(--primary-color); margin-bottom: 1rem;">Get Involved</h3>
+                <p style="line-height: 1.8;">
+                    This project is open source and welcomes contributions. Visit our 
+                    <a href="https://github.com/TahriT/PLANTalytics" target="_blank" style="color: var(--secondary-color);">GitHub repository</a> 
+                    to contribute, report issues, or suggest new features.
+                </p>
+
+                <div style="margin-top: 2rem; padding: 1.5rem; background: var(--light-bg); border-radius: 8px;">
+                    <h4 style="color: var(--primary-color); margin-bottom: 1rem;">Support Our Data Sources</h4>
+                    <p style="line-height: 1.8;">
+                        Please consider supporting PFAF and PermaPeople through donations. 
+                        Their invaluable work makes projects like this possible!
+                    </p>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <!-- Footer -->
+    <footer>
+        <p>
+            <strong>PLANTalytics</strong> &copy; 2025 | 
+            Data from <a href="https://pfaf.org/" target="_blank">PFAF</a> and 
+            <a href="https://permapeople.org" target="_blank">PermaPeople</a> | 
+            <a href="https://github.com/TahriT/PLANTalytics" target="_blank">View on GitHub</a>
+        </p>
+        <p style="margin-top: 0.5rem; font-size: 0.9rem;">
+            Built with passion for sustainable agriculture and permaculture
+        </p>
+    </footer>
+
+    <!-- Full Screen Button -->
+    <button class="fullscreen-btn" onclick="toggleFullScreen()" title="Toggle Fullscreen">
+        <i class="fas fa-expand"></i>
+    </button>
 
     <script>
-        // Set up the chart container
-        var chartDom = document.getElementById('main');
-        var myChart = echarts.init(chartDom);
+        // Navigation functionality
+        function showSection(sectionId) {
+            // Hide all sections
+            document.querySelectorAll('.content-section').forEach(section => {
+                section.classList.remove('active');
+            });
 
-        // Set the chart options for the 3D globe visualization
-        myChart.setOption({
-            backgroundColor: 'transparent', // Set the background to transparent
-            globe: {
-                baseTexture: 'https://echarts.apache.org/examples/data-gl/asset/world.topo.bathy.200401.jpg', // Globe base texture
-                heightTexture: 'https://echarts.apache.org/examples/data-gl/asset/bathymetry_bw_composite_4k.jpg', // Globe height texture
-                shading: 'lambert', // Apply shading for the globe
-                light: {
-                    ambient: {
-                        intensity: 0.4
-                    },
-                    main: {
-                        intensity: 0.4
-                    }
-                },
-                viewControl: {
-                    autoRotate: false // Disable auto-rotation of the globe
+            // Remove active class from all tabs
+            document.querySelectorAll('.nav-tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+
+            // Show selected section
+            document.getElementById(sectionId).classList.add('active');
+
+            // Add active class to clicked tab
+            event.target.closest('.nav-tab').classList.add('active');
+
+            // Scroll to top
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+
+            // Load data if Raw Data section is opened and not loaded yet
+            if (sectionId === 'individual-charts' && !window.dataLoaded) {
+                loadDataset('plant_data.csv');
+            }
+        }
+
+        // Fullscreen functionality
+        function toggleFullScreen() {
+            if (!document.fullscreenElement) {
+                document.documentElement.requestFullscreen();
+            } else {
+                if (document.exitFullscreen) {
+                    document.exitFullscreen();
                 }
             }
+        }
+
+        // Update fullscreen button icon
+        document.addEventListener('fullscreenchange', function() {
+            const btn = document.querySelector('.fullscreen-btn i');
+            if (document.fullscreenElement) {
+                btn.classList.remove('fa-expand');
+                btn.classList.add('fa-compress');
+            } else {
+                btn.classList.remove('fa-compress');
+                btn.classList.add('fa-expand');
+            }
         });
+
+        // Smooth scroll for anchor links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({ behavior: 'smooth' });
+                }
+            });
+        });
+
+        // CSV Data handling
+        let currentData = [];
+        let filteredData = [];
+        let currentPage = 1;
+        const rowsPerPage = 50;
+
+        // Load dataset from GitHub
+        async function loadDataset(filename) {
+            const loadingIndicator = document.getElementById('loadingIndicator');
+            const tableBody = document.getElementById('tableBody');
+            const tableHead = document.getElementById('tableHead');
+            
+            loadingIndicator.style.display = 'block';
+            tableBody.innerHTML = '<tr><td style="padding: 2rem; text-align: center;">Loading...</td></tr>';
+            
+            const url = `https://raw.githubusercontent.com/TahriT/PLANTalytics/main/${filename}`;
+            
+            try {
+                const response = await fetch(url);
+                if (!response.ok) throw new Error('Failed to load data');
+                
+                const csvText = await response.text();
+                const data = parseCSV(csvText);
+                
+                currentData = data;
+                filteredData = data;
+                window.dataLoaded = true;
+                
+                updateStats();
+                renderTable();
+                renderPagination();
+                
+                loadingIndicator.style.display = 'none';
+            } catch (error) {
+                loadingIndicator.style.display = 'none';
+                tableBody.innerHTML = `<tr><td style="padding: 2rem; text-align: center; color: #e74c3c;">
+                    <i class="fas fa-exclamation-triangle"></i> Error loading data: ${error.message}
+                    <br><small>Make sure the CSV files are in your GitHub repository.</small>
+                </td></tr>`;
+            }
+        }
+
+        // Parse CSV text to array
+        function parseCSV(text) {
+            const lines = text.split('\n').filter(line => line.trim());
+            const headers = lines[0].split(',').map(h => h.trim().replace(/^"|"$/g, ''));
+            const data = [];
+            
+            for (let i = 1; i < lines.length; i++) {
+                const values = parseCSVLine(lines[i]);
+                const row = {};
+                headers.forEach((header, index) => {
+                    row[header] = values[index] || '';
+                });
+                data.push(row);
+            }
+            
+            return data;
+        }
+
+        // Parse a single CSV line (handles quoted values with commas)
+        function parseCSVLine(line) {
+            const result = [];
+            let current = '';
+            let inQuotes = false;
+            
+            for (let i = 0; i < line.length; i++) {
+                const char = line[i];
+                
+                if (char === '"') {
+                    inQuotes = !inQuotes;
+                } else if (char === ',' && !inQuotes) {
+                    result.push(current.trim().replace(/^"|"$/g, ''));
+                    current = '';
+                } else {
+                    current += char;
+                }
+            }
+            
+            result.push(current.trim().replace(/^"|"$/g, ''));
+            return result;
+        }
+
+        // Update statistics
+        function updateStats() {
+            const totalCount = currentData.length;
+            const visibleCount = filteredData.length;
+            const columnCount = Object.keys(currentData[0] || {}).length;
+            
+            // Animated counting effect
+            animateValue('totalRows', 0, totalCount, 800);
+            animateValue('visibleRows', 0, visibleCount, 800);
+            animateValue('totalColumns', 0, columnCount, 600);
+        }
+
+        // Animate number counting
+        function animateValue(id, start, end, duration) {
+            const element = document.getElementById(id);
+            const range = end - start;
+            const increment = range / (duration / 16);
+            let current = start;
+            
+            const timer = setInterval(() => {
+                current += increment;
+                if ((increment > 0 && current >= end) || (increment < 0 && current <= end)) {
+                    current = end;
+                    clearInterval(timer);
+                }
+                element.textContent = Math.floor(current).toLocaleString();
+            }, 16);
+        }
+
+        // Render table with current page data
+        function renderTable() {
+            const tableHead = document.getElementById('tableHead');
+            const tableBody = document.getElementById('tableBody');
+            
+            if (filteredData.length === 0) {
+                tableBody.innerHTML = '<tr><td style="padding: 2rem; text-align: center; color: #999;">No data to display</td></tr>';
+                return;
+            }
+            
+            const headers = Object.keys(filteredData[0]);
+            
+            // Render headers
+            tableHead.innerHTML = '<tr>' + 
+                headers.map(header => 
+                    `<th style="padding: 1rem; text-align: left; font-weight: 600; white-space: nowrap; border-bottom: 2px solid rgba(255,255,255,0.3);">${header}</th>`
+                ).join('') + 
+                '</tr>';
+            
+            // Calculate pagination
+            const startIndex = (currentPage - 1) * rowsPerPage;
+            const endIndex = Math.min(startIndex + rowsPerPage, filteredData.length);
+            const pageData = filteredData.slice(startIndex, endIndex);
+            
+            // Render rows
+            tableBody.innerHTML = pageData.map((row, index) => {
+                const bgColor = index % 2 === 0 ? 'white' : 'var(--light-bg)';
+                return '<tr style="background: ' + bgColor + ';">' +
+                    headers.map(header => {
+                        const value = row[header] || '-';
+                        const displayValue = value.length > 100 ? value.substring(0, 100) + '...' : value;
+                        return `<td style="padding: 0.75rem 1rem; border-bottom: 1px solid #eee; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 300px;" title="${value}">${displayValue}</td>`;
+                    }).join('') +
+                    '</tr>';
+            }).join('');
+        }
+
+        // Render pagination controls
+        function renderPagination() {
+            const pagination = document.getElementById('pagination');
+            const totalPages = Math.ceil(filteredData.length / rowsPerPage);
+            
+            if (totalPages <= 1) {
+                pagination.innerHTML = '';
+                return;
+            }
+            
+            let html = '';
+            
+            // Previous button
+            html += `<button onclick="changePage(${currentPage - 1})" 
+                ${currentPage === 1 ? 'disabled' : ''} 
+                style="padding: 0.5rem 1rem; background: var(--secondary-color); color: white; border: none; border-radius: 6px; cursor: pointer; ${currentPage === 1 ? 'opacity: 0.5;' : ''}">
+                <i class="fas fa-chevron-left"></i> Previous
+            </button>`;
+            
+            // Page numbers
+            const maxButtons = 5;
+            let startPage = Math.max(1, currentPage - Math.floor(maxButtons / 2));
+            let endPage = Math.min(totalPages, startPage + maxButtons - 1);
+            
+            if (endPage - startPage < maxButtons - 1) {
+                startPage = Math.max(1, endPage - maxButtons + 1);
+            }
+            
+            for (let i = startPage; i <= endPage; i++) {
+                html += `<button onclick="changePage(${i})" 
+                    style="padding: 0.5rem 1rem; background: ${i === currentPage ? 'var(--primary-color)' : 'white'}; color: ${i === currentPage ? 'white' : 'var(--primary-color)'}; border: 2px solid var(--accent-color); border-radius: 6px; cursor: pointer; font-weight: ${i === currentPage ? 'bold' : 'normal'};">
+                    ${i}
+                </button>`;
+            }
+            
+            // Next button
+            html += `<button onclick="changePage(${currentPage + 1})" 
+                ${currentPage === totalPages ? 'disabled' : ''} 
+                style="padding: 0.5rem 1rem; background: var(--secondary-color); color: white; border: none; border-radius: 6px; cursor: pointer; ${currentPage === totalPages ? 'opacity: 0.5;' : ''}">
+                Next <i class="fas fa-chevron-right"></i>
+            </button>`;
+            
+            pagination.innerHTML = html;
+        }
+
+        // Change page
+        function changePage(page) {
+            const totalPages = Math.ceil(filteredData.length / rowsPerPage);
+            if (page < 1 || page > totalPages) return;
+            
+            currentPage = page;
+            renderTable();
+            renderPagination();
+            
+            // Scroll to table
+            document.getElementById('dataTable').scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+
+        // Search functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            const searchInput = document.getElementById('searchInput');
+            if (searchInput) {
+                searchInput.addEventListener('input', function(e) {
+                    const searchTerm = e.target.value.toLowerCase();
+                    
+                    if (!searchTerm) {
+                        filteredData = currentData;
+                    } else {
+                        filteredData = currentData.filter(row => {
+                            return Object.values(row).some(value => 
+                                String(value).toLowerCase().includes(searchTerm)
+                            );
+                        });
+                    }
+                    
+                    currentPage = 1;
+                    updateStats();
+                    renderTable();
+                    renderPagination();
+                });
+            }
+        });
+
+        // Export to CSV
+        function exportToCSV() {
+            if (filteredData.length === 0) {
+                alert('No data to export');
+                return;
+            }
+            
+            const headers = Object.keys(filteredData[0]);
+            const csvContent = [
+                headers.join(','),
+                ...filteredData.map(row => 
+                    headers.map(header => {
+                        const value = row[header] || '';
+                        // Escape commas and quotes
+                        return value.includes(',') || value.includes('"') 
+                            ? `"${value.replace(/"/g, '""')}"` 
+                            : value;
+                    }).join(',')
+                )
+            ].join('\n');
+            
+            const blob = new Blob([csvContent], { type: 'text/csv' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `plantalytics_export_${new Date().toISOString().split('T')[0]}.csv`;
+            a.click();
+            window.URL.revokeObjectURL(url);
+        }
     </script>
 </body>
 </html>

@@ -1,0 +1,541 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PLANTalytics - Advanced Dashboard Controls</title>
+    <script src="https://cdn.jsdelivr.net/npm/powerbi-client@2.23.1/dist/powerbi.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #2d5016;
+            --secondary-color: #6b9e3e;
+            --accent-color: #9ec472;
+            --dark-bg: #1a1a1a;
+            --light-bg: #f5f5f5;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+
+        .header {
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+            color: white;
+            padding: 1.5rem 2rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .header h1 {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .header a {
+            color: white;
+            text-decoration: none;
+            padding: 0.5rem 1rem;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 6px;
+            transition: all 0.3s ease;
+        }
+
+        .header a:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        .container {
+            max-width: 1800px;
+            margin: 2rem auto;
+            padding: 0 2rem;
+        }
+
+        .controls-panel {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .controls-header {
+            color: var(--primary-color);
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .control-group {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+            margin-bottom: 1rem;
+        }
+
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.95rem;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn-primary {
+            background: var(--secondary-color);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-color);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        .btn-secondary {
+            background: var(--light-bg);
+            color: var(--primary-color);
+            border: 2px solid var(--accent-color);
+        }
+
+        .btn-secondary:hover {
+            background: var(--accent-color);
+            color: white;
+        }
+
+        .dashboard-wrapper {
+            background: white;
+            border-radius: 12px;
+            padding: 1rem;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+            margin-bottom: 2rem;
+        }
+
+        #reportContainer {
+            width: 100%;
+            height: 85vh;
+            min-height: 700px;
+            border: none;
+            border-radius: 8px;
+        }
+
+        .info-banner {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+            padding: 1rem 1.5rem;
+            border-radius: 8px;
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .info-banner i {
+            font-size: 2rem;
+        }
+
+        .pages-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .page-card {
+            background: var(--light-bg);
+            padding: 1rem;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+        }
+
+        .page-card:hover {
+            background: var(--accent-color);
+            color: white;
+            transform: translateY(-2px);
+        }
+
+        .page-card.active {
+            border-color: var(--secondary-color);
+            background: var(--secondary-color);
+            color: white;
+        }
+
+        .filter-section {
+            background: var(--light-bg);
+            padding: 1rem;
+            border-radius: 8px;
+            margin-top: 1rem;
+        }
+
+        .filter-section h4 {
+            color: var(--primary-color);
+            margin-bottom: 0.75rem;
+        }
+
+        select, input {
+            padding: 0.5rem;
+            border: 2px solid var(--accent-color);
+            border-radius: 6px;
+            font-size: 0.95rem;
+            margin-right: 0.5rem;
+        }
+
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.7);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+        }
+
+        .loading-spinner {
+            text-align: center;
+            color: white;
+        }
+
+        .loading-spinner i {
+            font-size: 4rem;
+            animation: spin 2s linear infinite;
+        }
+
+        @keyframes spin {
+            100% { transform: rotate(360deg); }
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .status-message {
+            padding: 0.75rem;
+            border-radius: 6px;
+            margin-top: 1rem;
+            display: none;
+        }
+
+        .status-success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .status-error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        @media (max-width: 768px) {
+            .header {
+                flex-direction: column;
+                gap: 1rem;
+            }
+
+            .control-group {
+                flex-direction: column;
+            }
+
+            .btn {
+                width: 100%;
+            }
+
+            #reportContainer {
+                height: 600px;
+                min-height: 600px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="loading-overlay hidden" id="loadingOverlay">
+        <div class="loading-spinner">
+            <i class="fas fa-spinner"></i>
+            <p style="margin-top: 1rem; font-size: 1.2rem;">Loading Dashboard...</p>
+        </div>
+    </div>
+
+    <header class="header">
+        <h1>
+            <i class="fas fa-seedling"></i>
+            PLANTalytics - Advanced Controls
+        </h1>
+        <a href="index.html">
+            <i class="fas fa-arrow-left"></i>
+            Back to Main Site
+        </a>
+    </header>
+
+    <div class="container">
+        <div class="info-banner">
+            <i class="fas fa-lightbulb"></i>
+            <div>
+                <strong>Enhanced Dashboard Experience</strong>
+                <p style="margin-top: 0.3rem; opacity: 0.95;">
+                    Use the controls below to interact with specific pages, apply filters, export data, and customize your view.
+                </p>
+            </div>
+        </div>
+
+        <div class="controls-panel">
+            <h3 class="controls-header">
+                <i class="fas fa-sliders-h"></i>
+                Dashboard Controls
+            </h3>
+
+            <div class="control-group">
+                <button class="btn btn-primary" onclick="refreshReport()">
+                    <i class="fas fa-sync-alt"></i>
+                    Refresh Dashboard
+                </button>
+                <button class="btn btn-primary" onclick="toggleFullscreen()">
+                    <i class="fas fa-expand"></i>
+                    Fullscreen
+                </button>
+                <button class="btn btn-secondary" onclick="printReport()">
+                    <i class="fas fa-print"></i>
+                    Print View
+                </button>
+                <button class="btn btn-secondary" onclick="exportData()">
+                    <i class="fas fa-download"></i>
+                    Export Data
+                </button>
+            </div>
+
+            <div class="filter-section">
+                <h4><i class="fas fa-filter"></i> Quick Filters</h4>
+                <div style="display: flex; gap: 1rem; flex-wrap: wrap; align-items: center;">
+                    <div>
+                        <label for="filterFamily">Plant Family:</label>
+                        <select id="filterFamily" onchange="applyFilter('Family', this.value)">
+                            <option value="">All Families</option>
+                            <option value="Rosaceae">Rosaceae</option>
+                            <option value="Fabaceae">Fabaceae</option>
+                            <option value="Solanaceae">Solanaceae</option>
+                            <option value="Asteraceae">Asteraceae</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label for="filterZone">Hardiness Zone:</label>
+                        <select id="filterZone" onchange="applyFilter('HardinessZone', this.value)">
+                            <option value="">All Zones</option>
+                            <option value="3">Zone 3</option>
+                            <option value="4">Zone 4</option>
+                            <option value="5">Zone 5</option>
+                            <option value="6">Zone 6</option>
+                            <option value="7">Zone 7</option>
+                            <option value="8">Zone 8</option>
+                            <option value="9">Zone 9</option>
+                        </select>
+                    </div>
+                    <button class="btn btn-secondary" onclick="clearAllFilters()">
+                        <i class="fas fa-times"></i>
+                        Clear Filters
+                    </button>
+                </div>
+            </div>
+
+            <div id="statusMessage" class="status-message"></div>
+        </div>
+
+        <div class="dashboard-wrapper">
+            <div id="reportContainer"></div>
+        </div>
+    </div>
+
+    <script>
+        // Power BI embedded configuration
+        const embedConfig = {
+            type: 'report',
+            tokenType: window.powerbi.models.TokenType.Embed,
+            accessToken: 'eyJrIjoiYzI0ZmIyZmYtOWNjZS00NWIzLThjMmMtYmMyOTgwOThlYTUzIiwidCI6IjA5MmUzOThlLTIzYTktNGFjMS04MmJmLWIwMzQ2NTRlMGZjMyJ9',
+            embedUrl: 'https://app.powerbi.com/view?r=eyJrIjoiYzI0ZmIyZmYtOWNjZS00NWIzLThjMmMtYmMyOTgwOThlYTUzIiwidCI6IjA5MmUzOThlLTIzYTktNGFjMS04MmJmLWIwMzQ2NTRlMGZjMyJ9',
+            id: 'c24fb2ff-9cce-45b3-8c2c-bc298098ea53',
+            permissions: window.powerbi.models.Permissions.Read,
+            settings: {
+                filterPaneEnabled: true,
+                navContentPaneEnabled: true,
+                background: window.powerbi.models.BackgroundType.Transparent
+            }
+        };
+
+        let report;
+        let powerbi = window.powerbi;
+
+        // Initialize the report
+        function loadReport() {
+            showLoading();
+            const reportContainer = document.getElementById('reportContainer');
+            report = powerbi.embed(reportContainer, embedConfig);
+
+            // Handle loaded event
+            report.on('loaded', function() {
+                hideLoading();
+                showStatus('Dashboard loaded successfully!', 'success');
+                console.log('Report loaded successfully');
+            });
+
+            // Handle rendered event
+            report.on('rendered', function() {
+                console.log('Report rendered');
+            });
+
+            // Handle error event
+            report.on('error', function(event) {
+                hideLoading();
+                const errorMsg = event.detail || 'Unknown error occurred';
+                showStatus('Error loading dashboard: ' + errorMsg, 'error');
+                console.error('Error loading report:', event.detail);
+            });
+
+            // Handle page changed event
+            report.on('pageChanged', function(event) {
+                console.log('Page changed:', event.detail.newPage.displayName);
+            });
+        }
+
+        // Refresh the report
+        function refreshReport() {
+            if (report) {
+                showLoading();
+                report.refresh()
+                    .then(() => {
+                        hideLoading();
+                        showStatus('Dashboard refreshed!', 'success');
+                    })
+                    .catch((error) => {
+                        hideLoading();
+                        showStatus('Error refreshing dashboard', 'error');
+                        console.error('Refresh error:', error);
+                    });
+            }
+        }
+
+        // Toggle fullscreen
+        function toggleFullscreen() {
+            if (report) {
+                report.fullscreen()
+                    .then(() => {
+                        console.log('Fullscreen mode activated');
+                    })
+                    .catch((error) => {
+                        showStatus('Fullscreen not supported', 'error');
+                        console.error('Fullscreen error:', error);
+                    });
+            }
+        }
+
+        // Print the report
+        function printReport() {
+            if (report) {
+                report.print()
+                    .then(() => {
+                        showStatus('Print dialog opened', 'success');
+                    })
+                    .catch((error) => {
+                        showStatus('Error opening print dialog', 'error');
+                        console.error('Print error:', error);
+                    });
+            }
+        }
+
+        // Export data
+        function exportData() {
+            showStatus('Export functionality requires Power BI Pro license', 'error');
+            // Note: Export requires proper authentication and Power BI Pro
+            // This is a placeholder for demonstration
+        }
+
+        // Apply filter
+        function applyFilter(field, value) {
+            if (!report || !value) return;
+
+            const filter = {
+                $schema: "http://powerbi.com/product/schema#basic",
+                target: {
+                    table: "PlantData",
+                    column: field
+                },
+                operator: "In",
+                values: [value],
+                filterType: window.powerbi.models.FilterType.Basic
+            };
+
+            report.setFilters([filter])
+                .then(() => {
+                    showStatus(`Filter applied: ${field} = ${value}`, 'success');
+                })
+                .catch((error) => {
+                    showStatus('Error applying filter', 'error');
+                    console.error('Filter error:', error);
+                });
+        }
+
+        // Clear all filters
+        function clearAllFilters() {
+            if (report) {
+                report.removeFilters()
+                    .then(() => {
+                        // Reset dropdowns
+                        document.getElementById('filterFamily').value = '';
+                        document.getElementById('filterZone').value = '';
+                        showStatus('All filters cleared', 'success');
+                    })
+                    .catch((error) => {
+                        showStatus('Error clearing filters', 'error');
+                        console.error('Clear filters error:', error);
+                    });
+            }
+        }
+
+        // Show loading overlay
+        function showLoading() {
+            document.getElementById('loadingOverlay').classList.remove('hidden');
+        }
+
+        // Hide loading overlay
+        function hideLoading() {
+            document.getElementById('loadingOverlay').classList.add('hidden');
+        }
+
+        // Show status message
+        function showStatus(message, type) {
+            const statusEl = document.getElementById('statusMessage');
+            statusEl.textContent = message;
+            statusEl.className = 'status-message status-' + type;
+            statusEl.style.display = 'block';
+
+            setTimeout(() => {
+                statusEl.style.display = 'none';
+            }, 5000);
+        }
+
+        // Load report on page load
+        window.addEventListener('load', loadReport);
+    </script>
+</body>
+</html>

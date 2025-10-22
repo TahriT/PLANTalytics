@@ -1,0 +1,590 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PLANTalytics - Custom Chart Layout</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #2d5016;
+            --secondary: #6b9e3e;
+            --accent: #9ec472;
+            --light: #f5f5f5;
+            --white: #ffffff;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 1rem;
+        }
+
+        .header {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            color: white;
+            padding: 2rem;
+            border-radius: 12px;
+            margin-bottom: 2rem;
+            text-align: center;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .header p {
+            opacity: 0.9;
+            font-size: 1.1rem;
+        }
+
+        .layout-selector {
+            background: white;
+            padding: 1rem 2rem;
+            border-radius: 12px;
+            margin-bottom: 2rem;
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            flex-wrap: wrap;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .layout-btn {
+            padding: 0.75rem 1.5rem;
+            border: 2px solid var(--accent);
+            background: var(--light);
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .layout-btn:hover,
+        .layout-btn.active {
+            background: var(--secondary);
+            color: white;
+            transform: translateY(-2px);
+        }
+
+        .container {
+            max-width: 1800px;
+            margin: 0 auto;
+        }
+
+        /* Layout: Grid */
+        .layout-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
+            gap: 2rem;
+        }
+
+        /* Layout: Masonry */
+        .layout-masonry {
+            column-count: 2;
+            column-gap: 2rem;
+        }
+
+        .layout-masonry .chart-wrapper {
+            break-inside: avoid;
+            margin-bottom: 2rem;
+        }
+
+        /* Layout: Single Column */
+        .layout-single {
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+        }
+
+        /* Layout: Sidebar */
+        .layout-sidebar {
+            display: grid;
+            grid-template-columns: 350px 1fr;
+            gap: 2rem;
+        }
+
+        .sidebar {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            height: fit-content;
+            position: sticky;
+            top: 1rem;
+        }
+
+        .sidebar h3 {
+            color: var(--primary);
+            margin-bottom: 1rem;
+        }
+
+        .sidebar-section {
+            margin-bottom: 1.5rem;
+        }
+
+        .sidebar-section label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: #666;
+            font-weight: 500;
+        }
+
+        .sidebar-section select,
+        .sidebar-section input {
+            width: 100%;
+            padding: 0.5rem;
+            border: 2px solid var(--accent);
+            border-radius: 6px;
+            font-size: 0.95rem;
+        }
+
+        .filter-tag {
+            display: inline-block;
+            background: var(--accent);
+            color: white;
+            padding: 0.3rem 0.8rem;
+            border-radius: 20px;
+            margin: 0.25rem;
+            font-size: 0.85rem;
+        }
+
+        /* Chart Wrapper */
+        .chart-wrapper {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .chart-wrapper:hover {
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+            transform: translateY(-4px);
+        }
+
+        .chart-header {
+            background: linear-gradient(135deg, var(--secondary), var(--accent));
+            color: white;
+            padding: 1rem 1.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .chart-title {
+            font-weight: 600;
+            font-size: 1.1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .chart-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .icon-btn {
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            color: white;
+            padding: 0.5rem;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .icon-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        .chart-content {
+            position: relative;
+        }
+
+        .chart-iframe {
+            width: 100%;
+            height: 500px;
+            border: none;
+            display: block;
+        }
+
+        .chart-placeholder {
+            padding: 3rem;
+            text-align: center;
+            color: #999;
+            min-height: 400px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            background: var(--light);
+        }
+
+        .chart-placeholder i {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+            opacity: 0.5;
+        }
+
+        .chart-footer {
+            padding: 1rem 1.5rem;
+            background: var(--light);
+            border-top: 1px solid #ddd;
+            font-size: 0.9rem;
+            color: #666;
+        }
+
+        /* Quick Stats */
+        .quick-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+
+        .stat-icon {
+            font-size: 2rem;
+            color: var(--secondary);
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: bold;
+            color: var(--primary);
+        }
+
+        .stat-label {
+            color: #666;
+            margin-top: 0.25rem;
+        }
+
+        /* Responsive */
+        @media (max-width: 1200px) {
+            .layout-sidebar {
+                grid-template-columns: 1fr;
+            }
+
+            .layout-masonry {
+                column-count: 1;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .layout-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .chart-iframe {
+                height: 400px;
+            }
+        }
+
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1><i class="fas fa-leaf"></i> PLANTalytics Dashboard</h1>
+        <p>Customize your view with flexible layouts and individual chart controls</p>
+    </div>
+
+    <div class="layout-selector">
+        <button class="layout-btn active" onclick="changeLayout('grid')">
+            <i class="fas fa-th"></i> Grid Layout
+        </button>
+        <button class="layout-btn" onclick="changeLayout('masonry')">
+            <i class="fas fa-th-large"></i> Masonry Layout
+        </button>
+        <button class="layout-btn" onclick="changeLayout('single')">
+            <i class="fas fa-bars"></i> Single Column
+        </button>
+        <button class="layout-btn" onclick="changeLayout('sidebar')">
+            <i class="fas fa-columns"></i> Sidebar Layout
+        </button>
+    </div>
+
+    <div class="container">
+        <!-- Quick Stats -->
+        <div class="quick-stats">
+            <div class="stat-card">
+                <div class="stat-icon"><i class="fas fa-database"></i></div>
+                <div class="stat-value">5,000+</div>
+                <div class="stat-label">Plant Records</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon"><i class="fas fa-layer-group"></i></div>
+                <div class="stat-value">200+</div>
+                <div class="stat-label">Plant Families</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon"><i class="fas fa-map-marker-alt"></i></div>
+                <div class="stat-value">13</div>
+                <div class="stat-label">Hardiness Zones</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon"><i class="fas fa-globe"></i></div>
+                <div class="stat-value">150+</div>
+                <div class="stat-label">Countries</div>
+            </div>
+        </div>
+
+        <div id="layoutContainer" class="layout-grid">
+            <!-- Sidebar (only visible in sidebar layout) -->
+            <div class="sidebar hidden" id="sidebar">
+                <h3><i class="fas fa-filter"></i> Filters</h3>
+                
+                <div class="sidebar-section">
+                    <label>Plant Family</label>
+                    <select id="familyFilter">
+                        <option value="">All Families</option>
+                        <option value="Rosaceae">Rosaceae</option>
+                        <option value="Fabaceae">Fabaceae</option>
+                        <option value="Solanaceae">Solanaceae</option>
+                    </select>
+                </div>
+
+                <div class="sidebar-section">
+                    <label>Hardiness Zone</label>
+                    <select id="zoneFilter">
+                        <option value="">All Zones</option>
+                        <option value="3-5">Zones 3-5</option>
+                        <option value="6-8">Zones 6-8</option>
+                        <option value="9-11">Zones 9-11</option>
+                    </select>
+                </div>
+
+                <div class="sidebar-section">
+                    <label>Edibility Rating</label>
+                    <input type="range" min="0" max="5" value="0" id="edibilityFilter">
+                </div>
+
+                <div class="sidebar-section">
+                    <label>Active Filters:</label>
+                    <div id="activeFilters">
+                        <span class="filter-tag">None</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Charts Container -->
+            <div id="chartsContainer">
+                <!-- Chart 1: Overview Map -->
+                <div class="chart-wrapper">
+                    <div class="chart-header">
+                        <div class="chart-title">
+                            <i class="fas fa-globe-americas"></i>
+                            Global Plant Distribution
+                        </div>
+                        <div class="chart-actions">
+                            <button class="icon-btn" title="Refresh"><i class="fas fa-sync-alt"></i></button>
+                            <button class="icon-btn" title="Fullscreen"><i class="fas fa-expand"></i></button>
+                        </div>
+                    </div>
+                    <div class="chart-content">
+                        <!-- REPLACE THIS WITH YOUR POWER BI EMBED -->
+                        <iframe class="chart-iframe" 
+                                src="https://app.powerbi.com/view?r=eyJrIjoiYzI0ZmIyZmYtOWNjZS00NWIzLThjMmMtYmMyOTgwOThlYTUzIiwidCI6IjA5MmUzOThlLTIzYTktNGFjMS04MmJmLWIwMzQ2NTRlMGZjMyJ9&filterPaneEnabled=false"
+                                frameborder="0">
+                        </iframe>
+                    </div>
+                    <div class="chart-footer">
+                        <i class="fas fa-info-circle"></i> Interactive map showing plant distribution worldwide
+                    </div>
+                </div>
+
+                <!-- Chart 2: Family Distribution -->
+                <div class="chart-wrapper">
+                    <div class="chart-header">
+                        <div class="chart-title">
+                            <i class="fas fa-chart-pie"></i>
+                            Top Plant Families
+                        </div>
+                        <div class="chart-actions">
+                            <button class="icon-btn" title="Refresh"><i class="fas fa-sync-alt"></i></button>
+                            <button class="icon-btn" title="Fullscreen"><i class="fas fa-expand"></i></button>
+                        </div>
+                    </div>
+                    <div class="chart-content">
+                        <!-- REPLACE WITH YOUR SPECIFIC CHART EMBED -->
+                        <div class="chart-placeholder">
+                            <i class="fas fa-chart-pie"></i>
+                            <h3>Chart Placeholder</h3>
+                            <p>Replace this with your Power BI chart embed code</p>
+                            <p style="margin-top: 0.5rem; font-size: 0.9rem;">
+                                See POWERBI_EMBED_GUIDE.md for instructions
+                            </p>
+                        </div>
+                    </div>
+                    <div class="chart-footer">
+                        <i class="fas fa-info-circle"></i> Breakdown of plants by botanical family
+                    </div>
+                </div>
+
+                <!-- Chart 3: Hardiness Zones -->
+                <div class="chart-wrapper">
+                    <div class="chart-header">
+                        <div class="chart-title">
+                            <i class="fas fa-temperature-low"></i>
+                            Hardiness Zone Analysis
+                        </div>
+                        <div class="chart-actions">
+                            <button class="icon-btn" title="Refresh"><i class="fas fa-sync-alt"></i></button>
+                            <button class="icon-btn" title="Fullscreen"><i class="fas fa-expand"></i></button>
+                        </div>
+                    </div>
+                    <div class="chart-content">
+                        <div class="chart-placeholder">
+                            <i class="fas fa-temperature-low"></i>
+                            <h3>Chart Placeholder</h3>
+                            <p>Add your hardiness zone visualization here</p>
+                        </div>
+                    </div>
+                    <div class="chart-footer">
+                        <i class="fas fa-info-circle"></i> Plant distribution across USDA hardiness zones
+                    </div>
+                </div>
+
+                <!-- Chart 4: Edibility & Uses -->
+                <div class="chart-wrapper">
+                    <div class="chart-header">
+                        <div class="chart-title">
+                            <i class="fas fa-apple-alt"></i>
+                            Edibility & Medicinal Uses
+                        </div>
+                        <div class="chart-actions">
+                            <button class="icon-btn" title="Refresh"><i class="fas fa-sync-alt"></i></button>
+                            <button class="icon-btn" title="Fullscreen"><i class="fas fa-expand"></i></button>
+                        </div>
+                    </div>
+                    <div class="chart-content">
+                        <div class="chart-placeholder">
+                            <i class="fas fa-apple-alt"></i>
+                            <h3>Chart Placeholder</h3>
+                            <p>Add your edibility ratings visualization here</p>
+                        </div>
+                    </div>
+                    <div class="chart-footer">
+                        <i class="fas fa-info-circle"></i> Comparative analysis of edibility and medicinal ratings
+                    </div>
+                </div>
+
+                <!-- Chart 5: Growth Characteristics -->
+                <div class="chart-wrapper">
+                    <div class="chart-header">
+                        <div class="chart-title">
+                            <i class="fas fa-seedling"></i>
+                            Growth Characteristics
+                        </div>
+                        <div class="chart-actions">
+                            <button class="icon-btn" title="Refresh"><i class="fas fa-sync-alt"></i></button>
+                            <button class="icon-btn" title="Fullscreen"><i class="fas fa-expand"></i></button>
+                        </div>
+                    </div>
+                    <div class="chart-content">
+                        <div class="chart-placeholder">
+                            <i class="fas fa-seedling"></i>
+                            <h3>Chart Placeholder</h3>
+                            <p>Add your growth characteristics chart here</p>
+                        </div>
+                    </div>
+                    <div class="chart-footer">
+                        <i class="fas fa-info-circle"></i> Analysis of growth rates, heights, and spreads
+                    </div>
+                </div>
+
+                <!-- Chart 6: Ecosystem Services -->
+                <div class="chart-wrapper">
+                    <div class="chart-header">
+                        <div class="chart-title">
+                            <i class="fas fa-network-wired"></i>
+                            Ecosystem Services
+                        </div>
+                        <div class="chart-actions">
+                            <button class="icon-btn" title="Refresh"><i class="fas fa-sync-alt"></i></button>
+                            <button class="icon-btn" title="Fullscreen"><i class="fas fa-expand"></i></button>
+                        </div>
+                    </div>
+                    <div class="chart-content">
+                        <div class="chart-placeholder">
+                            <i class="fas fa-network-wired"></i>
+                            <h3>Chart Placeholder</h3>
+                            <p>Add your ecosystem services visualization here</p>
+                        </div>
+                    </div>
+                    <div class="chart-footer">
+                        <i class="fas fa-info-circle"></i> Pollinator support and ecological benefits
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function changeLayout(layout) {
+            const container = document.getElementById('layoutContainer');
+            const sidebar = document.getElementById('sidebar');
+            const buttons = document.querySelectorAll('.layout-btn');
+
+            // Remove all layout classes
+            container.className = '';
+            
+            // Add new layout class
+            container.classList.add('layout-' + layout);
+
+            // Show/hide sidebar
+            if (layout === 'sidebar') {
+                sidebar.classList.remove('hidden');
+            } else {
+                sidebar.classList.add('hidden');
+            }
+
+            // Update active button
+            buttons.forEach(btn => btn.classList.remove('active'));
+            event.target.closest('.layout-btn').classList.add('active');
+        }
+
+        // Icon button handlers
+        document.querySelectorAll('.icon-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const action = this.getAttribute('title');
+                if (action === 'Fullscreen') {
+                    const chart = this.closest('.chart-wrapper');
+                    if (chart.requestFullscreen) {
+                        chart.requestFullscreen();
+                    }
+                } else if (action === 'Refresh') {
+                    const iframe = this.closest('.chart-wrapper').querySelector('iframe');
+                    if (iframe) {
+                        iframe.src = iframe.src;
+                    }
+                }
+            });
+        });
+    </script>
+</body>
+</html>
