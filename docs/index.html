@@ -634,65 +634,67 @@
     <div class="container">
         <!-- Overview Section -->
         <section id="overview" class="content-section active">
-            <div style="display: grid; grid-template-columns: 1fr 350px; gap: 1.5rem; margin-bottom: 1.5rem; align-items: stretch;">
-                <!-- Left side: Header + Info Cards -->
-                <div style="display: flex; flex-direction: column; gap: 1.5rem;">
-                    <div class="section-header" style="margin-bottom: 0;">
-                        <h2><i class="fas fa-chart-pie"></i> Welcome to PLANTalytics</h2>
-                        <p>Comprehensive plant data analytics powered by PFAF and PermaPeople databases</p>
-                    </div>
-                    
-                    <!-- Info Cards Inside Header Container -->
-                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
-                        <div class="info-card compact-card" style="margin-bottom: 0; padding: 1rem;">
-                            <i class="fas fa-database" style="font-size: 1.8rem;"></i>
-                            <h3 style="font-size: 1rem;">Comprehensive Data</h3>
-                            <p class="card-description">Thousands of plant records with growth habits and hardiness zones.</p>
-                        </div>
-                        <div class="info-card compact-card" style="margin-bottom: 0; padding: 1rem;">
-                            <i class="fas fa-chart-bar" style="font-size: 1.8rem;"></i>
-                            <h3 style="font-size: 1rem;">Interactive Visualizations</h3>
-                            <p class="card-description">Dynamic Power BI dashboards with filtering and drill-down.</p>
-                        </div>
-                        <div class="info-card compact-card" style="margin-bottom: 0; padding: 1rem;">
-                            <i class="fas fa-leaf" style="font-size: 1.8rem;"></i>
-                            <h3 style="font-size: 1rem;">Permaculture Insights</h3>
-                            <p class="card-description">Companion planting and sustainable growing practices.</p>
-                        </div>
-                        <div class="info-card compact-card" style="margin-bottom: 0; padding: 1rem;">
-                            <i class="fas fa-globe-americas" style="font-size: 1.8rem;"></i>
-                            <h3 style="font-size: 1rem;">Climate Analysis</h3>
-                            <p class="card-description">Filter by hardiness zones and climate preferences.</p>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- SproutCast Standout Card -->
-                <div style="background: linear-gradient(135deg, #2196F3 0%, #1976D2 100%); color: white; padding: 1.5rem; border-radius: 12px; box-shadow: 0 8px 20px rgba(33, 150, 243, 0.4); animation: pulse 3s ease-in-out infinite; display: flex; flex-direction: column; justify-content: center;">
-                    <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.75rem;">
-                        <i class="fas fa-broadcast-tower" style="font-size: 1.8rem;"></i>
-                        <h3 style="font-size: 1.2rem; margin: 0;">SproutCast.io</h3>
-                    </div>
-                    <p style="line-height: 1.5; margin-bottom: 0.75rem; font-size: 0.9rem;">
-                        Real-time garden monitoring with live updates and intelligent insights.
-                    </p>
-                    <a href="https://sproutcast.io" target="_blank" style="display: inline-block; background: white; color: #1976D2; padding: 0.5rem 1rem; border-radius: 6px; text-decoration: none; font-weight: 600; transition: all 0.3s ease; box-shadow: 0 2px 8px rgba(0,0,0,0.2); font-size: 0.9rem;" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 4px 12px rgba(0,0,0,0.3)';" onmouseout="this.style.transform=''; this.style.boxShadow='0 2px 8px rgba(0,0,0,0.2)';">
-                        <i class="fas fa-external-link-alt"></i> Visit SproutCast
-                    </a>
-                </div>
+            <!-- Main Visual (Top Priority) -->
+            <div class="dashboard-container" style="margin-bottom: 1.5rem; height: 85vh; min-height: 600px;">
+                <iframe 
+                    class="dashboard-iframe"
+                    src="dashboard.html"
+                    frameborder="0"
+                    allowFullScreen="true">
+                </iframe>
             </div>
 
             <div class="rotation-hint">
                 <i class="fas fa-mobile-alt"></i> <strong>Tip:</strong> Rotate your device to landscape mode for a better viewing experience!
             </div>
 
-            <div class="dashboard-container">
-                <iframe 
-                    class="dashboard-iframe"
-                    src="https://app.powerbi.com/view?r=eyJrIjoiYzI0ZmIyZmYtOWNjZS00NWIzLThjMmMtYmMyOTgwOThlYTUzIiwidCI6IjA5MmUzOThlLTIzYTktNGFjMS04MmJmLWIwMzQ2NTRlMGZjMyJ9"
-                    frameborder="0"
-                    allowFullScreen="true">
-                </iframe>
+            <!-- Info Banner & SproutCast -->
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem; align-items: start;">
+                
+                <!-- Welcome & Info Banner -->
+                <div>
+                    <div class="section-header" style="margin-bottom: 1rem;">
+                        <h2><i class="fas fa-chart-pie"></i> Welcome to PLANTalytics</h2>
+                        <p>Comprehensive plant data analytics powered by PFAF and PermaPeople databases</p>
+                    </div>
+                    
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 1rem;">
+                        <div class="info-card compact-card" style="margin-bottom: 0; padding: 1rem;">
+                            <i class="fas fa-database" style="font-size: 1.5rem; color: var(--primary-color);"></i>
+                            <h3 style="font-size: 0.9rem; margin: 0.5rem 0;">Comprehensive Data</h3>
+                            <p class="card-description" style="font-size: 0.8rem;">Thousands of plant records.</p>
+                        </div>
+                        <div class="info-card compact-card" style="margin-bottom: 0; padding: 1rem;">
+                            <i class="fas fa-chart-bar" style="font-size: 1.5rem; color: var(--primary-color);"></i>
+                            <h3 style="font-size: 0.9rem; margin: 0.5rem 0;">Interactive Visualizations</h3>
+                            <p class="card-description" style="font-size: 0.8rem;">Dynamic D3.js visualizations.</p>
+                        </div>
+                        <div class="info-card compact-card" style="margin-bottom: 0; padding: 1rem;">
+                            <i class="fas fa-leaf" style="font-size: 1.5rem; color: var(--primary-color);"></i>
+                            <h3 style="font-size: 0.9rem; margin: 0.5rem 0;">Permaculture Insights</h3>
+                            <p class="card-description" style="font-size: 0.8rem;">Companion planting & more.</p>
+                        </div>
+                        <div class="info-card compact-card" style="margin-bottom: 0; padding: 1rem;">
+                            <i class="fas fa-globe-americas" style="font-size: 1.5rem; color: var(--primary-color);"></i>
+                            <h3 style="font-size: 0.9rem; margin: 0.5rem 0;">Climate Analysis</h3>
+                            <p class="card-description" style="font-size: 0.8rem;">Hardiness zones & climate.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- SproutCast (Smaller) -->
+                <div style="background: linear-gradient(135deg, #2196F3 0%, #1976D2 100%); color: white; padding: 1.5rem; border-radius: 12px; box-shadow: 0 4px 15px rgba(33, 150, 243, 0.3);">
+                    <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.75rem;">
+                        <i class="fas fa-broadcast-tower" style="font-size: 1.5rem;"></i>
+                        <h3 style="font-size: 1.1rem; margin: 0;">SproutCast.io</h3>
+                    </div>
+                    <p style="line-height: 1.4; margin-bottom: 1rem; font-size: 0.9rem;">
+                        Real-time garden monitoring with live updates and intelligent insights.
+                    </p>
+                    <a href="https://sproutcast.io" target="_blank" style="display: block; text-align: center; background: white; color: #1976D2; padding: 0.6rem; border-radius: 6px; text-decoration: none; font-weight: 600; font-size: 0.9rem; transition: transform 0.2s;" onmouseover="this.style.transform='scale(1.02)'" onmouseout="this.style.transform='scale(1)'">
+                        <i class="fas fa-external-link-alt"></i> Visit SproutCast
+                    </a>
+                </div>
             </div>
         </section>
 
