@@ -1,0 +1,46 @@
+name: Update Plant Data
+
+on:
+  schedule:
+    # Run every Sunday at midnight
+    - cron: '0 0 * * 0'
+  workflow_dispatch:
+
+jobs:
+  scrape-and-update:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.9'
+
+      - name: Install dependencies
+        run: |
+          pip install requests beautifulsoup4 python-dotenv
+
+      - name: Run PFAF Scraper
+        run: python plantalytics_data.py
+
+      # Note: PermaPeople scraper requires secrets
+      # - name: Run PermaPeople Scraper
+      #   env:
+      #     PERMAPEOPLE_ID: ${{ secrets.PERMAPEOPLE_ID }}
+      #     PERMAPEOPLE_SECRET: ${{ secrets.PERMAPEOPLE_SECRET }}
+      #   run: python permapeople_data.py
+
+      - name: Move Data to Docs
+        run: |
+          # Assuming the script outputs plant_data_debug.csv
+          mv plant_data_debug.csv docs/plant_data.csv
+
+      - name: Commit and Push
+        run: |
+          git config --global user.name 'GitHub Action'
+          git config --global user.email 'action@github.com'
+          git add docs/plant_data.csv
+          git commit -m "Auto-update plant data" || echo "No changes to commit"
+          git push

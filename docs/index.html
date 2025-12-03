@@ -3,7 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PLANTalytics - Plant Data Analytics Dashboard</title>
+    <title>PLANTalytics - Visual Explorer</title>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         :root {
@@ -14,8 +16,8 @@
             --light-bg: #f5f5f5;
             --text-dark: #333;
             --text-light: #fff;
-            --shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            --transition: all 0.3s ease;
+            --zone-cold: #3498db;
+            --zone-hot: #e74c3c;
         }
 
         * {
@@ -26,1190 +28,1666 @@
 
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #2d5016 0%, #6b9e3e 50%, #9ec472 100%);
+            background: #f0f2f5;
             color: var(--text-dark);
-            overflow-x: hidden;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
         }
 
-        /* Header Styles */
+        /* Header */
         header {
             background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
             color: var(--text-light);
-            padding: 1.5rem 2rem;
-            box-shadow: var(--shadow);
-            position: sticky;
-            top: 0;
-            z-index: 1000;
-        }
-
-        .header-content {
-            max-width: 1400px;
-            margin: 0 auto;
+            padding: 0.75rem 2rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
             display: flex;
             justify-content: space-between;
             align-items: center;
-            flex-wrap: wrap;
-            gap: 1rem;
+            flex-shrink: 0;
+            z-index: 10;
         }
 
-        .logo {
+        .header-title {
             display: flex;
             align-items: center;
             gap: 1rem;
+            font-size: 1.25rem;
+            font-weight: bold;
         }
 
-        .logo i {
-            font-size: 2rem;
-        }
-
-        .logo h1 {
-            font-size: 1.5rem;
-            font-weight: 700;
-        }
-
-        .header-links {
-            display: flex;
-            gap: 1.5rem;
-            align-items: center;
-        }
-
-        .header-links a {
-            color: var(--text-light);
+        .header-link {
+            color: white;
             text-decoration: none;
-            transition: var(--transition);
+            padding: 0.5rem 1rem;
+            background: rgba(255,255,255,0.2);
+            border-radius: 4px;
+            transition: background 0.3s;
+            font-size: 0.9rem;
+        }
+
+        .header-link:hover {
+            background: rgba(255,255,255,0.3);
+        }
+
+        /* Main Layout */
+        .main-container {
             display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-
-        .header-links a:hover {
-            color: var(--accent-color);
-            transform: translateY(-2px);
-        }
-
-        /* Navigation Tabs */
-        .nav-tabs {
-            background: white;
-            padding: 1rem 2rem;
-            box-shadow: var(--shadow);
-            display: flex;
-            gap: 1rem;
-            overflow-x: auto;
-            justify-content: center;
-            flex-wrap: wrap;
-        }
-
-        .nav-tab {
-            padding: 0.75rem 1.5rem;
-            background: var(--light-bg);
-            border: 2px solid transparent;
-            border-radius: 8px;
-            cursor: pointer;
-            transition: var(--transition);
-            white-space: nowrap;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            font-weight: 500;
-        }
-
-        .nav-tab:hover {
-            background: var(--accent-color);
-            color: white;
-            transform: translateY(-2px);
-        }
-
-        .nav-tab.active {
-            background: var(--secondary-color);
-            color: white;
-            border-color: var(--primary-color);
-        }
-
-        /* Main Content */
-        .container {
-            max-width: 1600px;
-            margin: 2rem auto;
-            padding: 0 2rem;
-        }
-
-        .content-section {
-            display: none;
-            animation: fadeIn 0.5s ease;
-        }
-
-        .content-section.active {
-            display: block;
-        }
-
-        @keyframes fadeIn {
-            from {
-                opacity: 0;
-                transform: translateY(20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        .section-header {
-            background: white;
-            padding: 1.5rem;
-            border-radius: 12px;
-            margin-bottom: 1.5rem;
-            box-shadow: var(--shadow);
-        }
-
-        .section-header h2 {
-            color: var(--primary-color);
-            margin-bottom: 0.5rem;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-
-        .section-header h2 i {
-            animation: pulse 2s ease-in-out infinite;
-        }
-
-        .section-header p {
-            color: #666;
-        }
-
-        /* Dashboard Container */
-        .dashboard-container {
-            background: white;
-            border-radius: 12px;
-            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+            flex: 1;
             overflow: hidden;
-            min-height: 800px;
         }
 
-        .dashboard-iframe {
-            width: 100%;
-            height: 85vh;
-            min-height: 800px;
-            border: none;
-        }
-
-        /* Grid Layout for Individual Charts */
-        .charts-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
-            gap: 2rem;
-            margin-top: 2rem;
-        }
-
-        .chart-card {
+        /* Sidebar */
+        .sidebar {
+            width: 340px;
             background: white;
-            border-radius: 12px;
-            box-shadow: var(--shadow);
-            overflow: hidden;
-            transition: var(--transition);
+            padding: 0;
+            box-shadow: 2px 0 5px rgba(0,0,0,0.05);
+            overflow-y: auto;
+            flex-shrink: 0;
+            z-index: 5;
+            display: flex;
+            flex-direction: column;
+            transition: width 0.3s ease, margin-left 0.3s ease;
         }
 
-        .chart-card:hover {
-            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
-            transform: translateY(-4px);
-        }
-
-        .chart-header {
-            background: linear-gradient(135deg, var(--secondary-color) 0%, var(--accent-color) 100%);
-            color: white;
-            padding: 1rem 1.5rem;
-            font-weight: 600;
-        }
-
-        .chart-content {
-            padding: 1rem;
-            min-height: 400px;
-        }
-
-        .chart-iframe {
-            width: 100%;
-            height: 500px;
-            border: none;
-        }
-
-        /* Info Cards */
-        .info-cards {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 1.5rem;
-            margin-bottom: 2rem;
-        }
-
-        .info-card {
-            background: white;
-            padding: 1.5rem;
-            border-radius: 12px;
-            box-shadow: var(--shadow);
-            transition: var(--transition);
-        }
-
-        .info-card:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
-        }
-
-        .info-card i {
-            font-size: 2.5rem;
-            color: var(--secondary-color);
-            margin-bottom: 1rem;
-        }
-
-        .info-card h3 {
-            color: var(--primary-color);
-            margin-bottom: 0.5rem;
-        }
-
-        .info-card p {
-            color: #666;
-            line-height: 1.6;
-        }
-
-        .compact-card i {
-            margin-bottom: 0.5rem;
-        }
-
-        .compact-card h3 {
-            margin-bottom: 0.3rem;
-        }
-
-        .compact-card p {
-            font-size: 0.85rem;
-            line-height: 1.4;
-        }
-
-        /* Footer */
-        footer {
-            background: var(--primary-color);
-            color: var(--text-light);
-            text-align: center;
-            padding: 2rem;
-            margin-top: 4rem;
-        }
-
-        footer a {
-            color: var(--accent-color);
-            text-decoration: none;
-        }
-
-        footer a:hover {
-            text-decoration: underline;
-        }
-
-        /* Responsive Design */
-        @media (max-width: 768px) {
-            .header-content {
-                flex-direction: column;
-                text-align: center;
-            }
-
-            .nav-tabs {
-                flex-direction: column;
-            }
-
-            .charts-grid {
-                grid-template-columns: 1fr;
-            }
-
-            .dashboard-iframe {
-                height: 600px;
-                min-height: 600px;
-            }
-
-            .logo i {
-                font-size: 1.5rem;
-            }
-
-            .logo h1 {
-                font-size: 1.2rem;
-            }
-
-            header {
-                padding: 1rem;
-            }
-
-            .header-links {
-                font-size: 0.9rem;
-            }
-
-            /* Rotation suggestion for mobile */
-            .rotation-hint {
-                display: block !important;
-                background: var(--accent-color);
-                color: white;
-                padding: 0.75rem;
-                text-align: center;
-                font-size: 0.9rem;
-                border-radius: 8px;
-                margin-bottom: 1rem;
-                animation: pulse 2s ease-in-out infinite;
-            }
-
-            /* Stack header and SproutCast card on mobile */
-            #overview > div:first-child {
-                grid-template-columns: 1fr !important;
-            }
-
-            /* Hide card descriptions on mobile - show only icons and titles */
-            .card-description {
-                display: none !important;
-            }
-
-            .compact-card {
-                padding: 0.75rem !important;
-                text-align: center;
-            }
-
-            .compact-card i {
-                font-size: 1.5rem !important;
-                margin-bottom: 0.3rem !important;
-            }
-
-            .compact-card h3 {
-                font-size: 0.85rem !important;
-                margin-bottom: 0 !important;
-            }
-
-            /* Collapse SproutCast card on mobile */
-            #overview > div:first-child > div:last-child {
-                padding: 0.75rem !important;
-                animation: none !important;
-            }
-
-            #overview > div:first-child > div:last-child > div:first-child {
-                justify-content: center !important;
-                margin-bottom: 0 !important;
-            }
-
-            #overview > div:first-child > div:last-child > div:first-child i {
-                font-size: 1.5rem !important;
-            }
-
-            #overview > div:first-child > div:last-child > div:first-child h3 {
-                font-size: 1rem !important;
-                font-weight: bold !important;
-            }
-
-            #overview > div:first-child > div:last-child > p,
-            #overview > div:first-child > div:last-child > a {
-                display: none !important;
-            }
-        }
-
-        .rotation-hint {
-            display: none;
-        }
-
-        /* Loading Animation */
-        .loading {
-            text-align: center;
-            padding: 4rem;
-            color: var(--secondary-color);
-        }
-
-        .loading i {
-            font-size: 3rem;
-            animation: spin 2s linear infinite;
-        }
-
-        @keyframes spin {
-            100% { transform: rotate(360deg); }
-        }
-
-        /* Subtle Animations */
-        @keyframes float {
-            0%, 100% { transform: translateY(0px); }
-            50% { transform: translateY(-10px); }
-        }
-
-        @keyframes pulse {
-            0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.05); }
-        }
-
-        @keyframes slideIn {
-            from {
-                opacity: 0;
-                transform: translateX(-20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateX(0);
-            }
-        }
-
-        @keyframes glow {
-            0%, 100% { 
-                box-shadow: 0 0 5px rgba(107, 158, 62, 0.5);
-            }
-            50% { 
-                box-shadow: 0 0 20px rgba(107, 158, 62, 0.8), 0 0 30px rgba(107, 158, 62, 0.6);
-            }
-        }
-
-        @keyframes rotate {
-            from { transform: rotate(0deg); }
-            to { transform: rotate(360deg); }
-        }
-
-        /* Apply animations to elements */
-        .logo i {
-            animation: float 3s ease-in-out infinite;
-        }
-
-        .header-links a {
-            animation: slideIn 0.5s ease-out;
-        }
-
-        .header-links a:nth-child(1) { animation-delay: 0.1s; }
-        .header-links a:nth-child(2) { animation-delay: 0.2s; }
-        .header-links a:nth-child(3) { animation-delay: 0.3s; }
-        .header-links a:nth-child(4) { animation-delay: 0.4s; }
-        .header-links a:nth-child(5) { animation-delay: 0.5s; }
-
-        .info-card i {
-            transition: all 0.3s ease;
-        }
-
-        .info-card:hover i {
-            animation: pulse 0.6s ease-in-out;
-            color: var(--primary-color);
-        }
-
-        .nav-tab i {
-            transition: transform 0.3s ease;
-        }
-
-        .nav-tab:hover i {
-            transform: scale(1.2);
-        }
-
-        .nav-tab.active i {
-            animation: pulse 1s ease-in-out infinite;
-        }
-
-        .fullscreen-btn {
-            animation: glow 2s ease-in-out infinite;
-        }
-
-        .fullscreen-btn:hover {
-            animation: pulse 0.3s ease-in-out;
-        }
-
-        /* Loading spinner animation enhancement */
-        .loading i,
-        #loadingIndicator i {
-            animation: rotate 1s linear infinite;
-        }
-
-        /* Stat cards animation on load */
-        .info-card {
-            animation: fadeIn 0.6s ease-out;
-        }
-
-        .info-card:nth-child(1) { animation-delay: 0.1s; }
-        .info-card:nth-child(2) { animation-delay: 0.2s; }
-        .info-card:nth-child(3) { animation-delay: 0.3s; }
-        .info-card:nth-child(4) { animation-delay: 0.4s; }
-
-        /* Subtle background gradient animation */
-        body {
-            background: linear-gradient(135deg, #2d5016 0%, #6b9e3e 50%, #9ec472 100%);
-            background-size: 400% 400%;
-            animation: gradientShift 15s ease infinite;
-        }
-
-        @keyframes gradientShift {
-            0% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
-            100% { background-position: 0% 50%; }
-        }
-
-        /* Hover effect for table rows */
-        #dataTable tbody tr {
-            transition: all 0.2s ease;
-        }
-
-        #dataTable tbody tr:hover {
-            transform: scale(1.01);
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-        }
-
-        /* Button press animation */
-        button {
-            transition: all 0.2s ease;
-        }
-
-        button:active {
-            transform: scale(0.95);
-        }
-
-        /* Pagination buttons hover */
-        #pagination button:hover:not([disabled]) {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
-        }
-
-        /* Full Screen Button */
-        .fullscreen-btn {
-            position: fixed;
-            bottom: 2rem;
-            right: 2rem;
-            background: var(--secondary-color);
-            color: white;
-            border: none;
-            padding: 1rem;
-            border-radius: 50%;
+        .sidebar.collapsed {
             width: 60px;
-            height: 60px;
-            cursor: pointer;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-            transition: var(--transition);
-            z-index: 999;
+            margin-left: 0;
+            overflow: hidden;
         }
 
-        .fullscreen-btn:hover {
+        .sidebar.collapsed .sidebar-content,
+        .sidebar.collapsed .sidebar-hero,
+        .sidebar.collapsed .sidebar-header h2,
+        .sidebar.collapsed .mobile-close-btn,
+        .sidebar.collapsed .desktop-close-btn {
+            display: none !important;
+        }
+
+        /* Mini Sidebar Icons */
+        .sidebar-mini {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            padding-top: 1rem;
+            gap: 1.5rem;
+        }
+
+        .sidebar.collapsed .sidebar-mini {
+            display: flex;
+        }
+
+        .mini-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: #f0f2f5;
+            color: var(--primary-color);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            font-size: 1.2rem;
+            transition: all 0.2s;
+        }
+
+        .mini-icon:hover {
             background: var(--primary-color);
+            color: white;
             transform: scale(1.1);
         }
 
-        .fullscreen-btn i {
-            font-size: 1.5rem;
+        .sidebar-hero {
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+            color: white;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .sidebar-hero h2 {
+            font-size: 1.4rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .sidebar-hero p {
+            font-size: 0.9rem;
+            opacity: 0.9;
+            line-height: 1.4;
+        }
+
+        .sidebar-section {
+            padding: 0 1.5rem 1.5rem 1.5rem;
+            border-bottom: 1px solid #eee;
+            margin-bottom: 1.5rem;
+        }
+
+        .sidebar-section:last-child {
+            border-bottom: none;
+        }
+
+        .section-step {
+            text-transform: uppercase;
+            font-size: 0.75rem;
+            color: #888;
+            font-weight: 700;
+            letter-spacing: 1px;
+            margin-bottom: 0.5rem;
+            display: block;
+        }
+
+        .sidebar-header {
+            font-size: 1.1rem;
+            color: var(--primary-color);
+            font-weight: 700;
+            margin-bottom: 0.8rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        /* Visual Filters */
+        .filter-card {
+            background: #fff;
+            border-radius: 8px;
+        }
+
+        .filter-label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            font-size: 0.9rem;
+            color: #555;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        /* Zone Selector */
+        .zone-selector {
+            display: flex;
+            height: 40px;
+            border-radius: 6px;
+            overflow: hidden;
+            cursor: pointer;
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .zone-segment {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.7rem;
+            color: white;
+            font-weight: bold;
+            transition: all 0.2s;
+            position: relative;
+        }
+
+        .zone-segment:hover {
+            transform: scaleY(1.1);
+            z-index: 2;
+        }
+
+        .zone-segment.active {
+            box-shadow: inset 0 0 0 2px white;
+            transform: scaleY(1.15);
+            z-index: 3;
+            font-size: 0.9rem;
+        }
+
+        .zone-segment.dimmed {
+            opacity: 0.3;
+        }
+
+        /* Range Slider */
+        .range-container {
+            position: relative;
+            height: 40px;
+            display: flex;
+            align-items: center;
+        }
+
+        .range-track {
+            position: absolute;
+            width: 100%;
+            height: 6px;
+            background: #ddd;
+            border-radius: 3px;
+        }
+
+        .range-fill {
+            position: absolute;
+            height: 6px;
+            background: var(--secondary-color);
+            border-radius: 3px;
+        }
+
+        .range-input {
+            position: absolute;
+            width: 100%;
+            height: 6px;
+            background: none;
+            pointer-events: none;
+            -webkit-appearance: none;
+            z-index: 2;
+        }
+
+        .range-input::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 18px;
+            height: 18px;
+            background: white;
+            border: 2px solid var(--primary-color);
+            border-radius: 50%;
+            cursor: pointer;
+            pointer-events: auto;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+            margin-top: -6px; /* Adjust for track height */
+        }
+        
+        /* Firefox support */
+        .range-input::-moz-range-thumb {
+            width: 18px;
+            height: 18px;
+            background: white;
+            border: 2px solid var(--primary-color);
+            border-radius: 50%;
+            cursor: pointer;
+            pointer-events: auto;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+
+        .range-values {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.85rem;
+            color: #666;
+            margin-top: 5px;
+        }
+
+        /* Standard Inputs */
+        select, input[type="text"] {
+            width: 100%;
+            padding: 0.6rem;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 0.9rem;
+            transition: border-color 0.3s;
+        }
+
+        select:focus, input[type="text"]:focus {
+            border-color: var(--secondary-color);
+            outline: none;
+        }
+
+        /* Stats */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.5rem;
+            background: var(--light-bg);
+            padding: 1rem;
+            border-radius: 8px;
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-val {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: var(--primary-color);
+        }
+
+        .stat-lbl {
+            font-size: 0.75rem;
+            color: #666;
+            text-transform: uppercase;
+        }
+
+        /* Main Layout */
+        main {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* Visualization Area */
+        .viz-area {
+            flex: 8; /* 80% height */
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            background: radial-gradient(circle at center, #f7f9f4 0%, #eef1e8 100%);
+            overflow: hidden;
+            border-bottom: 1px solid #ddd;
+        }
+
+        #spiralContainer {
+            flex: 1;
+            width: 100%;
+            height: 100%;
+            position: relative;
+            overflow: hidden;
+            cursor: grab;
+            border: 1px solid rgba(0,0,0,0.1); /* Debug border */
+        }
+
+        #spiralContainer:active {
+            cursor: grabbing;
+        }
+
+        /* Tooltip */
+        .tooltip {
+            position: absolute;
+            background: rgba(255, 255, 255, 0.95);
+            padding: 12px;
+            border-radius: 8px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+            pointer-events: none;
+            font-size: 0.9rem;
+            z-index: 1000;
+            max-width: 280px;
+            opacity: 0;
+            transition: opacity 0.2s;
+            border-left: 4px solid var(--primary-color);
+        }
+
+        .tooltip h4 {
+            color: var(--primary-color);
+            margin-bottom: 5px;
+            font-size: 1.1rem;
+        }
+
+        /* List View */
+        .list-panel {
+            flex: 2; /* 20% height */
+            background: white;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            position: relative;
+            z-index: 10;
+            box-shadow: 0 -2px 10px rgba(0,0,0,0.05);
+        }
+
+        .list-header {
+            padding: 0.5rem 1rem;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: #f9f9f9;
+            flex-shrink: 0;
+        }
+
+        .list-content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 0;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th {
+            position: sticky;
+            top: 0;
+            background: #f9f9f9;
+            padding: 0.5rem 1rem;
+            text-align: left;
+            font-size: 0.8rem;
+            color: #666;
+            border-bottom: 2px solid #eee;
+            z-index: 2;
+        }
+
+        td {
+            padding: 0.4rem 1rem;
+            border-bottom: 1px solid #eee;
+            font-size: 0.85rem;
+        }
+
+        tr:hover {
+            background: #f5f9f0;
+            cursor: pointer;
+        }
+
+        /* Mobile Responsive */
+        @media (max-width: 768px) {
+            body {
+                flex-direction: column;
+            }
+
+            #sidebar {
+                position: fixed;
+                left: -320px;
+                top: 0;
+                bottom: 0;
+                z-index: 100;
+                transition: left 0.3s ease;
+            }
+
+            #sidebar.open {
+                left: 0;
+            }
+
+            .sidebar-overlay {
+                position: fixed;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                background: rgba(0,0,0,0.5);
+                z-index: 90;
+                display: none;
+            }
+
+            .sidebar-overlay.open {
+                display: block;
+            }
+
+            main {
+                width: 100%;
+                height: 100vh;
+                display: flex;
+                flex-direction: column;
+            }
+            
+            .viz-area {
+                flex: 1; /* Split evenly on mobile or adjust */
+                min-height: 40vh;
+            }
+            
+            .list-panel {
+                flex: 1;
+                min-height: 40vh;
+            }
+        }
+
+        /* Loading */
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255,255,255,0.95);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 2000;
+            flex-direction: column;
+            text-align: center;
+        }
+
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid var(--primary-color);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: 1rem;
+        }
+
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+        .error-msg {
+            color: #e74c3c;
+            margin-top: 1rem;
+            max-width: 400px;
+            display: none;
+        }
+
+        /* Zoom Controls */
+        .zoom-controls {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+            z-index: 50;
+        }
+
+        .zoom-btn {
+            width: 36px;
+            height: 36px;
+            background: white;
+            border: none;
+            border-radius: 4px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            cursor: pointer;
+            color: #555;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 1.2rem;
+            transition: background 0.2s;
+        }
+
+        .zoom-btn:hover {
+            background: #f0f0f0;
+        }
+
+        /* Mobile Responsiveness */
+        .sidebar-toggle {
+            display: none;
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            z-index: 100;
+            background: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 30px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            font-weight: bold;
+            color: var(--primary-color);
+            cursor: pointer;
+        }
+
+        /* Show toggle when sidebar is collapsed on desktop */
+        .sidebar.collapsed + main .sidebar-toggle {
+            display: none; /* Handled by mini sidebar now */
+        }
+
+        .sidebar-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 900;
+        }
+
+        @media (max-width: 768px) {
+            .sidebar {
+                position: absolute;
+                top: 0;
+                left: 0;
+                height: 100%;
+                width: 85%;
+                max-width: 320px;
+                transform: translateX(-100%);
+                transition: transform 0.3s ease;
+                z-index: 1000;
+            }
+            
+            .sidebar.open {
+                transform: translateX(0);
+            }
+            
+            .sidebar-toggle {
+                display: block;
+            }
+            
+            .sidebar-overlay.open {
+                display: block;
+            }
+
+            .mobile-close-btn {
+                display: block !important;
+            }
+
+            .desktop-close-btn {
+                display: none !important;
+            }
+
+            .zoom-controls {
+                top: auto;
+                bottom: 80px;
+                right: 20px;
+            }
         }
     </style>
 </head>
 <body>
-    <!-- Header -->
-    <header>
-        <div class="header-content">
-            <div class="logo">
-                <i class="fas fa-seedling"></i>
-                <h1>PLANTalytics</h1>
-            </div>
-            <div class="header-links">
-                <a href="https://github.com/TahriT/PLANTalytics" target="_blank">
-                    <i class="fab fa-github"></i>
-                    <span>GitHub</span>
-                </a>
-                <a href="https://pfaf.org/" target="_blank">
-                    <i class="fas fa-leaf"></i>
-                    <span>PFAF</span>
-                </a>
-                <a href="https://permapeople.org" target="_blank">
-                    <i class="fas fa-users"></i>
-                    <span>PermaPeople</span>
-                </a>
-                <a href="https://www.printables.com/search/models?q=hydroponics" target="_blank">
-                    <i class="fas fa-cube"></i>
-                    <span>3D Printed Hydroponics</span>
-                </a>
-                <a href="https://sproutcast.io" target="_blank">
-                    <i class="fas fa-broadcast-tower"></i>
-                    <span>SproutCast</span>
-                </a>
-            </div>
+    <!-- Tooltip Container -->
+    <div id="tooltip" class="tooltip"></div>
+
+    <div id="loading" class="loading-overlay">
+        <div class="spinner"></div>
+        <p>Loading Plant Data...</p>
+        <div id="errorMsg" class="error-msg">
+            <i class="fas fa-exclamation-triangle"></i><br>
+            <strong>Failed to load data.</strong><br>
+            If you are opening this file locally, browsers block reading CSV files for security.<br>
+            Please use a local server (e.g., VS Code Live Server) or upload to GitHub Pages.
         </div>
-    </header>
-
-    <!-- Navigation Tabs -->
-    <nav class="nav-tabs">
-        <div class="nav-tab active" onclick="showSection('overview')">
-            <i class="fas fa-home"></i>
-            <span>Overview</span>
-        </div>
-        <div class="nav-tab" onclick="showSection('individual-charts')">
-            <i class="fas fa-table"></i>
-            <span>Raw Data</span>
-        </div>
-        <div class="nav-tab" onclick="showSection('about')">
-            <i class="fas fa-info-circle"></i>
-            <span>About</span>
-        </div>
-    </nav>
-
-    <!-- Main Container -->
-    <div class="container">
-        <!-- Overview Section -->
-        <section id="overview" class="content-section active">
-            <!-- Main Visual (Top Priority) -->
-            <div class="dashboard-container" style="margin-bottom: 1.5rem; height: 85vh; min-height: 600px;">
-                <iframe 
-                    class="dashboard-iframe"
-                    src="dashboard.html"
-                    frameborder="0"
-                    allowFullScreen="true">
-                </iframe>
-            </div>
-
-            <div class="rotation-hint">
-                <i class="fas fa-mobile-alt"></i> <strong>Tip:</strong> Rotate your device to landscape mode for a better viewing experience!
-            </div>
-
-            <!-- Info Banner & SproutCast -->
-            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem; align-items: start;">
-                
-                <!-- Welcome & Info Banner -->
-                <div>
-                    <div class="section-header" style="margin-bottom: 1rem;">
-                        <h2><i class="fas fa-chart-pie"></i> Welcome to PLANTalytics</h2>
-                        <p>Comprehensive plant data analytics powered by PFAF and PermaPeople databases</p>
-                    </div>
-                    
-                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 1rem;">
-                        <div class="info-card compact-card" style="margin-bottom: 0; padding: 1rem;">
-                            <i class="fas fa-database" style="font-size: 1.5rem; color: var(--primary-color);"></i>
-                            <h3 style="font-size: 0.9rem; margin: 0.5rem 0;">Comprehensive Data</h3>
-                            <p class="card-description" style="font-size: 0.8rem;">Thousands of plant records.</p>
-                        </div>
-                        <div class="info-card compact-card" style="margin-bottom: 0; padding: 1rem;">
-                            <i class="fas fa-chart-bar" style="font-size: 1.5rem; color: var(--primary-color);"></i>
-                            <h3 style="font-size: 0.9rem; margin: 0.5rem 0;">Interactive Visualizations</h3>
-                            <p class="card-description" style="font-size: 0.8rem;">Dynamic D3.js visualizations.</p>
-                        </div>
-                        <div class="info-card compact-card" style="margin-bottom: 0; padding: 1rem;">
-                            <i class="fas fa-leaf" style="font-size: 1.5rem; color: var(--primary-color);"></i>
-                            <h3 style="font-size: 0.9rem; margin: 0.5rem 0;">Permaculture Insights</h3>
-                            <p class="card-description" style="font-size: 0.8rem;">Companion planting & more.</p>
-                        </div>
-                        <div class="info-card compact-card" style="margin-bottom: 0; padding: 1rem;">
-                            <i class="fas fa-globe-americas" style="font-size: 1.5rem; color: var(--primary-color);"></i>
-                            <h3 style="font-size: 0.9rem; margin: 0.5rem 0;">Climate Analysis</h3>
-                            <p class="card-description" style="font-size: 0.8rem;">Hardiness zones & climate.</p>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- SproutCast (Smaller) -->
-                <div style="background: linear-gradient(135deg, #2196F3 0%, #1976D2 100%); color: white; padding: 1.5rem; border-radius: 12px; box-shadow: 0 4px 15px rgba(33, 150, 243, 0.3);">
-                    <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.75rem;">
-                        <i class="fas fa-broadcast-tower" style="font-size: 1.5rem;"></i>
-                        <h3 style="font-size: 1.1rem; margin: 0;">SproutCast.io</h3>
-                    </div>
-                    <p style="line-height: 1.4; margin-bottom: 1rem; font-size: 0.9rem;">
-                        Real-time garden monitoring with live updates and intelligent insights.
-                    </p>
-                    <a href="https://sproutcast.io" target="_blank" style="display: block; text-align: center; background: white; color: #1976D2; padding: 0.6rem; border-radius: 6px; text-decoration: none; font-weight: 600; font-size: 0.9rem; transition: transform 0.2s;" onmouseover="this.style.transform='scale(1.02)'" onmouseout="this.style.transform='scale(1)'">
-                        <i class="fas fa-external-link-alt"></i> Visit SproutCast
-                    </a>
-                </div>
-            </div>
-        </section>
-
-        <!-- Raw Data Section -->
-        <section id="individual-charts" class="content-section">
-            <div class="section-header">
-                <h2><i class="fas fa-table"></i> Raw Plant Data</h2>
-                <p>Browse and search through the complete plant database</p>
-            </div>
-
-            <div class="dashboard-container" style="padding: 2rem;">
-                <!-- Data Source Selector -->
-                <div style="margin-bottom: 2rem;">
-                    <div style="display: flex; gap: 1rem; flex-wrap: wrap; align-items: center;">
-                        <div>
-                            <label style="font-weight: 600; margin-right: 0.5rem; color: var(--primary-color);">
-                                <i class="fas fa-database"></i> Select Dataset:
-                            </label>
-                            <select id="datasetSelector" onchange="loadDataset(this.value)" style="padding: 0.5rem 1rem; border: 2px solid var(--accent-color); border-radius: 6px; font-size: 0.95rem;">
-                                <option value="plant_data.csv">PFAF Plant Data (Main)</option>
-                                <option value="permapeople_plants_expanded.csv">PermaPeople Plants (Expanded)</option>
-                                <option value="phzm_us_zipcode_2023.csv">USDA Hardiness Zones by Zipcode</option>
-                            </select>
-                        </div>
-                        <div style="flex: 1;">
-                            <input type="text" id="searchInput" placeholder="Search all columns..." 
-                                   style="width: 100%; padding: 0.5rem 1rem; border: 2px solid var(--accent-color); border-radius: 6px; font-size: 0.95rem;">
-                        </div>
-                        <button onclick="exportToCSV()" style="padding: 0.5rem 1rem; background: var(--secondary-color); color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 500;">
-                            <i class="fas fa-download"></i> Export CSV
-                        </button>
-                    </div>
-                </div>
-
-                <!-- Data Stats -->
-                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 1rem; margin-bottom: 2rem;">
-                    <div style="background: var(--light-bg); padding: 1rem; border-radius: 8px; text-align: center; transition: all 0.3s ease;" onmouseover="this.style.transform='translateY(-5px)'; this.style.boxShadow='0 8px 16px rgba(0,0,0,0.15)';" onmouseout="this.style.transform=''; this.style.boxShadow='';">
-                        <i class="fas fa-database" style="font-size: 1.5rem; color: var(--secondary-color); margin-bottom: 0.5rem; display: block;"></i>
-                        <div style="font-size: 1.5rem; font-weight: bold; color: var(--secondary-color);" id="totalRows">-</div>
-                        <div style="color: #666; font-size: 0.9rem;">Total Records</div>
-                    </div>
-                    <div style="background: var(--light-bg); padding: 1rem; border-radius: 8px; text-align: center; transition: all 0.3s ease;" onmouseover="this.style.transform='translateY(-5px)'; this.style.boxShadow='0 8px 16px rgba(0,0,0,0.15)';" onmouseout="this.style.transform=''; this.style.boxShadow='';">
-                        <i class="fas fa-filter" style="font-size: 1.5rem; color: var(--secondary-color); margin-bottom: 0.5rem; display: block;"></i>
-                        <div style="font-size: 1.5rem; font-weight: bold; color: var(--secondary-color);" id="visibleRows">-</div>
-                        <div style="color: #666; font-size: 0.9rem;">Visible Records</div>
-                    </div>
-                    <div style="background: var(--light-bg); padding: 1rem; border-radius: 8px; text-align: center; transition: all 0.3s ease;" onmouseover="this.style.transform='translateY(-5px)'; this.style.boxShadow='0 8px 16px rgba(0,0,0,0.15)';" onmouseout="this.style.transform=''; this.style.boxShadow='';">
-                        <i class="fas fa-columns" style="font-size: 1.5rem; color: var(--secondary-color); margin-bottom: 0.5rem; display: block;"></i>
-                        <div style="font-size: 1.5rem; font-weight: bold; color: var(--secondary-color);" id="totalColumns">-</div>
-                        <div style="color: #666; font-size: 0.9rem;">Columns</div>
-                    </div>
-                </div>
-
-                <!-- Loading Indicator -->
-                <div id="loadingIndicator" style="text-align: center; padding: 3rem; display: none;">
-                    <i class="fas fa-spinner fa-spin" style="font-size: 3rem; color: var(--secondary-color);"></i>
-                    <p style="margin-top: 1rem; color: #666;">Loading data...</p>
-                </div>
-
-                <!-- Data Table Container -->
-                <div style="overflow-x: auto; background: white; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); max-width: 100%;">
-                    <table id="dataTable" style="width: 100%; border-collapse: collapse; font-size: 0.9rem; min-width: 800px;">
-                        <thead id="tableHead" style="background: linear-gradient(135deg, var(--secondary-color), var(--accent-color)); color: white; position: sticky; top: 0;">
-                            <tr>
-                                <th style="padding: 1rem; text-align: left; font-weight: 600;">Loading...</th>
-                            </tr>
-                        </thead>
-                        <tbody id="tableBody">
-                            <tr>
-                                <td style="padding: 2rem; text-align: center; color: #999;">
-                                    Select a dataset and wait for it to load
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-
-                <div style="margin-top: 1rem; text-align: center; color: #666; font-size: 0.9rem;">
-                    <i class="fas fa-arrows-alt-h"></i> Scroll horizontally to view all columns
-                </div>
-
-                <!-- Pagination -->
-                <div id="pagination" style="margin-top: 1.5rem; display: flex; justify-content: center; gap: 0.5rem; flex-wrap: wrap;">
-                    <!-- Pagination will be generated dynamically -->
-                </div>
-
-                <!-- Download Links -->
-                <div style="margin-top: 2rem; padding: 1.5rem; background: var(--light-bg); border-radius: 8px;">
-                    <h4 style="color: var(--primary-color); margin-bottom: 1rem;">
-                        <i class="fas fa-file-download"></i> Download Raw Data Files
-                    </h4>
-                    <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
-                        <a href="https://raw.githubusercontent.com/TahriT/PLANTalytics/main/plant_data.csv" 
-                           download style="padding: 0.5rem 1rem; background: white; border: 2px solid var(--accent-color); border-radius: 6px; text-decoration: none; color: var(--primary-color); font-weight: 500; transition: all 0.3s ease; display: inline-flex; align-items: center; gap: 0.5rem;"
-                           onmouseover="this.style.transform='translateY(-3px)'; this.style.boxShadow='0 4px 12px rgba(0,0,0,0.2)'; this.style.background='var(--accent-color)'; this.style.color='white';"
-                           onmouseout="this.style.transform=''; this.style.boxShadow=''; this.style.background='white'; this.style.color='var(--primary-color)';">
-                            <i class="fas fa-leaf"></i> PFAF Plant Data
-                        </a>
-                        <a href="https://raw.githubusercontent.com/TahriT/PLANTalytics/main/permapeople_plants_expanded.csv" 
-                           download style="padding: 0.5rem 1rem; background: white; border: 2px solid var(--accent-color); border-radius: 6px; text-decoration: none; color: var(--primary-color); font-weight: 500; transition: all 0.3s ease; display: inline-flex; align-items: center; gap: 0.5rem;"
-                           onmouseover="this.style.transform='translateY(-3px)'; this.style.boxShadow='0 4px 12px rgba(0,0,0,0.2)'; this.style.background='var(--accent-color)'; this.style.color='white';"
-                           onmouseout="this.style.transform=''; this.style.boxShadow=''; this.style.background='white'; this.style.color='var(--primary-color)';">
-                            <i class="fas fa-users"></i> PermaPeople Data
-                        </a>
-                        <a href="https://raw.githubusercontent.com/TahriT/PLANTalytics/main/phzm_us_zipcode_2023.csv" 
-                           download style="padding: 0.5rem 1rem; background: white; border: 2px solid var(--accent-color); border-radius: 6px; text-decoration: none; color: var(--primary-color); font-weight: 500; transition: all 0.3s ease; display: inline-flex; align-items: center; gap: 0.5rem;"
-                           onmouseover="this.style.transform='translateY(-3px)'; this.style.boxShadow='0 4px 12px rgba(0,0,0,0.2)'; this.style.background='var(--accent-color)'; this.style.color='white';"
-                           onmouseout="this.style.transform=''; this.style.boxShadow=''; this.style.background='white'; this.style.color='var(--primary-color)';">
-                            <i class="fas fa-map-marker-alt"></i> Hardiness Zones
-                        </a>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- About Section -->
-        <section id="about" class="content-section">
-            <div class="section-header">
-                <h2><i class="fas fa-info-circle"></i> About PLANTalytics</h2>
-                <p>Understanding plant data for sustainable agriculture and permaculture</p>
-            </div>
-
-            <div class="dashboard-container" style="padding: 2rem;">
-                <h3 style="color: var(--primary-color); margin-bottom: 1rem;">Project Overview</h3>
-                <p style="line-height: 1.8; margin-bottom: 1.5rem;">
-                    PLANTalytics is a comprehensive data analytics project designed to help gardeners, farmers, 
-                    and permaculture enthusiasts better understand plant growth patterns, synergies, and characteristics. 
-                    By aggregating data from trusted sources like Plants For A Future (PFAF) and PermaPeople, 
-                    we provide actionable insights for sustainable growing practices.
-                </p>
-
-                <h3 style="color: var(--primary-color); margin-bottom: 1rem;">Data Sources</h3>
-                <ul style="line-height: 2; margin-bottom: 1.5rem; margin-left: 2rem;">
-                    <li><strong>PFAF.org:</strong> Comprehensive database of edible and useful plants</li>
-                    <li><strong>PermaPeople.org:</strong> Permaculture-focused plant database with ecological relationships</li>
-                    <li><strong>USDA Hardiness Zones:</strong> Climate and geographical data integration</li>
-                </ul>
-
-                <h3 style="color: var(--primary-color); margin-bottom: 1rem;">Features</h3>
-                <ul style="line-height: 2; margin-bottom: 1.5rem; margin-left: 2rem;">
-                    <li>Interactive Power BI dashboards with real-time filtering</li>
-                    <li>Comprehensive plant characteristic analysis (20+ attributes)</li>
-                    <li>Companion planting and ecosystem service insights</li>
-                    <li>Climate zone and habitat range mapping</li>
-                    <li>Edibility and medicinal use ratings</li>
-                </ul>
-
-                <h3 style="color: var(--primary-color); margin-bottom: 1rem;">Get Involved</h3>
-                <p style="line-height: 1.8;">
-                    This project is open source and welcomes contributions. Visit our 
-                    <a href="https://github.com/TahriT/PLANTalytics" target="_blank" style="color: var(--secondary-color);">GitHub repository</a> 
-                    to contribute, report issues, or suggest new features.
-                </p>
-
-                <div style="margin-top: 2rem; padding: 1.5rem; background: var(--light-bg); border-radius: 8px;">
-                    <h4 style="color: var(--primary-color); margin-bottom: 1rem;">Support Our Data Sources</h4>
-                    <p style="line-height: 1.8;">
-                        Please consider supporting PFAF and PermaPeople through donations. 
-                        Their invaluable work makes projects like this possible!
-                    </p>
-                </div>
-            </div>
-        </section>
     </div>
 
-    <!-- Footer -->
-    <footer>
-        <p>
-            <strong>PLANTalytics</strong> &copy; 2025 | 
-            Data from <a href="https://pfaf.org/" target="_blank">PFAF</a> and 
-            <a href="https://permapeople.org" target="_blank">PermaPeople</a> | 
-            <a href="https://github.com/TahriT/PLANTalytics" target="_blank">View on GitHub</a>
-        </p>
-        <p style="margin-top: 0.5rem; font-size: 0.9rem;">
-            Built with passion for sustainable agriculture and permaculture
-        </p>
-        <p style="margin-top: 1rem; font-size: 0.9rem; border-top: 1px solid rgba(255,255,255,0.2); padding-top: 1rem;">
-            <i class="fas fa-user"></i> Created by <strong>Tahri</strong> | 
-            <a href="mailto:info@plantalytics.net" style="color: var(--accent-color); text-decoration: none;">
-                <i class="fas fa-envelope"></i> info@plantalytics.net
-            </a> | 
-            <a href="https://buymeacoffee.com/tahritech" target="_blank" style="color: var(--accent-color); text-decoration: none;">
-                <i class="fas fa-coffee"></i> Buy Me a Coffee
-            </a>
-        </p>
-    </footer>
+    <div class="app-container" style="display:flex; height:100vh; width:100%;">
+        <div class="sidebar-overlay" onclick="toggleSidebar()"></div>
+        <!-- Sidebar -->
+        <aside id="sidebar" class="sidebar">
+            <!-- Mini Sidebar (Visible when collapsed) -->
+            <div class="sidebar-mini">
+                <div class="mini-icon" onclick="toggleSidebar()" title="Expand Filters">
+                    <i class="fas fa-filter"></i>
+                </div>
+                <div class="mini-icon" onclick="toggleSidebar()" title="Search">
+                    <i class="fas fa-search"></i>
+                </div>
+                <div class="mini-icon" onclick="toggleSidebar()" title="Zones">
+                    <i class="fas fa-temperature-low"></i>
+                </div>
+                <div class="mini-icon" onclick="toggleSidebar()" title="Settings">
+                    <i class="fas fa-cog"></i>
+                </div>
+            </div>
 
-    <!-- Full Screen Button -->
-    <button class="fullscreen-btn" onclick="toggleFullScreen()" title="Toggle Fullscreen">
-        <i class="fas fa-expand"></i>
-    </button>
+            <div class="sidebar-header" style="padding: 1.5rem; background: var(--primary-color); color: white;">
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                    <h2 style="margin:0; font-size:1.2rem;"><i class="fas fa-leaf"></i> PLANTalytics</h2>
+                    <button class="mobile-close-btn" onclick="toggleSidebar()" style="background:none; border:none; color:white; font-size:1.2rem; cursor:pointer; display:none;">
+                        <i class="fas fa-times"></i>
+                    </button>
+                    <button class="desktop-close-btn" onclick="toggleSidebar()" style="background:none; border:none; color:white; font-size:1rem; cursor:pointer; opacity:0.8;" title="Collapse Sidebar">
+                        <i class="fas fa-chevron-left"></i>
+                    </button>
+                </div>
+            </div>
+            
+            <div class="sidebar-content" style="padding: 1.5rem; overflow-y: auto; height: calc(100% - 70px);">
+                <!-- Search -->
+                <div class="filter-group" style="margin-bottom: 1.5rem;">
+                    <label style="display:block; margin-bottom:0.5rem; font-weight:600;">Search Plants</label>
+                    <input type="text" id="searchFilter" placeholder="e.g. Oak, Acer..." oninput="debounceFilter()">
+                </div>
+
+                <!-- Zip Code -->
+                <div class="filter-group" style="margin-bottom: 1.5rem;">
+                    <label style="display:block; margin-bottom:0.5rem; font-weight:600;">Your Zip Code (US)</label>
+                    <div style="display:flex; gap:5px;">
+                        <input type="text" id="zipInput" placeholder="Zip Code" maxlength="5">
+                        <button onclick="lookupZip()" style="padding:0 10px; background:var(--primary-color); color:white; border:none; border-radius:4px; cursor:pointer;">Go</button>
+                    </div>
+                    <div id="zipResult" style="font-size:0.8rem; margin-top:5px; font-weight:bold;"></div>
+                </div>
+
+                <!-- Zone Selector -->
+                <div class="filter-group" style="margin-bottom: 1.5rem;">
+                    <label style="display:block; margin-bottom:0.5rem; font-weight:600;">Hardiness Zone: <span id="zoneValue" style="color:var(--primary-color)">All</span></label>
+                    <div class="zone-selector" id="zoneSelector"></div>
+                    <div class="range-values">
+                        <span>Cold (1)</span>
+                        <span>Hot (13)</span>
+                    </div>
+                </div>
+
+                <!-- Color By -->
+                <div class="filter-group" style="margin-bottom: 1.5rem;">
+                    <label style="display:block; margin-bottom:0.5rem; font-weight:600;">Color Nodes By</label>
+                    <select id="colorByFilter" onchange="applyFilters()">
+                        <option value="none">None (Spiral Layout)</option>
+                        <option value="family">Family (Grouped)</option>
+                        <option value="edibility">Edibility (Grouped)</option>
+                        <option value="ph">pH Preference (Grouped)</option>
+                        <option value="growth">Growth Rate (Grouped)</option>
+                    </select>
+                </div>
+
+                <!-- Height Slider -->
+                <div class="filter-group" style="margin-bottom: 1.5rem;">
+                    <label style="display:block; margin-bottom:0.5rem; font-weight:600;">Height Range</label>
+                    <div class="range-container">
+                        <div class="range-track"></div>
+                        <div class="range-fill" id="heightFill"></div>
+                        <input type="range" id="heightMin" min="0" max="50" value="0" class="range-input" oninput="updateHeightSlider()">
+                        <input type="range" id="heightMax" min="0" max="50" value="50" class="range-input" oninput="updateHeightSlider()">
+                    </div>
+                    <div class="range-values">
+                        <span id="heightMinVal">0m</span>
+                        <span id="heightMaxVal">50m+</span>
+                    </div>
+                </div>
+
+                <!-- Dropdowns -->
+                <div class="filter-group" style="margin-bottom: 1.5rem;">
+                    <label style="display:block; margin-bottom:0.5rem; font-weight:600;">Family</label>
+                    <select id="familyFilter" onchange="applyFilters()">
+                        <option value="">All Families</option>
+                    </select>
+                </div>
+
+                <div class="filter-group" style="margin-bottom: 1.5rem;">
+                    <label style="display:block; margin-bottom:0.5rem; font-weight:600;">Growth Rate</label>
+                    <select id="growthFilter" onchange="applyFilters()">
+                        <option value="">Any</option>
+                    </select>
+                </div>
+
+                <div class="filter-group" style="margin-bottom: 1.5rem;">
+                    <label style="display:block; margin-bottom:0.5rem; font-weight:600;">Min Edibility Rating</label>
+                    <select id="edibilityFilter" onchange="applyFilters()">
+                        <option value="0">Any</option>
+                        <option value="1">1+ (Minor)</option>
+                        <option value="2">2+ (Fair)</option>
+                        <option value="3">3+ (Good)</option>
+                        <option value="4">4+ (Very Good)</option>
+                        <option value="5">5 (Excellent)</option>
+                    </select>
+                </div>
+
+                <!-- Stats -->
+                <div class="stats-grid">
+                    <div class="stat-item">
+                        <div class="stat-val" id="countVisible">-</div>
+                        <div class="stat-lbl">Plants</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-val" id="countImages">-</div>
+                        <div class="stat-lbl">Images</div>
+                    </div>
+                </div>
+
+                <button onclick="resetFilters()" style="width:100%; margin-top:1rem; padding:0.8rem; background:#eee; border:none; border-radius:6px; cursor:pointer; font-weight:bold; color:#666;">
+                    Reset All Filters
+                </button>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main>
+            <!-- Mobile Header -->
+            <header class="mobile-header" style="display:none; padding:10px; background:white; border-bottom:1px solid #eee; align-items:center; justify-content:space-between;">
+                <button onclick="toggleSidebar()" style="background:none; border:none; font-size:1.2rem; color:var(--primary-color); cursor:pointer;">
+                    <i class="fas fa-bars"></i> Filters
+                </button>
+                <h3 style="margin:0; color:var(--primary-color);">PLANTalytics</h3>
+                <div style="width:24px;"></div> <!-- Spacer -->
+            </header>
+
+            <div class="viz-area">
+                <div class="viz-controls" style="position:absolute; top:15px; right:15px; z-index:10; display:flex; gap:10px;">
+                    <button onclick="zoomIn()" class="btn-icon" style="width:36px; height:36px; background:white; border:none; border-radius:4px; box-shadow:0 2px 5px rgba(0,0,0,0.1); cursor:pointer;"><i class="fas fa-plus"></i></button>
+                    <button onclick="zoomOut()" class="btn-icon" style="width:36px; height:36px; background:white; border:none; border-radius:4px; box-shadow:0 2px 5px rgba(0,0,0,0.1); cursor:pointer;"><i class="fas fa-minus"></i></button>
+                    <button onclick="resetZoom()" class="btn-icon" style="width:36px; height:36px; background:white; border:none; border-radius:4px; box-shadow:0 2px 5px rgba(0,0,0,0.1); cursor:pointer;"><i class="fas fa-compress-arrows-alt"></i></button>
+                </div>
+                <div id="spiralContainer"></div>
+            </div>
+
+            <div class="list-panel" id="listPanel">
+                <div class="list-header">
+                    <h3>Plant List</h3>
+                    <span style="font-size:0.8rem; color:#666;">Scroll to see more</span>
+                </div>
+                <div class="list-content">
+                    <table id="dataTable">
+                        <thead>
+                            <tr>
+                                <th style="width:50px">Img</th>
+                                <th>Name</th>
+                                <th>Scientific</th>
+                                <th>Family</th>
+                                <th>Height (m)</th>
+                                <th>Zone</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </div>
+        </main>
+    </div>
+
 
     <script>
-        // Navigation functionality
-        function showSection(sectionId) {
-            // Hide all sections
-            document.querySelectorAll('.content-section').forEach(section => {
-                section.classList.remove('active');
-            });
-
-            // Remove active class from all tabs
-            document.querySelectorAll('.nav-tab').forEach(tab => {
-                tab.classList.remove('active');
-            });
-
-            // Show selected section
-            document.getElementById(sectionId).classList.add('active');
-
-            // Add active class to clicked tab
-            event.target.closest('.nav-tab').classList.add('active');
-
-            // Scroll to top
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-
-            // Load data if Raw Data section is opened and not loaded yet
-            if (sectionId === 'individual-charts' && !window.dataLoaded) {
-                loadDataset('plant_data.csv');
-            }
-        }
-
-        // Fullscreen functionality
-        function toggleFullScreen() {
-            if (!document.fullscreenElement) {
-                document.documentElement.requestFullscreen();
-            } else {
-                if (document.exitFullscreen) {
-                    document.exitFullscreen();
-                }
-            }
-        }
-
-        // Update fullscreen button icon
-        document.addEventListener('fullscreenchange', function() {
-            const btn = document.querySelector('.fullscreen-btn i');
-            if (document.fullscreenElement) {
-                btn.classList.remove('fa-expand');
-                btn.classList.add('fa-compress');
-            } else {
-                btn.classList.remove('fa-compress');
-                btn.classList.add('fa-expand');
-            }
-        });
-
-        // Smooth scroll for anchor links
-        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-            anchor.addEventListener('click', function (e) {
-                e.preventDefault();
-                const target = document.querySelector(this.getAttribute('href'));
-                if (target) {
-                    target.scrollIntoView({ behavior: 'smooth' });
-                }
-            });
-        });
-
-        // CSV Data handling
-        let currentData = [];
+        let allData = [];
         let filteredData = [];
-        let currentPage = 1;
-        const rowsPerPage = 50;
+        let selectedZone = null;
+        let zipData = {};
+        
+        // D3 Globals
+        let svg, g, zoom;
+        let simulation;
+        let width, height;
 
-        // Load dataset from GitHub
-        async function loadDataset(filename) {
-            const loadingIndicator = document.getElementById('loadingIndicator');
-            const tableBody = document.getElementById('tableBody');
-            const tableHead = document.getElementById('tableHead');
-            
-            loadingIndicator.style.display = 'block';
-            tableBody.innerHTML = '<tr><td style="padding: 2rem; text-align: center;">Loading...</td></tr>';
-            
-            const url = `https://raw.githubusercontent.com/TahriT/PLANTalytics/main/${filename}`;
-            
+        // Configuration
+        const CONFIG = {
+            nodeSize: 25,
+            padding: 5,
+            maxNodes: 600
+        };
+
+        // Initialize
+        function init() {
+            console.log('Initializing Dashboard...');
             try {
-                const response = await fetch(url);
-                if (!response.ok) throw new Error('Failed to load data');
+                setupZoneSelector();
+                setupD3();
+                loadData();
+                loadZipData();
                 
-                const csvText = await response.text();
-                const data = parseCSV(csvText);
-                
-                currentData = data;
-                filteredData = data;
-                window.dataLoaded = true;
-                
-                updateStats();
-                renderTable();
-                renderPagination();
-                
-                loadingIndicator.style.display = 'none';
-            } catch (error) {
-                loadingIndicator.style.display = 'none';
-                tableBody.innerHTML = `<tr><td style="padding: 2rem; text-align: center; color: #e74c3c;">
-                    <i class="fas fa-exclamation-triangle"></i> Error loading data: ${error.message}
-                    <br><small>Make sure the CSV files are in your GitHub repository.</small>
-                </td></tr>`;
+                // Hide header if in iframe
+                if (window.self !== window.top) {
+                    const header = document.querySelector('header');
+                    if(header) header.style.display = 'none';
+                }
+
+                window.addEventListener('resize', onWindowResize);
+            } catch (e) {
+                console.error('Initialization Error:', e);
+                alert('An error occurred during initialization: ' + e.message);
             }
         }
 
-        // Parse CSV text to array
-        function parseCSV(text) {
-            const lines = text.split('\n').filter(line => line.trim());
-            const headers = lines[0].split(',').map(h => h.trim().replace(/^"|"$/g, ''));
-            const data = [];
+        function setupD3() {
+            const container = document.getElementById('spiralContainer');
+            width = container.clientWidth || window.innerWidth;
+            height = container.clientHeight || window.innerHeight;
             
-            for (let i = 1; i < lines.length; i++) {
-                const values = parseCSVLine(lines[i]);
-                const row = {};
-                headers.forEach((header, index) => {
-                    row[header] = values[index] || '';
+            console.log(`Setup D3: ${width}x${height}`);
+
+            // Clear any existing
+            container.innerHTML = '';
+
+            svg = d3.select('#spiralContainer').append('svg')
+                .attr('width', width)
+                .attr('height', height)
+                .style('background', 'transparent');
+            
+            // Add Gloss Gradient
+            const defs = svg.append('defs');
+            const gradient = defs.append('radialGradient')
+                .attr('id', 'glossGradient')
+                .attr('cx', '30%')
+                .attr('cy', '30%')
+                .attr('r', '70%');
+            
+            gradient.append('stop')
+                .attr('offset', '0%')
+                .attr('stop-color', 'rgba(255,255,255,0.8)');
+                
+            gradient.append('stop')
+                .attr('offset', '20%')
+                .attr('stop-color', 'rgba(255,255,255,0.4)');
+                
+            gradient.append('stop')
+                .attr('offset', '100%')
+                .attr('stop-color', 'rgba(255,255,255,0)');
+            
+            g = svg.append('g');
+
+            zoom = d3.zoom()
+                .scaleExtent([0.1, 8])
+                .on('zoom', (e) => g.attr('transform', e.transform));
+
+            svg.call(zoom);
+            
+            // Don't set initial transform here - let renderViz handle it
+            console.log('D3 setup complete');
+        }
+
+        function onWindowResize() {
+            const container = document.getElementById('spiralContainer');
+            width = container.clientWidth;
+            height = container.clientHeight;
+            svg.attr('width', width).attr('height', height);
+            renderViz();
+        }
+
+        function setupZoneSelector() {
+            const container = document.getElementById('zoneSelector');
+            const colors = d3.scaleSequential(d3.interpolateTurbo).domain([13, 1]); // Cold to Hot
+            
+            for(let i=1; i<=13; i++) {
+                const div = document.createElement('div');
+                div.className = 'zone-segment';
+                div.style.backgroundColor = colors(i);
+                div.textContent = i;
+                div.title = `Zone ${i}`;
+                div.onclick = () => toggleZone(i);
+                div.dataset.zone = i;
+                container.appendChild(div);
+            }
+        }
+
+        function toggleZone(zone) {
+            const segments = document.querySelectorAll('.zone-segment');
+            
+            if (selectedZone === zone) {
+                // Deselect
+                selectedZone = null;
+                document.getElementById('zoneValue').textContent = 'All';
+                segments.forEach(s => {
+                    s.classList.remove('active', 'dimmed');
                 });
-                data.push(row);
-            }
-            
-            return data;
-        }
-
-        // Parse a single CSV line (handles quoted values with commas)
-        function parseCSVLine(line) {
-            const result = [];
-            let current = '';
-            let inQuotes = false;
-            
-            for (let i = 0; i < line.length; i++) {
-                const char = line[i];
-                
-                if (char === '"') {
-                    inQuotes = !inQuotes;
-                } else if (char === ',' && !inQuotes) {
-                    result.push(current.trim().replace(/^"|"$/g, ''));
-                    current = '';
-                } else {
-                    current += char;
-                }
-            }
-            
-            result.push(current.trim().replace(/^"|"$/g, ''));
-            return result;
-        }
-
-        // Update statistics
-        function updateStats() {
-            const totalCount = currentData.length;
-            const visibleCount = filteredData.length;
-            const columnCount = Object.keys(currentData[0] || {}).length;
-            
-            // Animated counting effect
-            animateValue('totalRows', 0, totalCount, 800);
-            animateValue('visibleRows', 0, visibleCount, 800);
-            animateValue('totalColumns', 0, columnCount, 600);
-        }
-
-        // Animate number counting
-        function animateValue(id, start, end, duration) {
-            const element = document.getElementById(id);
-            const range = end - start;
-            const increment = range / (duration / 16);
-            let current = start;
-            
-            const timer = setInterval(() => {
-                current += increment;
-                if ((increment > 0 && current >= end) || (increment < 0 && current <= end)) {
-                    current = end;
-                    clearInterval(timer);
-                }
-                element.textContent = Math.floor(current).toLocaleString();
-            }, 16);
-        }
-
-        // Render table with current page data
-        function renderTable() {
-            const tableHead = document.getElementById('tableHead');
-            const tableBody = document.getElementById('tableBody');
-            
-            if (filteredData.length === 0) {
-                tableBody.innerHTML = '<tr><td style="padding: 2rem; text-align: center; color: #999;">No data to display</td></tr>';
-                return;
-            }
-            
-            const headers = Object.keys(filteredData[0]);
-            
-            // Render headers
-            tableHead.innerHTML = '<tr>' + 
-                headers.map(header => 
-                    `<th style="padding: 1rem; text-align: left; font-weight: 600; white-space: nowrap; border-bottom: 2px solid rgba(255,255,255,0.3);">${header}</th>`
-                ).join('') + 
-                '</tr>';
-            
-            // Calculate pagination
-            const startIndex = (currentPage - 1) * rowsPerPage;
-            const endIndex = Math.min(startIndex + rowsPerPage, filteredData.length);
-            const pageData = filteredData.slice(startIndex, endIndex);
-            
-            // Render rows
-            tableBody.innerHTML = pageData.map((row, index) => {
-                const bgColor = index % 2 === 0 ? 'white' : 'var(--light-bg)';
-                return '<tr style="background: ' + bgColor + ';">' +
-                    headers.map(header => {
-                        const value = row[header] || '-';
-                        const displayValue = value.length > 100 ? value.substring(0, 100) + '...' : value;
-                        return `<td style="padding: 0.75rem 1rem; border-bottom: 1px solid #eee; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 300px;" title="${value}">${displayValue}</td>`;
-                    }).join('') +
-                    '</tr>';
-            }).join('');
-        }
-
-        // Render pagination controls
-        function renderPagination() {
-            const pagination = document.getElementById('pagination');
-            const totalPages = Math.ceil(filteredData.length / rowsPerPage);
-            
-            if (totalPages <= 1) {
-                pagination.innerHTML = '';
-                return;
-            }
-            
-            let html = '';
-            
-            // Previous button
-            html += `<button onclick="changePage(${currentPage - 1})" 
-                ${currentPage === 1 ? 'disabled' : ''} 
-                style="padding: 0.5rem 1rem; background: var(--secondary-color); color: white; border: none; border-radius: 6px; cursor: pointer; ${currentPage === 1 ? 'opacity: 0.5;' : ''}">
-                <i class="fas fa-chevron-left"></i> Previous
-            </button>`;
-            
-            // Page numbers
-            const maxButtons = 5;
-            let startPage = Math.max(1, currentPage - Math.floor(maxButtons / 2));
-            let endPage = Math.min(totalPages, startPage + maxButtons - 1);
-            
-            if (endPage - startPage < maxButtons - 1) {
-                startPage = Math.max(1, endPage - maxButtons + 1);
-            }
-            
-            for (let i = startPage; i <= endPage; i++) {
-                html += `<button onclick="changePage(${i})" 
-                    style="padding: 0.5rem 1rem; background: ${i === currentPage ? 'var(--primary-color)' : 'white'}; color: ${i === currentPage ? 'white' : 'var(--primary-color)'}; border: 2px solid var(--accent-color); border-radius: 6px; cursor: pointer; font-weight: ${i === currentPage ? 'bold' : 'normal'};">
-                    ${i}
-                </button>`;
-            }
-            
-            // Next button
-            html += `<button onclick="changePage(${currentPage + 1})" 
-                ${currentPage === totalPages ? 'disabled' : ''} 
-                style="padding: 0.5rem 1rem; background: var(--secondary-color); color: white; border: none; border-radius: 6px; cursor: pointer; ${currentPage === totalPages ? 'opacity: 0.5;' : ''}">
-                Next <i class="fas fa-chevron-right"></i>
-            </button>`;
-            
-            pagination.innerHTML = html;
-        }
-
-        // Change page
-        function changePage(page) {
-            const totalPages = Math.ceil(filteredData.length / rowsPerPage);
-            if (page < 1 || page > totalPages) return;
-            
-            currentPage = page;
-            renderTable();
-            renderPagination();
-            
-            // Scroll to table
-            document.getElementById('dataTable').scrollIntoView({ behavior: 'smooth', block: 'start' });
-        }
-
-        // Search functionality
-        document.addEventListener('DOMContentLoaded', function() {
-            const searchInput = document.getElementById('searchInput');
-            if (searchInput) {
-                searchInput.addEventListener('input', function(e) {
-                    const searchTerm = e.target.value.toLowerCase();
-                    
-                    if (!searchTerm) {
-                        filteredData = currentData;
+            } else {
+                // Select
+                selectedZone = zone;
+                document.getElementById('zoneValue').textContent = `Zone ${zone}`;
+                segments.forEach(s => {
+                    if (parseInt(s.dataset.zone) === zone) {
+                        s.classList.add('active');
+                        s.classList.remove('dimmed');
                     } else {
-                        filteredData = currentData.filter(row => {
-                            return Object.values(row).some(value => 
-                                String(value).toLowerCase().includes(searchTerm)
-                            );
-                        });
+                        s.classList.remove('active');
+                        s.classList.add('dimmed');
                     }
-                    
-                    currentPage = 1;
-                    updateStats();
-                    renderTable();
-                    renderPagination();
                 });
             }
-        });
+            applyFilters();
+        }
 
-        // Export to CSV
-        function exportToCSV() {
-            if (filteredData.length === 0) {
-                alert('No data to export');
+        function updateHeightSlider() {
+            const minInput = document.getElementById('heightMin');
+            const maxInput = document.getElementById('heightMax');
+            const minVal = parseInt(minInput.value);
+            const maxVal = parseInt(maxInput.value);
+
+            // Prevent crossover
+            if (minVal > maxVal - 1) {
+                if (document.activeElement === minInput) minInput.value = maxVal - 1;
+                else maxInput.value = minVal + 1;
+            }
+
+            const min = parseInt(minInput.value);
+            const max = parseInt(maxInput.value);
+
+            document.getElementById('heightMinVal').textContent = min + 'm';
+            document.getElementById('heightMaxVal').textContent = max >= 50 ? '50m+' : max + 'm';
+
+            // Update visual fill
+            const percent1 = (min / minInput.max) * 100;
+            const percent2 = (max / maxInput.max) * 100;
+            const fill = document.getElementById('heightFill');
+            fill.style.left = percent1 + "%";
+            fill.style.width = (percent2 - percent1) + "%";
+
+            debounceFilter();
+        }
+
+        function zoomed(event) {
+            // No-op
+        }
+
+        function zoomIn() { 
+            zoom.scaleBy(svg.transition().duration(750), 1.2);
+        }
+        function zoomOut() { 
+            zoom.scaleBy(svg.transition().duration(750), 0.8);
+        }
+        function resetZoom() {
+            svg.transition().duration(750).call(zoom.transform, d3.zoomIdentity.translate(width/2, height/2).scale(0.8));
+        }
+
+        function loadZipData() {
+            Papa.parse('zip_zone.csv', {
+                download: true,
+                header: true,
+                dynamicTyping: true,
+                skipEmptyLines: true,
+                complete: function(results) {
+                    results.data.forEach(d => {
+                        if (d.zipcode && d.zone) {
+                            let z = String(d.zipcode).padStart(5, '0');
+                            zipData[z] = d.zone;
+                        }
+                    });
+                },
+                error: function(err) {
+                    console.warn('Zip Data Load Error:', err);
+                }
+            });
+        }
+
+        function lookupZip() {
+            const input = document.getElementById('zipInput');
+            const result = document.getElementById('zipResult');
+            const zip = input.value.trim();
+            
+            if (zip.length !== 5) {
+                result.textContent = 'Invalid Zip';
+                result.style.color = 'red';
                 return;
             }
-            
-            const headers = Object.keys(filteredData[0]);
-            const csvContent = [
-                headers.join(','),
-                ...filteredData.map(row => 
-                    headers.map(header => {
-                        const value = row[header] || '';
-                        // Escape commas and quotes
-                        return value.includes(',') || value.includes('"') 
-                            ? `"${value.replace(/"/g, '""')}"` 
-                            : value;
-                    }).join(',')
-                )
-            ].join('\n');
-            
-            const blob = new Blob([csvContent], { type: 'text/csv' });
-            const url = window.URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = `plantalytics_export_${new Date().toISOString().split('T')[0]}.csv`;
-            a.click();
-            window.URL.revokeObjectURL(url);
+
+            const zoneStr = zipData[zip];
+            if (zoneStr) {
+                const zoneNum = parseInt(zoneStr);
+                result.textContent = `Zone ${zoneStr}`;
+                result.style.color = 'var(--primary-color)';
+                
+                if (!isNaN(zoneNum)) {
+                    if (selectedZone !== zoneNum) {
+                        toggleZone(zoneNum);
+                    }
+                }
+            } else {
+                result.textContent = 'Not Found';
+                result.style.color = 'red';
+            }
         }
+
+        // Load Data
+        function loadData() {
+            // Check for local file protocol
+            if (window.location.protocol === 'file:') {
+                console.warn('Running locally via file:// protocol. CSV loading might fail due to CORS.');
+            }
+
+            Papa.parse('plant_data.csv', {
+                download: true,
+                header: true,
+                dynamicTyping: true,
+                skipEmptyLines: true,
+                complete: function(results) {
+                    // Pre-process data
+                    allData = results.data.filter(d => d.CommonName && d.Family);
+                    
+                    // Clean height data & Assign IDs
+                    let idCounter = 0;
+                    allData.forEach(d => {
+                        d._id = 'p' + (idCounter++);
+                        d.HeightVal = parseFloat(d.Height) || 999;
+                        d.hasImage = d['Image URL'] && d['Image URL'].length > 5;
+                    });
+
+                    populateFilters();
+                    applyFilters();
+                    
+                    console.log(`Loaded ${allData.length} plants.`);
+                    document.getElementById('loading').style.display = 'none';
+                },
+                error: function(err) {
+                    console.error('CSV Load Error:', err);
+                    document.getElementById('loading').style.display = 'none';
+                    document.getElementById('errorMsg').style.display = 'block';
+                    document.getElementById('errorMsg').innerHTML += '<br><small>' + (err.message || err) + '</small>';
+                }
+            });
+        }
+
+        function populateFilters() {
+            const populate = (id, field) => {
+                const unique = [...new Set(allData.map(d => d[field]))].filter(Boolean).sort();
+                const select = document.getElementById(id);
+                unique.forEach(v => {
+                    const opt = document.createElement('option');
+                    opt.value = v;
+                    opt.textContent = v;
+                    select.appendChild(opt);
+                });
+            };
+
+            populate('familyFilter', 'Family');
+            populate('growthFilter', 'GrowthRate');
+        }
+
+        let debounceTimer;
+        function debounceFilter() {
+            clearTimeout(debounceTimer);
+            debounceTimer = setTimeout(applyFilters, 300);
+        }
+
+        function applyFilters() {
+            const search = document.getElementById('searchFilter').value.toLowerCase();
+            const family = document.getElementById('familyFilter').value;
+            const growth = document.getElementById('growthFilter').value;
+            const minEdibility = parseInt(document.getElementById('edibilityFilter').value);
+            
+            const minHeight = parseInt(document.getElementById('heightMin').value);
+            const maxHeight = parseInt(document.getElementById('heightMax').value);
+
+            filteredData = allData.filter(d => {
+                // Search
+                const matchSearch = !search || 
+                    (d.CommonName && d.CommonName.toLowerCase().includes(search)) || 
+                    (d.Genus && d.Genus.toLowerCase().includes(search));
+                
+                // Dropdowns
+                const matchFamily = !family || d.Family === family;
+                const matchGrowth = !growth || d.GrowthRate === growth;
+                
+                // Edibility
+                const matchEdibility = (d.Edibility || 0) >= minEdibility;
+                
+                // Height Slider
+                const h = d.HeightVal;
+                const matchHeight = (h >= minHeight) && (maxHeight >= 50 ? true : h <= maxHeight);
+
+                // Zone Selector
+                let matchZone = true;
+                if (selectedZone) {
+                    // Check if plant has zone info
+                    if (!d.HardinessZones) {
+                        matchZone = false;
+                    } else {
+                        const strZones = String(d.HardinessZones);
+                        // Direct match
+                        if (strZones.includes(String(selectedZone))) {
+                            matchZone = true;
+                        } 
+                        // Range match "5 to 9"
+                        else if (strZones.includes('to')) {
+                            const parts = strZones.split('to').map(p => parseInt(p));
+                            if (parts.length === 2 && !isNaN(parts[0]) && !isNaN(parts[1])) {
+                                matchZone = selectedZone >= parts[0] && selectedZone <= parts[1];
+                            } else {
+                                matchZone = false;
+                            }
+                        } else {
+                            matchZone = false;
+                        }
+                    }
+                }
+
+                return matchSearch && matchFamily && matchGrowth && matchHeight && matchZone && matchEdibility;
+            });
+
+            // Sort by Height (Smallest -> Largest)
+            filteredData.sort((a, b) => a.HeightVal - b.HeightVal);
+
+            console.log(`Rendering ${filteredData.length} nodes.`);
+            updateStats();
+            renderViz();
+            updateList();
+        }
+
+        function updateStats() {
+            document.getElementById('countVisible').textContent = filteredData.length.toLocaleString();
+            document.getElementById('countImages').textContent = filteredData.filter(d => d.hasImage).length.toLocaleString();
+        }
+
+        function renderViz() {
+            try {
+                const data = filteredData.slice(0, CONFIG.maxNodes);
+                const colorMode = document.getElementById('colorByFilter').value;
+                
+                console.log(`RenderViz called with ${data.length} items, colorMode: ${colorMode}`);
+                
+                // Guard: make sure we have valid dimensions
+                if (!width || !height || width < 100 || height < 100) {
+                    const container = document.getElementById('spiralContainer');
+                    width = container.clientWidth || 800;
+                    height = container.clientHeight || 600;
+                    console.log(`Fixed dimensions: ${width}x${height}`);
+                }
+                
+                // Stop any previous simulation
+                if (simulation) simulation.stop();
+
+                // Bind Data
+                const nodes = g.selectAll('.node')
+                    .data(data, d => d._id);
+
+                nodes.exit()
+                    .transition().duration(500)
+                    .attr('opacity', 0)
+                    .remove();
+
+                const enter = nodes.enter().append('g')
+                    .attr('class', 'node')
+                    .attr('opacity', 0)
+                    .call(d3.drag()
+                        .on('start', dragstarted)
+                        .on('drag', dragged)
+                        .on('end', dragended));
+
+                // Circle Background
+                enter.append('circle')
+                    .attr('r', CONFIG.nodeSize)
+                    .attr('fill', '#fff')
+                    .attr('stroke', '#fff')
+                    .attr('stroke-width', 2);
+
+                // Image (ClipPath)
+                enter.append('clipPath')
+                    .attr('id', d => `clip-${d._id}`)
+                    .append('circle')
+                    .attr('r', CONFIG.nodeSize);
+
+                enter.append('image')
+                    .attr('xlink:href', d => d.hasImage ? d['Image URL'] : '')
+                    .attr('x', -CONFIG.nodeSize)
+                    .attr('y', -CONFIG.nodeSize)
+                    .attr('width', CONFIG.nodeSize * 2)
+                    .attr('height', CONFIG.nodeSize * 2)
+                    .attr('clip-path', d => `url(#clip-${d._id})`)
+                    .style('display', d => d.hasImage ? 'block' : 'none')
+                    .on('error', function(e, d) { 
+                        d3.select(this).style('display', 'none'); 
+                        d3.select(this.parentNode).select('.fallback').style('display', 'block');
+                    }); 
+                
+                // Fallback Circle (if no image)
+                enter.append('circle')
+                    .attr('class', 'fallback')
+                    .attr('r', CONFIG.nodeSize)
+                    .attr('fill', d => getPlantColor(d, colorMode))
+                    .style('display', d => d.hasImage ? 'none' : 'block');
+
+                // Gloss Overlay for 3D Effect
+                enter.append('circle')
+                    .attr('r', CONFIG.nodeSize)
+                    .attr('fill', 'url(#glossGradient)')
+                    .style('pointer-events', 'none');
+
+                // Merge
+                const allNodes = enter.merge(nodes);
+
+                // Animate Entry
+                enter.attr('opacity', 1);
+
+                // Update Colors
+                allNodes.select('.fallback')
+                    .transition().duration(500)
+                    .attr('fill', d => getPlantColor(d, colorMode))
+                    .style('display', d => d.hasImage ? 'none' : 'block');
+                    
+                allNodes.select('circle')
+                    .transition().duration(500)
+                    .attr('stroke', d => getPlantColor(d, colorMode));
+
+                // Tooltip Events
+                allNodes
+                    .on('mouseenter', (e, d) => {
+                        d3.select(e.currentTarget).transition().duration(200).attr('transform', `translate(${d.x},${d.y}) scale(1.5)`);
+                        // Bring to front
+                        e.currentTarget.parentNode.appendChild(e.currentTarget);
+                        showTooltip(e, d);
+                    })
+                    .on('mouseleave', (e, d) => {
+                        d3.select(e.currentTarget).transition().duration(200).attr('transform', `translate(${d.x},${d.y}) scale(1)`);
+                        hideTooltip();
+                    });
+
+                // Layout Logic
+                if (colorMode && colorMode !== 'none') {
+                    // Force Layout for Grouping
+                    const groups = Array.from(new Set(data.map(d => getGroupValue(d, colorMode))));
+                    const centers = {};
+                    
+                    // Calculate grid
+                    const cols = Math.ceil(Math.sqrt(groups.length));
+                    const rows = Math.ceil(groups.length / cols);
+                    const cellW = width / cols;
+                    const cellH = height / rows;
+                    
+                    groups.forEach((grp, i) => {
+                        centers[grp] = { 
+                            x: (i % cols) * cellW + cellW/2 - width/2, 
+                            y: Math.floor(i / cols) * cellH + cellH/2 - height/2,
+                            label: String(grp)
+                        };
+                    });
+
+                    // Create/Update group bubbles and labels
+                    const groupData = groups.map(grp => ({
+                        key: grp,
+                        label: getGroupLabel(grp, colorMode),
+                        color: getGroupColor(grp, colorMode),
+                        cx: centers[grp].x,
+                        cy: centers[grp].y,
+                        r: Math.min(cellW, cellH) / 2.5
+                    }));
+
+                    // Remove old group elements
+                    g.selectAll('.group-bubble').remove();
+                    g.selectAll('.group-label').remove();
+
+                    // Add group bubbles (behind nodes)
+                    const bubbles = g.selectAll('.group-bubble')
+                        .data(groupData, d => d.key)
+                        .enter()
+                        .insert('ellipse', '.node')
+                        .attr('class', 'group-bubble')
+                        .attr('cx', d => d.cx)
+                        .attr('cy', d => d.cy)
+                        .attr('rx', d => d.r)
+                        .attr('ry', d => d.r * 0.8)
+                        .attr('fill', d => d.color)
+                        .attr('fill-opacity', 0.15)
+                        .attr('stroke', d => d.color)
+                        .attr('stroke-width', 2)
+                        .attr('stroke-opacity', 0.4)
+                        .style('pointer-events', 'none');
+
+                    // Add group labels
+                    const labels = g.selectAll('.group-label')
+                        .data(groupData, d => d.key)
+                        .enter()
+                        .insert('text', '.node')
+                        .attr('class', 'group-label')
+                        .attr('x', d => d.cx)
+                        .attr('y', d => d.cy - d.r + 20)
+                        .attr('text-anchor', 'middle')
+                        .attr('font-size', '14px')
+                        .attr('font-weight', 'bold')
+                        .attr('fill', d => d.color)
+                        .attr('opacity', 0.9)
+                        .style('pointer-events', 'none')
+                        .text(d => d.label);
+
+                    // Store group bounds for dynamic updates
+                    const groupBounds = {};
+                    groups.forEach(grp => {
+                        groupBounds[grp] = { minX: Infinity, maxX: -Infinity, minY: Infinity, maxY: -Infinity, count: 0 };
+                    });
+
+                    simulation = d3.forceSimulation(data)
+                        .force('x', d3.forceX(d => centers[getGroupValue(d, colorMode)].x).strength(0.08))
+                        .force('y', d3.forceY(d => centers[getGroupValue(d, colorMode)].y).strength(0.08))
+                        .force('collide', d3.forceCollide(CONFIG.nodeSize + 5).strength(0.9))
+                        .force('charge', d3.forceManyBody().strength(-20))
+                        .alphaDecay(0.03)
+                        .on('tick', () => {
+                            allNodes.attr('transform', d => `translate(${d.x},${d.y})`);
+                            
+                            // Recalculate group bounds based on actual node positions
+                            groups.forEach(grp => {
+                                groupBounds[grp] = { minX: Infinity, maxX: -Infinity, minY: Infinity, maxY: -Infinity, count: 0 };
+                            });
+                            
+                            data.forEach(d => {
+                                const grp = getGroupValue(d, colorMode);
+                                const bounds = groupBounds[grp];
+                                bounds.minX = Math.min(bounds.minX, d.x);
+                                bounds.maxX = Math.max(bounds.maxX, d.x);
+                                bounds.minY = Math.min(bounds.minY, d.y);
+                                bounds.maxY = Math.max(bounds.maxY, d.y);
+                                bounds.count++;
+                            });
+                            
+                            // Update bubble positions and sizes dynamically
+                            g.selectAll('.group-bubble')
+                                .attr('cx', d => {
+                                    const bounds = groupBounds[d.key];
+                                    return bounds.count > 0 ? (bounds.minX + bounds.maxX) / 2 : d.cx;
+                                })
+                                .attr('cy', d => {
+                                    const bounds = groupBounds[d.key];
+                                    return bounds.count > 0 ? (bounds.minY + bounds.maxY) / 2 : d.cy;
+                                })
+                                .attr('rx', d => {
+                                    const bounds = groupBounds[d.key];
+                                    const padding = CONFIG.nodeSize * 2;
+                                    return bounds.count > 0 ? Math.max((bounds.maxX - bounds.minX) / 2 + padding, CONFIG.nodeSize * 3) : d.r;
+                                })
+                                .attr('ry', d => {
+                                    const bounds = groupBounds[d.key];
+                                    const padding = CONFIG.nodeSize * 2;
+                                    return bounds.count > 0 ? Math.max((bounds.maxY - bounds.minY) / 2 + padding, CONFIG.nodeSize * 3) : d.r * 0.8;
+                                });
+                            
+                            // Update label positions
+                            g.selectAll('.group-label')
+                                .attr('x', d => {
+                                    const bounds = groupBounds[d.key];
+                                    return bounds.count > 0 ? (bounds.minX + bounds.maxX) / 2 : d.cx;
+                                })
+                                .attr('y', d => {
+                                    const bounds = groupBounds[d.key];
+                                    const padding = CONFIG.nodeSize * 2;
+                                    const ry = bounds.count > 0 ? Math.max((bounds.maxY - bounds.minY) / 2 + padding, CONFIG.nodeSize * 3) : d.r * 0.8;
+                                    const cy = bounds.count > 0 ? (bounds.minY + bounds.maxY) / 2 : d.cy;
+                                    return cy - ry + 18;
+                                });
+                        });
+                    
+                    simulation.restart();
+                    
+                    // Auto Zoom to fit all groups - center on origin
+                    console.log(`Force layout: centering at ${width/2},${height/2}`);
+                    svg.call(
+                        zoom.transform, 
+                        d3.zoomIdentity.translate(width/2, height/2).scale(0.8)
+                    );
+
+                } else {
+                    // Remove group elements when not grouping
+                    g.selectAll('.group-bubble').remove();
+                    g.selectAll('.group-label').remove();
+                    
+                    // Spiral Layout (Static)
+                    const spacing = CONFIG.nodeSize * 2.2;
+                    
+                    data.forEach((d, i) => {
+                        const angle = i * 0.5;
+                        const r = spacing * Math.sqrt(i);
+                        d.x = r * Math.cos(angle);
+                        d.y = r * Math.sin(angle);
+                    });
+
+                    // Immediately set positions (no animation for initial render)
+                    allNodes.attr('transform', d => `translate(${d.x},${d.y})`);
+                        
+                    // Auto Zoom to fit spiral - center on origin where spiral is
+                    if (data.length > 0) {
+                        const maxR = spacing * Math.sqrt(data.length);
+                        const scale = Math.min(width, height) / (maxR * 2.5);
+                        const finalScale = Math.max(0.3, Math.min(scale, 1.5));
+                        
+                        console.log(`Zoom: centering at ${width/2},${height/2} scale ${finalScale}`);
+                        
+                        svg.call(
+                            zoom.transform, 
+                            d3.zoomIdentity.translate(width/2, height/2).scale(finalScale)
+                        );
+                    }
+                }
+            } catch (err) {
+                console.error("Render Error:", err);
+            }
+        }
+
+        function dragstarted(event, d) {
+            if (!event.active && simulation) simulation.alphaTarget(0.3).restart();
+            d.fx = d.x;
+            d.fy = d.y;
+        }
+
+        function dragged(event, d) {
+            d.fx = event.x;
+            d.fy = event.y;
+        }
+
+        function dragended(event, d) {
+            if (!event.active && simulation) simulation.alphaTarget(0);
+            d.fx = null;
+            d.fy = null;
+        }
+
+        function getGroupValue(d, mode) {
+            if (mode === 'edibility') return d.Edibility || 0;
+            if (mode === 'ph') {
+                const ph = (d.pH || '').toLowerCase();
+                if (ph.includes('acid') && ph.includes('basic')) return 'Wide';
+                if (ph.includes('acid')) return 'Acid';
+                if (ph.includes('basic') || ph.includes('alkaline')) return 'Base';
+                return 'Neutral';
+            }
+            if (mode === 'growth') return d.GrowthRate || 'Unknown';
+            if (mode === 'family') return d.Family || 'Unknown';
+            return 'All';
+        }
+
+        function getGroupLabel(grp, mode) {
+            if (mode === 'edibility') {
+                const labels = {0: 'Not Edible', 1: 'Minor Use', 2: 'Fair', 3: 'Good', 4: 'Very Good', 5: 'Excellent'};
+                return labels[grp] || `Edibility: ${grp}`;
+            }
+            if (mode === 'ph') {
+                const labels = {'Acid': '🔴 Acidic Soil', 'Base': '🔵 Alkaline Soil', 'Wide': '🟣 Wide Range', 'Neutral': '⚪ Neutral'};
+                return labels[grp] || grp;
+            }
+            if (mode === 'growth') {
+                const labels = {'Fast': '🚀 Fast Growth', 'Medium': '🌱 Medium Growth', 'Slow': '🐢 Slow Growth', 'Unknown': '❓ Unknown'};
+                return labels[grp] || grp;
+            }
+            if (mode === 'family') {
+                return `🌿 ${grp}`;
+            }
+            return String(grp);
+        }
+
+        function getGroupColor(grp, mode) {
+            if (mode === 'edibility') {
+                const colors = {0: '#e74c3c', 1: '#e67e22', 2: '#f1c40f', 3: '#a2d9ce', 4: '#27ae60', 5: '#2ecc71'};
+                return colors[grp] || '#95a5a6';
+            }
+            if (mode === 'ph') {
+                const colors = {'Acid': '#e74c3c', 'Base': '#3498db', 'Wide': '#9b59b6', 'Neutral': '#95a5a6'};
+                return colors[grp] || '#95a5a6';
+            }
+            if (mode === 'growth') {
+                const colors = {'Fast': '#2ecc71', 'Medium': '#f1c40f', 'Slow': '#e74c3c', 'Unknown': '#95a5a6'};
+                return colors[grp] || '#95a5a6';
+            }
+            if (mode === 'family') {
+                // Hash-based color
+                let hash = 0;
+                const str = String(grp);
+                for (let i = 0; i < str.length; i++) {
+                    hash = str.charCodeAt(i) + ((hash << 5) - hash);
+                }
+                const c = (hash & 0x00FFFFFF).toString(16).toUpperCase();
+                return '#' + "00000".substring(0, 6 - c.length) + c;
+            }
+            return '#6b9e3e';
+        }
+
+        function getPlantColor(d, mode) {
+            if (mode === 'edibility') {
+                const e = d.Edibility || 0;
+                if (e >= 5) return '#2ecc71'; // Green (Excellent)
+                if (e >= 4) return '#a2d9ce'; // Teal
+                if (e >= 3) return '#f1c40f'; // Yellow
+                if (e >= 2) return '#e67e22'; // Orange
+                return '#e74c3c'; // Red (Not edible/Low)
+            }
+            if (mode === 'ph') {
+                const ph = (d.pH || '').toLowerCase();
+                if (ph.includes('acid') && ph.includes('basic')) return '#9b59b6'; // Purple (Wide)
+                if (ph.includes('acid')) return '#e74c3c'; // Red (Acid)
+                if (ph.includes('basic') || ph.includes('alkaline')) return '#3498db'; // Blue (Base)
+                return '#95a5a6'; // Gray (Neutral/Unknown)
+            }
+            if (mode === 'growth') {
+                if (d.GrowthRate === 'Fast') return '#2ecc71';
+                if (d.GrowthRate === 'Slow') return '#e74c3c';
+                return '#f1c40f'; // Medium
+            }
+            if (mode === 'family') {
+                // Simple hash for color
+                let hash = 0;
+                const str = d.Family || 'Unknown';
+                for (let i = 0; i < str.length; i++) {
+                    hash = str.charCodeAt(i) + ((hash << 5) - hash);
+                }
+                const c = (hash & 0x00FFFFFF).toString(16).toUpperCase();
+                return '#' + "00000".substring(0, 6 - c.length) + c;
+            }
+            return '#6b9e3e'; // Default
+        }
+
+        function showTooltip(event, d) {
+            const tooltip = document.getElementById('tooltip');
+            
+            let imgHtml = '';
+            if (d.hasImage) {
+                imgHtml = `<div style="width:100%; height:120px; background:url('${d['Image URL']}') center/cover no-repeat; border-radius:4px; margin-bottom:8px;"></div>`;
+            }
+
+            tooltip.innerHTML = `
+                ${imgHtml}
+                <h4>${d.CommonName}</h4>
+                <p><i>${d.Genus} ${d.Species}</i></p>
+                <p>Height: ${d.Height || '?'} m</p>
+                <p>Zone: ${d.HardinessZones || '?'}</p>
+                <p>Edibility: ${d.Edibility || 0}/5</p>
+                <p style="font-size:0.8rem; margin-top:5px; color:#888;">Click to view details</p>
+            `;
+            tooltip.style.opacity = 1;
+            tooltip.style.left = (event.pageX + 15) + 'px';
+            tooltip.style.top = (event.pageY + 15) + 'px';
+        }
+
+        function hideTooltip() {
+            document.getElementById('tooltip').style.opacity = 0;
+        }
+
+        function resetFilters() {
+            document.getElementById('searchFilter').value = '';
+            document.getElementById('familyFilter').value = '';
+            document.getElementById('growthFilter').value = '';
+            document.getElementById('edibilityFilter').value = '0';
+            
+            // Reset Slider
+            document.getElementById('heightMin').value = 0;
+            document.getElementById('heightMax').value = 50;
+            updateHeightSlider();
+
+            // Reset Zone
+            selectedZone = null;
+            toggleZone(null); // This will clear it
+            
+            applyFilters();
+        }
+
+        function toggleList() {
+            const panel = document.getElementById('listPanel');
+            panel.classList.toggle('open');
+            const btn = document.querySelector('.list-toggle');
+            btn.innerHTML = panel.classList.contains('open') ? 
+                '<i class="fas fa-chevron-down"></i> Hide List' : 
+                '<i class="fas fa-list"></i> Show List View';
+        }
+
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.querySelector('.sidebar-overlay');
+            
+            if (window.innerWidth <= 768) {
+                sidebar.classList.toggle('open');
+                overlay.classList.toggle('open');
+            } else {
+                sidebar.classList.toggle('collapsed');
+                // Trigger resize for D3
+                setTimeout(onWindowResize, 350);
+            }
+        }
+
+        function updateList() {
+            const tbody = document.querySelector('#dataTable tbody');
+            tbody.innerHTML = '';
+            
+            filteredData.slice(0, 50).forEach(d => {
+                const tr = document.createElement('tr');
+                const imgHtml = d.hasImage ? 
+                    `<img src="${d['Image URL']}" style="width:30px; height:30px; border-radius:50%; object-fit:cover;">` : 
+                    `<div style="width:30px; height:30px; border-radius:50%; background:#eee; display:flex; align-items:center; justify-content:center; font-size:0.7rem;">?</div>`;
+                
+                tr.innerHTML = `
+                    <td>${imgHtml}</td>
+                    <td>${d.CommonName}</td>
+                    <td><i>${d.Genus} ${d.Species}</i></td>
+                    <td>${d.Family}</td>
+                    <td>${d.Height || '-'}</td>
+                    <td>${d.HardinessZones}</td>
+                `;
+                tr.onclick = () => {
+                    if(d.PFAF) window.open(d.PFAF, '_blank');
+                };
+                tbody.appendChild(tr);
+            });
+        }
+
+        // Start
+        init();
+
     </script>
 </body>
 </html>
