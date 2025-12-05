@@ -82,23 +82,66 @@
         .sidebar {
             width: 340px;
             background: white;
-            padding: 1.5rem;
+            padding: 0;
             box-shadow: 2px 0 5px rgba(0,0,0,0.05);
             overflow-y: auto;
             flex-shrink: 0;
             z-index: 5;
             display: flex;
             flex-direction: column;
-            gap: 1.5rem;
+            transition: margin-left 0.3s ease, transform 0.3s ease;
+        }
+
+        .sidebar.collapsed {
+            margin-left: -340px;
+        }
+
+        .sidebar-hero {
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+            color: white;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .sidebar-hero h2 {
+            font-size: 1.4rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .sidebar-hero p {
+            font-size: 0.9rem;
+            opacity: 0.9;
+            line-height: 1.4;
+        }
+
+        .sidebar-section {
+            padding: 0 1.5rem 1.5rem 1.5rem;
+            border-bottom: 1px solid #eee;
+            margin-bottom: 1.5rem;
+        }
+
+        .sidebar-section:last-child {
+            border-bottom: none;
+        }
+
+        .section-step {
+            text-transform: uppercase;
+            font-size: 0.75rem;
+            color: #888;
+            font-weight: 700;
+            letter-spacing: 1px;
+            margin-bottom: 0.5rem;
+            display: block;
         }
 
         .sidebar-header {
             font-size: 1.1rem;
             color: var(--primary-color);
             font-weight: 700;
-            border-bottom: 2px solid var(--accent-color);
-            padding-bottom: 0.5rem;
-            margin-bottom: 0.5rem;
+            margin-bottom: 0.8rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
         }
 
         /* Visual Filters */
@@ -262,14 +305,24 @@
             text-transform: uppercase;
         }
 
+        /* Main Layout */
+        main {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            overflow: hidden;
+        }
+
         /* Visualization Area */
         .viz-area {
-            flex: 1;
+            flex: 8; /* 80% height */
             display: flex;
             flex-direction: column;
             position: relative;
             background: #eef1e8;
             overflow: hidden;
+            border-bottom: 1px solid #ddd;
         }
 
         #spiralContainer {
@@ -308,82 +361,111 @@
         }
 
         /* List View */
-        .list-toggle {
-            position: absolute;
-            bottom: 20px;
-            right: 20px;
-            background: white;
-            padding: 10px 20px;
-            border-radius: 30px;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-            cursor: pointer;
-            font-weight: bold;
-            color: var(--primary-color);
-            z-index: 50;
-            transition: transform 0.2s;
-        }
-
-        .list-toggle:hover {
-            transform: translateY(-2px);
-        }
-
         .list-panel {
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            height: 350px;
+            flex: 2; /* 20% height */
             background: white;
-            box-shadow: 0 -4px 20px rgba(0,0,0,0.1);
-            transform: translateY(100%);
-            transition: transform 0.3s ease-in-out;
-            z-index: 40;
             display: flex;
             flex-direction: column;
-        }
-
-        .list-panel.open {
-            transform: translateY(0);
+            overflow: hidden;
+            position: relative;
+            z-index: 10;
+            box-shadow: 0 -2px 10px rgba(0,0,0,0.05);
         }
 
         .list-header {
-            padding: 1rem 2rem;
+            padding: 0.5rem 1rem;
             border-bottom: 1px solid #eee;
             display: flex;
             justify-content: space-between;
             align-items: center;
             background: #f9f9f9;
+            flex-shrink: 0;
         }
 
         .list-content {
             flex: 1;
-            overflow: auto;
-            padding: 0 2rem;
+            overflow-y: auto;
+            padding: 0;
         }
 
         table {
             width: 100%;
             border-collapse: collapse;
-            margin-top: 1rem;
-        }
-
-        th, td {
-            padding: 0.75rem;
-            text-align: left;
-            border-bottom: 1px solid #eee;
         }
 
         th {
             position: sticky;
             top: 0;
-            background: white;
-            font-weight: 600;
-            color: var(--primary-color);
+            background: #f9f9f9;
+            padding: 0.5rem 1rem;
+            text-align: left;
+            font-size: 0.8rem;
+            color: #666;
+            border-bottom: 2px solid #eee;
+            z-index: 2;
+        }
+
+        td {
+            padding: 0.4rem 1rem;
+            border-bottom: 1px solid #eee;
+            font-size: 0.85rem;
         }
 
         tr:hover {
-            background-color: #f0f7eb;
+            background: #f5f9f0;
             cursor: pointer;
+        }
+
+        /* Mobile Responsive */
+        @media (max-width: 768px) {
+            body {
+                flex-direction: column;
+            }
+
+            #sidebar {
+                position: fixed;
+                left: -320px;
+                top: 0;
+                bottom: 0;
+                z-index: 100;
+                transition: left 0.3s ease;
+            }
+
+            #sidebar.open {
+                left: 0;
+            }
+
+            .sidebar-overlay {
+                position: fixed;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                background: rgba(0,0,0,0.5);
+                z-index: 90;
+                display: none;
+            }
+
+            .sidebar-overlay.open {
+                display: block;
+            }
+
+            main {
+                width: 100%;
+                height: 100vh;
+                display: flex;
+                flex-direction: column;
+            }
+            
+            .viz-area {
+                flex: 1; /* Split evenly on mobile or adjust */
+                min-height: 40vh;
+            }
+            
+            .list-panel {
+                flex: 1;
+                min-height: 40vh;
+            }
         }
 
         /* Loading */
@@ -469,6 +551,11 @@
             cursor: pointer;
         }
 
+        /* Show toggle when sidebar is collapsed on desktop */
+        .sidebar.collapsed + main .sidebar-toggle {
+            display: block;
+        }
+
         .sidebar-overlay {
             display: none;
             position: fixed;
@@ -509,6 +596,10 @@
                 display: block !important;
             }
 
+            .desktop-close-btn {
+                display: none !important;
+            }
+
             .zoom-controls {
                 top: auto;
                 bottom: 80px;
@@ -529,137 +620,153 @@
         </div>
     </div>
 
-    <header>
-        <div class="header-title">
-            <i class="fas fa-leaf"></i>
-            PLANTalytics Visual Explorer
-        </div>
-        <a href="index.html" class="header-link">
-            <i class="fas fa-home"></i> Back to Home
-        </a>
-    </header>
-
-    <div class="main-container">
-        <!-- Sidebar -->
+    <div class="app-container" style="display:flex; height:100vh; width:100%;">
         <div class="sidebar-overlay" onclick="toggleSidebar()"></div>
-        <aside class="sidebar" id="sidebar">
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem;">
-                <div class="header-title" style="font-size:1rem; color:var(--primary-color);">
-                    <i class="fas fa-leaf"></i> Filters
+        <!-- Sidebar -->
+        <aside id="sidebar" class="sidebar">
+            <div class="sidebar-header" style="padding: 1.5rem; background: var(--primary-color); color: white;">
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                    <h2 style="margin:0; font-size:1.2rem;"><i class="fas fa-leaf"></i> PLANTalytics</h2>
+                    <button class="mobile-close-btn" onclick="toggleSidebar()" style="background:none; border:none; color:white; font-size:1.2rem; cursor:pointer; display:none;">
+                        <i class="fas fa-times"></i>
+                    </button>
+                    <button class="desktop-close-btn" onclick="toggleSidebar()" style="background:none; border:none; color:white; font-size:1rem; cursor:pointer; opacity:0.8;" title="Collapse Sidebar">
+                        <i class="fas fa-chevron-left"></i>
+                    </button>
                 </div>
-                <button onclick="toggleSidebar()" style="background:none; border:none; font-size:1.2rem; cursor:pointer; display:none;" class="mobile-close-btn">
-                    <i class="fas fa-times"></i>
+            </div>
+            
+            <div class="sidebar-content" style="padding: 1.5rem; overflow-y: auto; height: calc(100% - 70px);">
+                <!-- Search -->
+                <div class="filter-group" style="margin-bottom: 1.5rem;">
+                    <label style="display:block; margin-bottom:0.5rem; font-weight:600;">Search Plants</label>
+                    <input type="text" id="searchFilter" placeholder="e.g. Oak, Acer..." oninput="debounceFilter()">
+                </div>
+
+                <!-- Zip Code -->
+                <div class="filter-group" style="margin-bottom: 1.5rem;">
+                    <label style="display:block; margin-bottom:0.5rem; font-weight:600;">Your Zip Code (US)</label>
+                    <div style="display:flex; gap:5px;">
+                        <input type="text" id="zipInput" placeholder="Zip Code" maxlength="5">
+                        <button onclick="lookupZip()" style="padding:0 10px; background:var(--primary-color); color:white; border:none; border-radius:4px; cursor:pointer;">Go</button>
+                    </div>
+                    <div id="zipResult" style="font-size:0.8rem; margin-top:5px; font-weight:bold;"></div>
+                </div>
+
+                <!-- Zone Selector -->
+                <div class="filter-group" style="margin-bottom: 1.5rem;">
+                    <label style="display:block; margin-bottom:0.5rem; font-weight:600;">Hardiness Zone: <span id="zoneValue" style="color:var(--primary-color)">All</span></label>
+                    <div class="zone-selector" id="zoneSelector"></div>
+                    <div class="range-values">
+                        <span>Cold (1)</span>
+                        <span>Hot (13)</span>
+                    </div>
+                </div>
+
+                <!-- Color By -->
+                <div class="filter-group" style="margin-bottom: 1.5rem;">
+                    <label style="display:block; margin-bottom:0.5rem; font-weight:600;">Color Nodes By</label>
+                    <select id="colorByFilter" onchange="applyFilters()">
+                        <option value="none">None (Spiral Layout)</option>
+                        <option value="family">Family (Grouped)</option>
+                        <option value="edibility">Edibility (Grouped)</option>
+                        <option value="ph">pH Preference (Grouped)</option>
+                        <option value="growth">Growth Rate (Grouped)</option>
+                    </select>
+                </div>
+
+                <!-- Height Slider -->
+                <div class="filter-group" style="margin-bottom: 1.5rem;">
+                    <label style="display:block; margin-bottom:0.5rem; font-weight:600;">Height Range</label>
+                    <div class="range-container">
+                        <div class="range-track"></div>
+                        <div class="range-fill" id="heightFill"></div>
+                        <input type="range" id="heightMin" min="0" max="50" value="0" class="range-input" oninput="updateHeightSlider()">
+                        <input type="range" id="heightMax" min="0" max="50" value="50" class="range-input" oninput="updateHeightSlider()">
+                    </div>
+                    <div class="range-values">
+                        <span id="heightMinVal">0m</span>
+                        <span id="heightMaxVal">50m+</span>
+                    </div>
+                </div>
+
+                <!-- Dropdowns -->
+                <div class="filter-group" style="margin-bottom: 1.5rem;">
+                    <label style="display:block; margin-bottom:0.5rem; font-weight:600;">Family</label>
+                    <select id="familyFilter" onchange="applyFilters()">
+                        <option value="">All Families</option>
+                    </select>
+                </div>
+
+                <div class="filter-group" style="margin-bottom: 1.5rem;">
+                    <label style="display:block; margin-bottom:0.5rem; font-weight:600;">Growth Rate</label>
+                    <select id="growthFilter" onchange="applyFilters()">
+                        <option value="">Any</option>
+                    </select>
+                </div>
+
+                <div class="filter-group" style="margin-bottom: 1.5rem;">
+                    <label style="display:block; margin-bottom:0.5rem; font-weight:600;">Min Edibility Rating</label>
+                    <select id="edibilityFilter" onchange="applyFilters()">
+                        <option value="0">Any</option>
+                        <option value="1">1+ (Minor)</option>
+                        <option value="2">2+ (Fair)</option>
+                        <option value="3">3+ (Good)</option>
+                        <option value="4">4+ (Very Good)</option>
+                        <option value="5">5 (Excellent)</option>
+                    </select>
+                </div>
+
+                <!-- Stats -->
+                <div class="stats-grid">
+                    <div class="stat-item">
+                        <div class="stat-val" id="countVisible">-</div>
+                        <div class="stat-lbl">Plants</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-val" id="countImages">-</div>
+                        <div class="stat-lbl">Images</div>
+                    </div>
+                </div>
+
+                <button onclick="resetFilters()" style="width:100%; margin-top:1rem; padding:0.8rem; background:#eee; border:none; border-radius:6px; cursor:pointer; font-weight:bold; color:#666;">
+                    Reset All Filters
                 </button>
             </div>
-            
-            <div class="stats-grid">
-                <div class="stat-item">
-                    <div class="stat-val" id="countVisible">0</div>
-                    <div class="stat-lbl">Plants Shown</div>
-                </div>
-                <div class="stat-item">
-                    <div class="stat-val" id="countImages">0</div>
-                    <div class="stat-lbl">With Images</div>
-                </div>
-            </div>
-
-            <div class="filter-card">
-                <div class="sidebar-header">Search</div>
-                <input type="text" id="searchFilter" placeholder="Common name, genus..." oninput="debounceFilter()">
-            </div>
-
-            <div class="filter-card">
-                <div class="sidebar-header">Hardiness Zone</div>
-                <div style="margin-bottom: 0.8rem;">
-                    <div style="display: flex; gap: 8px;">
-                        <input type="text" id="zipInput" placeholder="Zip Code" maxlength="5" style="width: 100px;">
-                        <button onclick="lookupZip()" style="padding: 0 12px; background: var(--secondary-color); color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 600;">Go</button>
-                        <div id="zipResult" style="display: flex; align-items: center; font-size: 0.85rem; font-weight: bold; color: var(--primary-color);"></div>
-                    </div>
-                </div>
-                <div class="filter-label">
-                    <span>Select your region</span>
-                    <span id="zoneValue" style="color:var(--primary-color)">All</span>
-                </div>
-                <div class="zone-selector" id="zoneSelector">
-                    <!-- Generated by JS -->
-                </div>
-                <div style="display:flex; justify-content:space-between; font-size:0.7rem; color:#888; margin-top:4px;">
-                    <span>Cold (1)</span>
-                    <span>Hot (13)</span>
-                </div>
-            </div>
-
-            <div class="filter-card">
-                <div class="sidebar-header">Plant Height (m)</div>
-                <div class="range-container">
-                    <div class="range-track"></div>
-                    <div class="range-fill" id="heightFill"></div>
-                    <input type="range" min="0" max="50" value="0" class="range-input" id="heightMin" oninput="updateHeightSlider()">
-                    <input type="range" min="0" max="50" value="50" class="range-input" id="heightMax" oninput="updateHeightSlider()">
-                </div>
-                <div class="range-values">
-                    <span id="heightMinVal">0m</span>
-                    <span id="heightMaxVal">50m+</span>
-                </div>
-            </div>
-
-            <div class="filter-card">
-                <div class="sidebar-header">Filters</div>
-                <div style="display:flex; flex-direction:column; gap:1rem;">
-                    <div>
-                        <label class="filter-label">Family</label>
-                        <select id="familyFilter" onchange="applyFilters()">
-                            <option value="">All Families</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label class="filter-label">Growth Rate</label>
-                        <select id="growthFilter" onchange="applyFilters()">
-                            <option value="">All Rates</option>
-                        </select>
-                    </div>
-                </div>
-            </div>
-
-            <button onclick="resetFilters()" style="padding:0.8rem; background:#eee; border:none; border-radius:6px; cursor:pointer; font-weight:600; color:#555; transition:background 0.2s;">
-                <i class="fas fa-undo"></i> Reset All Filters
-            </button>
         </aside>
 
-        <!-- Visualization -->
-        <main class="viz-area">
-            <button class="sidebar-toggle" onclick="toggleSidebar()">
-                <i class="fas fa-filter"></i> Filters
-            </button>
-            <div id="spiralContainer"></div>
-            
-            <div class="zoom-controls">
-                <button class="zoom-btn" onclick="zoomIn()"><i class="fas fa-plus"></i></button>
-                <button class="zoom-btn" onclick="zoomOut()"><i class="fas fa-minus"></i></button>
-                <button class="zoom-btn" onclick="resetZoom()"><i class="fas fa-compress-arrows-alt"></i></button>
-            </div>
+        <!-- Main Content -->
+        <main>
+            <!-- Mobile Header -->
+            <header class="mobile-header" style="display:none; padding:10px; background:white; border-bottom:1px solid #eee; align-items:center; justify-content:space-between;">
+                <button onclick="toggleSidebar()" style="background:none; border:none; font-size:1.2rem; color:var(--primary-color); cursor:pointer;">
+                    <i class="fas fa-bars"></i> Filters
+                </button>
+                <h3 style="margin:0; color:var(--primary-color);">PLANTalytics</h3>
+                <div style="width:24px;"></div> <!-- Spacer -->
+            </header>
 
-            <div class="tooltip" id="tooltip"></div>
-
-            <div class="list-toggle" onclick="toggleList()">
-                <i class="fas fa-list"></i> Show List View
+            <div class="viz-area">
+                <div class="viz-controls" style="position:absolute; top:15px; right:15px; z-index:10; display:flex; gap:10px;">
+                    <button onclick="zoomIn()" class="btn-icon" style="width:36px; height:36px; background:white; border:none; border-radius:4px; box-shadow:0 2px 5px rgba(0,0,0,0.1); cursor:pointer;"><i class="fas fa-plus"></i></button>
+                    <button onclick="zoomOut()" class="btn-icon" style="width:36px; height:36px; background:white; border:none; border-radius:4px; box-shadow:0 2px 5px rgba(0,0,0,0.1); cursor:pointer;"><i class="fas fa-minus"></i></button>
+                    <button onclick="resetZoom()" class="btn-icon" style="width:36px; height:36px; background:white; border:none; border-radius:4px; box-shadow:0 2px 5px rgba(0,0,0,0.1); cursor:pointer;"><i class="fas fa-compress-arrows-alt"></i></button>
+                </div>
+                <div id="spiralContainer"></div>
             </div>
 
             <div class="list-panel" id="listPanel">
                 <div class="list-header">
                     <h3>Plant List</h3>
-                    <button onclick="toggleList()" style="background:none; border:none; font-size:1.2rem; cursor:pointer;">
-                        <i class="fas fa-times"></i>
-                    </button>
+                    <span style="font-size:0.8rem; color:#666;">Scroll to see more</span>
                 </div>
                 <div class="list-content">
                     <table id="dataTable">
                         <thead>
                             <tr>
-                                <th>Image</th>
-                                <th>Common Name</th>
-                                <th>Scientific Name</th>
+                                <th style="width:50px">Img</th>
+                                <th>Name</th>
+                                <th>Scientific</th>
                                 <th>Family</th>
                                 <th>Height (m)</th>
                                 <th>Zone</th>
@@ -672,49 +779,78 @@
         </main>
     </div>
 
+
     <script>
         let allData = [];
         let filteredData = [];
-        let zoomTransform = d3.zoomIdentity;
-        let svg, g;
         let selectedZone = null;
         let zipData = {};
         
+        // D3 Globals
+        let svg, g, zoom;
+        let simulation;
+        let width, height;
+
         // Configuration
         const CONFIG = {
-            nodeSize: 40,
+            nodeSize: 25,
             padding: 5,
             maxNodes: 600
         };
 
         // Initialize
         function init() {
-            setupZoneSelector();
-            setupD3();
-            loadData();
-            loadZipData();
-            
-            // Hide header if in iframe
-            if (window.self !== window.top) {
-                const header = document.querySelector('header');
-                if(header) header.style.display = 'none';
+            console.log('Initializing Dashboard...');
+            try {
+                setupZoneSelector();
+                setupD3();
+                loadData();
+                loadZipData();
+                
+                // Hide header if in iframe
+                if (window.self !== window.top) {
+                    const header = document.querySelector('header');
+                    if(header) header.style.display = 'none';
+                }
+
+                window.addEventListener('resize', onWindowResize);
+            } catch (e) {
+                console.error('Initialization Error:', e);
+                alert('An error occurred during initialization: ' + e.message);
             }
         }
 
         function setupD3() {
             const container = document.getElementById('spiralContainer');
-            svg = d3.select("#spiralContainer")
-                .append("svg")
-                .attr("width", "100%")
-                .attr("height", "100%")
-                .call(d3.zoom().scaleExtent([0.1, 8]).on("zoom", zoomed))
-                .on("dblclick.zoom", null);
+            width = container.clientWidth;
+            height = container.clientHeight;
 
-            g = svg.append("g");
+            // Clear any existing
+            container.innerHTML = '';
+
+            svg = d3.select('#spiralContainer').append('svg')
+                .attr('width', width)
+                .attr('height', height)
+                .style('background', '#eef1e8');
+            
+            g = svg.append('g');
+
+            zoom = d3.zoom()
+                .scaleExtent([0.1, 8])
+                .on('zoom', (e) => g.attr('transform', e.transform));
+
+            svg.call(zoom);
             
             // Initial center
-            const t = d3.zoomIdentity.translate(container.clientWidth/2, container.clientHeight/2).scale(0.8);
-            svg.call(d3.zoom().transform, t);
+            svg.call(zoom.transform, d3.zoomIdentity.translate(width/2, height/2).scale(0.8));
+        }
+
+        function onWindowResize() {
+            const container = document.getElementById('spiralContainer');
+            width = container.clientWidth;
+            height = container.clientHeight;
+            svg.attr('width', width).attr('height', height);
+            renderViz();
         }
 
         function setupZoneSelector() {
@@ -789,16 +925,17 @@
         }
 
         function zoomed(event) {
-            g.attr("transform", event.transform);
-            zoomTransform = event.transform;
+            // No-op
         }
 
-        function zoomIn() { svg.transition().call(d3.zoom().scaleBy, 1.3); }
-        function zoomOut() { svg.transition().call(d3.zoom().scaleBy, 1/1.3); }
+        function zoomIn() { 
+            zoom.scaleBy(svg.transition().duration(750), 1.2);
+        }
+        function zoomOut() { 
+            zoom.scaleBy(svg.transition().duration(750), 0.8);
+        }
         function resetZoom() {
-            const container = document.getElementById('spiralContainer');
-            const t = d3.zoomIdentity.translate(container.clientWidth/2, container.clientHeight/2).scale(0.8);
-            svg.transition().duration(750).call(d3.zoom().transform, t);
+            svg.transition().duration(750).call(zoom.transform, d3.zoomIdentity.translate(width/2, height/2).scale(0.8));
         }
 
         function loadZipData() {
@@ -874,12 +1011,14 @@
                     populateFilters();
                     applyFilters();
                     
+                    console.log(`Loaded ${allData.length} plants.`);
                     document.getElementById('loading').style.display = 'none';
                 },
                 error: function(err) {
                     console.error('CSV Load Error:', err);
-                    document.querySelector('.spinner').style.display = 'none';
+                    document.getElementById('loading').style.display = 'none';
                     document.getElementById('errorMsg').style.display = 'block';
+                    document.getElementById('errorMsg').innerHTML += '<br><small>' + (err.message || err) + '</small>';
                 }
             });
         }
@@ -910,6 +1049,7 @@
             const search = document.getElementById('searchFilter').value.toLowerCase();
             const family = document.getElementById('familyFilter').value;
             const growth = document.getElementById('growthFilter').value;
+            const minEdibility = parseInt(document.getElementById('edibilityFilter').value);
             
             const minHeight = parseInt(document.getElementById('heightMin').value);
             const maxHeight = parseInt(document.getElementById('heightMax').value);
@@ -923,6 +1063,9 @@
                 // Dropdowns
                 const matchFamily = !family || d.Family === family;
                 const matchGrowth = !growth || d.GrowthRate === growth;
+                
+                // Edibility
+                const matchEdibility = (d.Edibility || 0) >= minEdibility;
                 
                 // Height Slider
                 const h = d.HeightVal;
@@ -954,14 +1097,14 @@
                     }
                 }
 
-                return matchSearch && matchFamily && matchGrowth && matchHeight && matchZone;
+                return matchSearch && matchFamily && matchGrowth && matchHeight && matchZone && matchEdibility;
             });
 
-            // Sort by Height (Smallest -> Largest) for the spiral
+            // Sort by Height (Smallest -> Largest)
             filteredData.sort((a, b) => a.HeightVal - b.HeightVal);
 
             updateStats();
-            renderSpiral();
+            renderViz();
             updateList();
         }
 
@@ -970,79 +1113,235 @@
             document.getElementById('countImages').textContent = filteredData.filter(d => d.hasImage).length.toLocaleString();
         }
 
-        function renderSpiral() {
-            const displayData = filteredData.slice(0, CONFIG.maxNodes);
-
-            // Calculate positions (Phyllotaxis Spiral)
-            const c = CONFIG.nodeSize + CONFIG.padding;
+        function renderViz() {
+            const data = filteredData.slice(0, CONFIG.maxNodes);
+            const colorMode = document.getElementById('colorByFilter').value;
             
-            displayData.forEach((d, i) => {
-                const angle = i * 2.39996; // ~137.5 degrees
-                const r = c * Math.sqrt(i);
-                d.x = r * Math.cos(angle);
-                d.y = r * Math.sin(angle);
-            });
+            // Stop any previous simulation
+            if (simulation) simulation.stop();
 
-            // D3 Update
-            const nodes = g.selectAll(".node-group")
-                .data(displayData, d => d.CommonName + d.Genus);
+            // Bind Data
+            const nodes = g.selectAll('.node')
+                .data(data, d => d.CommonName);
 
             nodes.exit()
                 .transition().duration(500)
-                .attr("opacity", 0)
+                .attr('opacity', 0)
                 .remove();
 
-            const enter = nodes.enter()
-                .append("g")
-                .attr("class", "node-group")
-                .attr("transform", d => `translate(${d.x}, ${d.y})`)
-                .attr("opacity", 0);
+            const enter = nodes.enter().append('g')
+                .attr('class', 'node')
+                .attr('opacity', 0)
+                .call(d3.drag()
+                    .on('start', dragstarted)
+                    .on('drag', dragged)
+                    .on('end', dragended));
 
-            enter.append("circle")
-                .attr("r", CONFIG.nodeSize / 2)
-                .attr("fill", "#ddd")
-                .attr("stroke", "white")
-                .attr("stroke-width", 2);
+            // Circle Background
+            enter.append('circle')
+                .attr('r', CONFIG.nodeSize)
+                .attr('fill', '#fff')
+                .attr('stroke', '#fff')
+                .attr('stroke-width', 2);
 
-            enter.filter(d => d.hasImage)
-                .append("image")
-                .attr("xlink:href", d => d['Image URL'])
-                .attr("x", -CONFIG.nodeSize/2)
-                .attr("y", -CONFIG.nodeSize/2)
-                .attr("width", CONFIG.nodeSize)
-                .attr("height", CONFIG.nodeSize)
-                .style("clip-path", "circle(50%)");
+            // Image (ClipPath)
+            enter.append('clipPath')
+                .attr('id', (d, i) => `clip-${i}`)
+                .append('circle')
+                .attr('r', CONFIG.nodeSize);
 
-            const update = enter.merge(nodes);
+            enter.append('image')
+                .attr('xlink:href', d => d.hasImage ? d['Image URL'] : '')
+                .attr('x', -CONFIG.nodeSize)
+                .attr('y', -CONFIG.nodeSize)
+                .attr('width', CONFIG.nodeSize * 2)
+                .attr('height', CONFIG.nodeSize * 2)
+                .attr('clip-path', (d, i) => `url(#clip-${i})`)
+                .style('display', d => d.hasImage ? 'block' : 'none')
+                .on('error', function() { d3.select(this).style('display', 'none'); }); // Hide broken images
             
-            update.transition().duration(750)
-                .attr("transform", d => `translate(${d.x}, ${d.y})`)
-                .attr("opacity", 1);
+            // Fallback Circle (if no image)
+            enter.append('circle')
+                .attr('class', 'fallback')
+                .attr('r', CONFIG.nodeSize)
+                .attr('fill', d => getPlantColor(d, colorMode))
+                .style('display', d => d.hasImage ? 'none' : 'block');
 
-            update.on("mouseenter", function(event, d) {
-                d3.select(this).raise().select("circle, image")
-                    .transition().duration(200)
-                    .attr("transform", "scale(1.5)");
-                showTooltip(event, d);
-            })
-            .on("mouseleave", function() {
-                d3.select(this).select("circle, image")
-                    .transition().duration(200)
-                    .attr("transform", "scale(1)");
-                hideTooltip();
-            })
-            .on("click", (e, d) => {
-                if(d.PFAF) window.open(d.PFAF, '_blank');
-            });
+            // Merge
+            const allNodes = enter.merge(nodes);
+
+            // Animate Entry
+            enter.transition().duration(750).attr('opacity', 1);
+
+            // Update Colors
+            allNodes.select('.fallback')
+                .transition().duration(500)
+                .attr('fill', d => getPlantColor(d, colorMode))
+                .style('display', d => d.hasImage ? 'none' : 'block');
+                
+            allNodes.select('circle')
+                .transition().duration(500)
+                .attr('stroke', d => getPlantColor(d, colorMode));
+
+            // Tooltip Events
+            allNodes
+                .on('mouseenter', (e, d) => {
+                    d3.select(e.currentTarget).transition().duration(200).attr('transform', `translate(${d.x},${d.y}) scale(1.5)`);
+                    // Bring to front
+                    e.currentTarget.parentNode.appendChild(e.currentTarget);
+                    showTooltip(e, d);
+                })
+                .on('mouseleave', (e, d) => {
+                    d3.select(e.currentTarget).transition().duration(200).attr('transform', `translate(${d.x},${d.y}) scale(1)`);
+                    hideTooltip();
+                });
+
+            // Layout Logic
+            if (colorMode && colorMode !== 'none') {
+                // Force Layout for Grouping
+                const groups = Array.from(new Set(data.map(d => getGroupValue(d, colorMode))));
+                const centers = {};
+                
+                // Calculate grid
+                const cols = Math.ceil(Math.sqrt(groups.length));
+                const rows = Math.ceil(groups.length / cols);
+                const cellW = width / cols;
+                const cellH = height / rows;
+                
+                groups.forEach((grp, i) => {
+                    centers[grp] = { 
+                        x: (i % cols) * cellW + cellW/2 - width/2, 
+                        y: Math.floor(i / cols) * cellH + cellH/2 - height/2
+                    };
+                });
+
+                simulation = d3.forceSimulation(data)
+                    .force('x', d3.forceX(d => centers[getGroupValue(d, colorMode)].x).strength(0.08))
+                    .force('y', d3.forceY(d => centers[getGroupValue(d, colorMode)].y).strength(0.08))
+                    .force('collide', d3.forceCollide(CONFIG.nodeSize + 5).strength(0.9))
+                    .force('charge', d3.forceManyBody().strength(-20))
+                    .alphaDecay(0.03)
+                    .on('tick', () => {
+                        allNodes.attr('transform', d => `translate(${d.x},${d.y})`);
+                    });
+                
+                simulation.restart();
+                
+                // Auto Zoom to fit all groups
+                svg.transition().duration(1000).call(
+                    zoom.transform, 
+                    d3.zoomIdentity.translate(width/2, height/2).scale(0.9)
+                );
+
+            } else {
+                // Spiral Layout (Static)
+                const spacing = CONFIG.nodeSize * 2.2;
+                
+                data.forEach((d, i) => {
+                    const angle = i * 0.5;
+                    const r = spacing * Math.sqrt(i);
+                    d.x = r * Math.cos(angle);
+                    d.y = r * Math.sin(angle);
+                });
+
+                allNodes.transition().duration(1000)
+                    .attr('transform', d => `translate(${d.x},${d.y})`);
+                    
+                // Auto Zoom to fit spiral
+                if (data.length > 0) {
+                    const maxR = spacing * Math.sqrt(data.length);
+                    const scale = Math.min(width, height) / (maxR * 2.5);
+                    // Clamp scale
+                    const finalScale = Math.max(0.2, Math.min(scale, 2));
+                    
+                    svg.transition().duration(1000).call(
+                        zoom.transform, 
+                        d3.zoomIdentity.translate(width/2, height/2).scale(finalScale)
+                    );
+                }
+            }
+        }
+
+        function dragstarted(event, d) {
+            if (!event.active && simulation) simulation.alphaTarget(0.3).restart();
+            d.fx = d.x;
+            d.fy = d.y;
+        }
+
+        function dragged(event, d) {
+            d.fx = event.x;
+            d.fy = event.y;
+        }
+
+        function dragended(event, d) {
+            if (!event.active && simulation) simulation.alphaTarget(0);
+            d.fx = null;
+            d.fy = null;
+        }
+
+        function getGroupValue(d, mode) {
+            if (mode === 'edibility') return d.Edibility || 0;
+            if (mode === 'ph') {
+                const ph = (d.pH || '').toLowerCase();
+                if (ph.includes('acid') && ph.includes('basic')) return 'Wide';
+                if (ph.includes('acid')) return 'Acid';
+                if (ph.includes('basic') || ph.includes('alkaline')) return 'Base';
+                return 'Neutral';
+            }
+            if (mode === 'growth') return d.GrowthRate || 'Unknown';
+            if (mode === 'family') return d.Family || 'Unknown';
+            return 'All';
+        }
+
+        function getPlantColor(d, mode) {
+            if (mode === 'edibility') {
+                const e = d.Edibility || 0;
+                if (e >= 5) return '#2ecc71'; // Green (Excellent)
+                if (e >= 4) return '#a2d9ce'; // Teal
+                if (e >= 3) return '#f1c40f'; // Yellow
+                if (e >= 2) return '#e67e22'; // Orange
+                return '#e74c3c'; // Red (Not edible/Low)
+            }
+            if (mode === 'ph') {
+                const ph = (d.pH || '').toLowerCase();
+                if (ph.includes('acid') && ph.includes('basic')) return '#9b59b6'; // Purple (Wide)
+                if (ph.includes('acid')) return '#e74c3c'; // Red (Acid)
+                if (ph.includes('basic') || ph.includes('alkaline')) return '#3498db'; // Blue (Base)
+                return '#95a5a6'; // Gray (Neutral/Unknown)
+            }
+            if (mode === 'growth') {
+                if (d.GrowthRate === 'Fast') return '#2ecc71';
+                if (d.GrowthRate === 'Slow') return '#e74c3c';
+                return '#f1c40f'; // Medium
+            }
+            if (mode === 'family') {
+                // Simple hash for color
+                let hash = 0;
+                const str = d.Family || 'Unknown';
+                for (let i = 0; i < str.length; i++) {
+                    hash = str.charCodeAt(i) + ((hash << 5) - hash);
+                }
+                const c = (hash & 0x00FFFFFF).toString(16).toUpperCase();
+                return '#' + "00000".substring(0, 6 - c.length) + c;
+            }
+            return '#6b9e3e'; // Default
         }
 
         function showTooltip(event, d) {
             const tooltip = document.getElementById('tooltip');
+            
+            let imgHtml = '';
+            if (d.hasImage) {
+                imgHtml = `<div style="width:100%; height:120px; background:url('${d['Image URL']}') center/cover no-repeat; border-radius:4px; margin-bottom:8px;"></div>`;
+            }
+
             tooltip.innerHTML = `
+                ${imgHtml}
                 <h4>${d.CommonName}</h4>
                 <p><i>${d.Genus} ${d.Species}</i></p>
                 <p>Height: ${d.Height || '?'} m</p>
                 <p>Zone: ${d.HardinessZones || '?'}</p>
+                <p>Edibility: ${d.Edibility || 0}/5</p>
                 <p style="font-size:0.8rem; margin-top:5px; color:#888;">Click to view details</p>
             `;
             tooltip.style.opacity = 1;
@@ -1058,6 +1357,7 @@
             document.getElementById('searchFilter').value = '';
             document.getElementById('familyFilter').value = '';
             document.getElementById('growthFilter').value = '';
+            document.getElementById('edibilityFilter').value = '0';
             
             // Reset Slider
             document.getElementById('heightMin').value = 0;
@@ -1081,8 +1381,17 @@
         }
 
         function toggleSidebar() {
-            document.getElementById('sidebar').classList.toggle('open');
-            document.querySelector('.sidebar-overlay').classList.toggle('open');
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.querySelector('.sidebar-overlay');
+            
+            if (window.innerWidth <= 768) {
+                sidebar.classList.toggle('open');
+                overlay.classList.toggle('open');
+            } else {
+                sidebar.classList.toggle('collapsed');
+                // Trigger resize for D3
+                setTimeout(onWindowResize, 350);
+            }
         }
 
         function updateList() {
