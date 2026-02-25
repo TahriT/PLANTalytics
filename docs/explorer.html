@@ -1,0 +1,1784 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PLANTalytics - Plant Explorer</title>
+    <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #2d5016;
+            --secondary: #6b9e3e;
+            --accent: #9ec472;
+            --light: #f5f5f5;
+            --white: #ffffff;
+            --filter-width: 300px;
+            --header-h: 64px;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #eef2e6;
+            color: #333;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* ── Header ── */
+        header {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            color: white;
+            height: var(--header-h);
+            display: flex;
+            align-items: center;
+            padding: 0 1.5rem;
+            gap: 1rem;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.25);
+            flex-shrink: 0;
+            z-index: 100;
+        }
+
+        header h1 {
+            font-size: 1.4rem;
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            flex: 1;
+        }
+
+        header h1 .badge {
+            font-size: 0.7rem;
+            background: rgba(255,255,255,0.25);
+            padding: 0.2rem 0.5rem;
+            border-radius: 20px;
+            font-weight: 400;
+            letter-spacing: 0.5px;
+        }
+
+        .header-links {
+            display: flex;
+            gap: 0.75rem;
+            align-items: center;
+        }
+
+        .header-link {
+            color: white;
+            text-decoration: none;
+            padding: 0.4rem 0.85rem;
+            background: rgba(255,255,255,0.15);
+            border-radius: 6px;
+            font-size: 0.85rem;
+            transition: background 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+            white-space: nowrap;
+        }
+
+        .header-link:hover { background: rgba(255,255,255,0.28); }
+        .header-link.v2 { opacity: 0.75; font-size: 0.8rem; }
+
+        /* ── Page body ── */
+        .page-body {
+            flex: 1;
+            display: flex;
+            gap: 1.25rem;
+            padding: 1.25rem;
+            align-items: flex-start;
+            overflow: hidden;
+        }
+
+        /* ── Main area ── */
+        .main-area {
+            flex: 1;
+            min-width: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 1.25rem;
+        }
+
+        /* ── Stats row ── */
+        .stats-row {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1rem;
+        }
+
+        .stat-card {
+            background: white;
+            border-radius: 10px;
+            padding: 1rem 1.25rem;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+            display: flex;
+            align-items: center;
+            gap: 0.85rem;
+        }
+
+        .stat-icon {
+            width: 44px;
+            height: 44px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            flex-shrink: 0;
+        }
+
+        .stat-icon.green  { background: #e8f5e9; color: #2e7d32; }
+        .stat-icon.blue   { background: #e3f2fd; color: #1565c0; }
+        .stat-icon.orange { background: #fff3e0; color: #e65100; }
+        .stat-icon.purple { background: #f3e5f5; color: #6a1b9a; }
+
+        .stat-info { min-width: 0; }
+        .stat-value { font-size: 1.7rem; font-weight: 700; color: var(--primary); line-height: 1; }
+        .stat-label { font-size: 0.8rem; color: #777; margin-top: 0.2rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+        /* ── Charts grid ── */
+        .charts-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.25rem;
+        }
+
+        .chart-card {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .chart-card.full-width {
+            grid-column: 1 / -1;
+        }
+
+        .card-header {
+            background: linear-gradient(135deg, var(--secondary), var(--accent));
+            color: white;
+            padding: 0.8rem 1.25rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-shrink: 0;
+        }
+
+        .card-title {
+            font-weight: 600;
+            font-size: 0.95rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .card-actions { display: flex; gap: 0.4rem; }
+
+        .icon-btn {
+            background: rgba(255,255,255,0.2);
+            border: none;
+            color: white;
+            width: 28px;
+            height: 28px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.75rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.2s;
+        }
+
+        .icon-btn:hover { background: rgba(255,255,255,0.35); }
+
+        .card-body {
+            flex: 1;
+            padding: 0.5rem;
+            min-height: 0;
+        }
+
+        .chart-instance { width: 100%; height: 360px; }
+        .chart-instance.tall   { height: 420px; }
+        .chart-instance.iframe-host {
+            height: 480px;
+            padding: 0;
+        }
+
+        .chart-instance.iframe-host iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+            display: block;
+        }
+
+        .card-footer {
+            padding: 0.6rem 1.25rem;
+            background: var(--light);
+            border-top: 1px solid #e8e8e8;
+            font-size: 0.78rem;
+            color: #888;
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+        }
+
+        /* ── Filter panel ── */
+        .filter-panel {
+            width: var(--filter-width);
+            flex-shrink: 0;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            position: sticky;
+            top: 1.25rem;
+            max-height: calc(100vh - var(--header-h) - 2.5rem);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            transition: width 0.3s ease;
+        }
+
+        .filter-panel.collapsed {
+            width: 44px;
+        }
+
+        .filter-toggle {
+            background: var(--primary);
+            color: white;
+            border: none;
+            cursor: pointer;
+            padding: 0.85rem;
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            font-size: 0.9rem;
+            font-weight: 600;
+            flex-shrink: 0;
+            width: 100%;
+            white-space: nowrap;
+            overflow: hidden;
+        }
+
+        .filter-toggle .toggle-icon {
+            transition: transform 0.3s;
+            flex-shrink: 0;
+        }
+
+        .filter-panel.collapsed .filter-toggle .toggle-icon {
+            transform: rotate(180deg);
+        }
+
+        .filter-toggle .toggle-label {
+            transition: opacity 0.2s;
+        }
+
+        .filter-panel.collapsed .filter-toggle .toggle-label {
+            opacity: 0;
+        }
+
+        .filter-body {
+            flex: 1;
+            overflow-y: auto;
+            padding: 1rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1.1rem;
+            transition: opacity 0.2s;
+        }
+
+        .filter-panel.collapsed .filter-body {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .filter-section-heading {
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            color: #aaa;
+            font-weight: 700;
+            margin-bottom: 0.4rem;
+        }
+
+        .filter-group { display: flex; flex-direction: column; gap: 0.35rem; }
+
+        .filter-group label {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: #555;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .filter-group label span.val {
+            font-weight: 400;
+            color: var(--secondary);
+            font-size: 0.8rem;
+        }
+
+        .filter-group input[type="text"],
+        .filter-group select {
+            width: 100%;
+            padding: 0.5rem 0.7rem;
+            border: 1.5px solid #ddd;
+            border-radius: 7px;
+            font-size: 0.88rem;
+            transition: border-color 0.2s;
+            background: var(--light);
+        }
+
+        .filter-group input[type="text"]:focus,
+        .filter-group select:focus {
+            outline: none;
+            border-color: var(--secondary);
+        }
+
+        .zip-row { display: flex; gap: 0.4rem; }
+
+        .zip-row input { flex: 1; }
+
+        .zip-btn {
+            background: var(--secondary);
+            color: white;
+            border: none;
+            border-radius: 7px;
+            padding: 0 0.75rem;
+            cursor: pointer;
+            font-size: 0.85rem;
+            transition: background 0.2s;
+        }
+
+        .zip-btn:hover { background: var(--primary); }
+
+        .zone-feedback {
+            font-size: 0.75rem;
+            color: var(--secondary);
+            min-height: 1.1em;
+        }
+
+        .zone-feedback.error { color: #c62828; }
+
+        /* Zone color bar */
+        .zone-bar {
+            display: flex;
+            height: 32px;
+            border-radius: 6px;
+            overflow: hidden;
+            cursor: pointer;
+            gap: 1px;
+        }
+
+        .zone-seg {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.65rem;
+            font-weight: 700;
+            color: white;
+            text-shadow: 0 1px 2px rgba(0,0,0,0.4);
+            transition: flex 0.2s, opacity 0.2s;
+            user-select: none;
+        }
+
+        .zone-seg.dimmed { opacity: 0.3; }
+        .zone-seg.active { flex: 2; font-size: 0.78rem; outline: 2px solid white; outline-offset: -2px; border-radius: 3px; }
+
+        .slider-row {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .slider-row input[type="range"] {
+            flex: 1;
+            accent-color: var(--secondary);
+        }
+
+        .slider-row .val-badge {
+            background: var(--accent);
+            color: var(--primary);
+            font-weight: 700;
+            font-size: 0.8rem;
+            min-width: 24px;
+            text-align: center;
+            border-radius: 4px;
+            padding: 0.1rem 0.3rem;
+        }
+
+        /* active filter chips */
+        .chips-area {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.35rem;
+            min-height: 1.5rem;
+        }
+
+        .chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.3rem;
+            background: var(--secondary);
+            color: white;
+            border-radius: 20px;
+            padding: 0.2rem 0.65rem;
+            font-size: 0.78rem;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .chip:hover { background: var(--primary); }
+        .chip i { font-size: 0.7rem; }
+
+        .clear-all-btn {
+            background: #fff0f0;
+            color: #c62828;
+            border: 1.5px solid #ffcdd2;
+            border-radius: 7px;
+            padding: 0.45rem;
+            font-size: 0.82rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.4rem;
+        }
+
+        .clear-all-btn:hover { background: #ffcdd2; }
+
+        /* loader */
+        .loader-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(45,80,22,0.85);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            z-index: 9999;
+            gap: 1rem;
+        }
+
+        .loader-overlay .spin {
+            font-size: 3rem;
+            animation: spin 1.2s linear infinite;
+        }
+
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        .loader-overlay p { font-size: 1.1rem; opacity: 0.9; }
+
+        /* empty state */
+        .empty-chart {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            color: #bbb;
+            font-size: 0.9rem;
+            gap: 0.5rem;
+        }
+
+        .empty-chart i { font-size: 2.5rem; }
+
+        /* tooltip for plants on scatter */
+        .scatter-tip {
+            font-size: 0.78rem;
+            line-height: 1.5;
+        }
+
+        /* Top picks table inside chart card */
+        .picks-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.82rem;
+        }
+
+        .picks-table th {
+            background: var(--light);
+            color: var(--primary);
+            font-weight: 700;
+            padding: 0.5rem 0.75rem;
+            text-align: left;
+            border-bottom: 2px solid #ddd;
+            position: sticky;
+            top: 0;
+        }
+
+        .picks-table td {
+            padding: 0.45rem 0.75rem;
+            border-bottom: 1px solid #f0f0f0;
+            vertical-align: middle;
+        }
+
+        .picks-table tr:hover td { background: #f9fef4; }
+
+        .picks-table tr:last-child td { border-bottom: none; }
+
+        .score-bar {
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+        }
+
+        .score-fill {
+            height: 6px;
+            border-radius: 3px;
+            background: var(--secondary);
+            min-width: 2px;
+            transition: width 0.4s ease;
+        }
+
+        .table-scroll { overflow-y: auto; max-height: 340px; }
+
+        .pfaf-link {
+            color: var(--secondary);
+            font-size: 0.75rem;
+            text-decoration: none;
+        }
+
+        .pfaf-link:hover { text-decoration: underline; }
+
+        .rating-dot {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            margin-right: 1px;
+        }
+
+        /* scrollbar styling */
+        .filter-body::-webkit-scrollbar { width: 5px; }
+        .filter-body::-webkit-scrollbar-track { background: transparent; }
+        .filter-body::-webkit-scrollbar-thumb { background: var(--accent); border-radius: 3px; }
+
+        .table-scroll::-webkit-scrollbar { width: 5px; }
+        .table-scroll::-webkit-scrollbar-track { background: transparent; }
+        .table-scroll::-webkit-scrollbar-thumb { background: var(--accent); border-radius: 3px; }
+
+        /* responsive */
+        @media (max-width: 1200px) {
+            .stats-row { grid-template-columns: repeat(2, 1fr); }
+            .charts-grid { grid-template-columns: 1fr; }
+        }
+
+        @media (max-width: 900px) {
+            .filter-panel { display: none; }
+            .stats-row { grid-template-columns: repeat(2, 1fr); }
+        }
+
+        @media (max-width: 600px) {
+            .page-body { padding: 0.75rem; }
+            .stats-row { grid-template-columns: 1fr 1fr; }
+            header h1 .badge { display: none; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- Loader -->
+<div class="loader-overlay" id="loader">
+    <i class="fas fa-leaf spin"></i>
+    <p>Loading plant data…</p>
+</div>
+
+<!-- Header -->
+<header>
+    <h1>
+        <i class="fas fa-leaf"></i>
+        PLANTalytics Explorer
+        <span class="badge">Apache ECharts · Live CSV</span>
+    </h1>
+    <div class="header-links">
+        <a href="index.html" class="header-link"><i class="fas fa-home"></i> Home</a>
+        <a href="dashboard.html" class="header-link"><i class="fas fa-chart-bar"></i> Visual Explorer</a>
+        <a href="advanced-dashboard.html" class="header-link v2" title="Power BI embedded report"><i class="fas fa-cube"></i> Power BI</a>
+        <a href="custom-layout.html" class="header-link v2"><i class="fas fa-history"></i> Legacy v2</a>
+    </div>
+</header>
+
+<!-- Page body -->
+<div class="page-body">
+
+    <!-- Main area -->
+    <div class="main-area">
+
+        <!-- Stats -->
+        <div class="stats-row">
+            <div class="stat-card">
+                <div class="stat-icon green"><i class="fas fa-seedling"></i></div>
+                <div class="stat-info">
+                    <div class="stat-value" id="statTotal">—</div>
+                    <div class="stat-label">Matching Plants</div>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon orange"><i class="fas fa-apple-alt"></i></div>
+                <div class="stat-info">
+                    <div class="stat-value" id="statEdible">—</div>
+                    <div class="stat-label">Edible Species (≥3)</div>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon purple"><i class="fas fa-mortar-pestle"></i></div>
+                <div class="stat-info">
+                    <div class="stat-value" id="statMedicinal">—</div>
+                    <div class="stat-label">Medicinal Species (≥3)</div>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon blue"><i class="fas fa-bug"></i></div>
+                <div class="stat-info">
+                    <div class="stat-value" id="statPollinators">—</div>
+                    <div class="stat-label">Support Pollinators</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Charts -->
+        <div class="charts-grid">
+
+            <!-- Chart 1: Plant Type Treemap — full width -->
+            <div class="chart-card full-width">
+                <div class="card-header">
+                    <div class="card-title"><i class="fas fa-th-large"></i> Plant Type Landscape</div>
+                    <div class="card-actions">
+                        <button class="icon-btn" title="Clear type filter" onclick="clearFilter('type')"><i class="fas fa-times"></i></button>
+                        <button class="icon-btn" title="Fullscreen" onclick="fullscreenCard(this)"><i class="fas fa-expand"></i></button>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="chart-instance tall" id="chartTypeMap" style="height:400px"></div>
+                </div>
+                <div class="card-footer"><i class="fas fa-mouse-pointer"></i> Every plant type in the dataset — tile size = count · click to filter · grouped by growth form</div>
+            </div>
+
+            <!-- Chart 2: Top Families Donut -->
+            <div class="chart-card">
+                <div class="card-header">
+                    <div class="card-title"><i class="fas fa-chart-pie"></i> Top Plant Families</div>
+                    <div class="card-actions">
+                        <button class="icon-btn" title="Clear family filter" onclick="clearFilter('family')"><i class="fas fa-times"></i></button>
+                        <button class="icon-btn" title="Fullscreen" onclick="fullscreenCard(this)"><i class="fas fa-expand"></i></button>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="chart-instance" id="chartFamilies"></div>
+                </div>
+                <div class="card-footer"><i class="fas fa-mouse-pointer"></i> Click a slice to filter all charts by family</div>
+            </div>
+
+            <!-- Chart 3: Edibility × Medicinal Scatter -->
+            <div class="chart-card">
+                <div class="card-header">
+                    <div class="card-title"><i class="fas fa-circle"></i> Edibility × Medicinal Value</div>
+                    <div class="card-actions">
+                        <button class="icon-btn" title="Fullscreen" onclick="fullscreenCard(this)"><i class="fas fa-expand"></i></button>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="chart-instance" id="chartScatter"></div>
+                </div>
+                <div class="card-footer"><i class="fas fa-info-circle"></i> Bubble size = OtherUses score · Top-right quadrant = highest dual-value plants</div>
+            </div>
+
+            <!-- Chart 4: Harvest Calendar -->
+            <div class="chart-card">
+                <div class="card-header">
+                    <div class="card-title"><i class="fas fa-calendar-alt"></i> Bloom &amp; Harvest Calendar</div>
+                    <div class="card-actions">
+                        <button class="icon-btn" title="Clear month filter" onclick="clearFilter('month')"><i class="fas fa-times"></i></button>
+                        <button class="icon-btn" title="Fullscreen" onclick="fullscreenCard(this)"><i class="fas fa-expand"></i></button>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="chart-instance" id="chartCalendar"></div>
+                </div>
+                <div class="card-footer"><i class="fas fa-mouse-pointer"></i> Click a month to filter · Blue = flowering, Green = ripening</div>
+            </div>
+
+            <!-- Chart 5: Growth Rate × Plant Type -->
+            <div class="chart-card">
+                <div class="card-header">
+                    <div class="card-title"><i class="fas fa-chart-bar"></i> Plant Type &amp; Growth Rate</div>
+                    <div class="card-actions">
+                        <button class="icon-btn" title="Clear type/growth filter" onclick="clearFilter('type'); clearFilter('growthRate')"><i class="fas fa-times"></i></button>
+                        <button class="icon-btn" title="Fullscreen" onclick="fullscreenCard(this)"><i class="fas fa-expand"></i></button>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="chart-instance" id="chartGrowth"></div>
+                </div>
+                <div class="card-footer"><i class="fas fa-mouse-pointer"></i> Click a bar segment to filter by plant type</div>
+            </div>
+
+            <!-- Chart 6: Pollinator Support -->
+            <div class="chart-card">
+                <div class="card-header">
+                    <div class="card-title"><i class="fas fa-bug"></i> Pollinator Support</div>
+                    <div class="card-actions">
+                        <button class="icon-btn" title="Clear pollinator filter" onclick="clearFilter('pollinator')"><i class="fas fa-times"></i></button>
+                        <button class="icon-btn" title="Fullscreen" onclick="fullscreenCard(this)"><i class="fas fa-expand"></i></button>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="chart-instance" id="chartPollinators"></div>
+                </div>
+                <div class="card-footer"><i class="fas fa-mouse-pointer"></i> Click a bar to filter by pollinator type</div>
+            </div>
+
+            <!-- Chart 7: Top Picks Table — full width -->
+            <div class="chart-card full-width">
+                <div class="card-header">
+                    <div class="card-title"><i class="fas fa-star"></i> Top Picks for Your Selection</div>
+                    <div class="card-actions">
+                        <button class="icon-btn" title="Fullscreen" onclick="fullscreenCard(this)"><i class="fas fa-expand"></i></button>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="table-scroll" id="topPicksContainer">
+                        <table class="picks-table">
+                            <thead>
+                                <tr>
+                                    <th>#</th>
+                                    <th>Common Name</th>
+                                    <th>Family / Species</th>
+                                    <th>Type</th>
+                                    <th>Zone</th>
+                                    <th>Edibility</th>
+                                    <th>Medicinal</th>
+                                    <th>Other Uses</th>
+                                    <th>Utility Score</th>
+                                    <th>Link</th>
+                                </tr>
+                            </thead>
+                            <tbody id="topPicksBody"></tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="card-footer"><i class="fas fa-info-circle"></i> Sorted by Utility Score (Edibility + Medicinal + OtherUses). Showing top 50 from filtered set.</div>
+            </div>
+
+        </div><!-- /charts-grid -->
+    </div><!-- /main-area -->
+
+    <!-- Filter Panel (right, collapsible) -->
+    <div class="filter-panel" id="filterPanel">
+
+        <button class="filter-toggle" onclick="toggleFilterPanel()">
+            <i class="fas fa-chevron-right toggle-icon"></i>
+            <span class="toggle-label"><i class="fas fa-sliders-h" style="margin-right:0.4rem"></i>Filters</span>
+        </button>
+
+        <div class="filter-body">
+
+            <!-- ZIP lookup -->
+            <div>
+                <div class="filter-section-heading">1 · Location</div>
+                <div class="filter-group">
+                    <label>ZIP Code → Zone</label>
+                    <div class="zip-row">
+                        <input type="text" id="zipInput" placeholder="e.g. 90210" maxlength="5" onkeydown="if(event.key==='Enter') lookupZip()">
+                        <button class="zip-btn" onclick="lookupZip()"><i class="fas fa-search"></i></button>
+                    </div>
+                    <div class="zone-feedback" id="zoneFeedback"></div>
+                </div>
+            </div>
+
+            <!-- Hardiness Zone visual bar -->
+            <div>
+                <div class="filter-section-heading">2 · Hardiness Zone</div>
+                <div class="filter-group">
+                    <label>Click zone to filter <span class="val" id="zoneValLabel"></span></label>
+                    <div class="zone-bar" id="zoneBar"></div>
+                    <div style="display:flex;justify-content:space-between;font-size:0.68rem;color:#aaa;margin-top:0.25rem;">
+                        <span>Zone 1 (coldest)</span><span>Zone 13 (hottest)</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Plant Type -->
+            <div>
+                <div class="filter-section-heading">3 · Plant Characteristics</div>
+                <div class="filter-group">
+                    <label>Plant Type</label>
+                    <select id="typeFilter" onchange="setFilter('type', this.value || null)">
+                        <option value="">All Types</option>
+                    </select>
+                </div>
+
+                <div class="filter-group" style="margin-top:0.75rem">
+                    <label>Growth Rate</label>
+                    <select id="growthFilter" onchange="setFilter('growthRate', this.value || null)">
+                        <option value="">All Rates</option>
+                        <option value="slow">Slow</option>
+                        <option value="medium">Medium</option>
+                        <option value="fast">Fast</option>
+                    </select>
+                </div>
+
+                <div class="filter-group" style="margin-top:0.75rem">
+                    <label>Foliage</label>
+                    <select id="foliageFilter" onchange="setFilter('foliage', this.value || null)">
+                        <option value="">All</option>
+                        <option value="Evergreen">Evergreen</option>
+                        <option value="Deciduous">Deciduous</option>
+                        <option value="Semi-evergreen">Semi-evergreen</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Soil -->
+            <div>
+                <div class="filter-section-heading">4 · Growing Conditions</div>
+                <div class="filter-group">
+                    <label>Soil Type</label>
+                    <select id="soilFilter" onchange="setFilter('soil', this.value || null)">
+                        <option value="">Any Soil</option>
+                        <option value="light">Light (Sandy)</option>
+                        <option value="medium">Medium (Loam)</option>
+                        <option value="heavy">Heavy (Clay)</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Edibility / Medicinal sliders -->
+            <div>
+                <div class="filter-section-heading">5 · Use Ratings</div>
+                <div class="filter-group">
+                    <label>Min Edibility <span class="val" id="edibilityValLabel">0+</span></label>
+                    <div class="slider-row">
+                        <input type="range" min="0" max="5" value="0" id="edibilitySlider"
+                               oninput="document.getElementById('edibilityValLabel').textContent=this.value+'+'; setFilter('minEdibility', parseInt(this.value))">
+                        <span class="val-badge" id="edBadge">0</span>
+                    </div>
+                </div>
+                <div class="filter-group" style="margin-top:0.75rem">
+                    <label>Min Medicinal <span class="val" id="medicinalValLabel">0+</span></label>
+                    <div class="slider-row">
+                        <input type="range" min="0" max="5" value="0" id="medicinalSlider"
+                               oninput="document.getElementById('medicinalValLabel').textContent=this.value+'+'; setFilter('minMedicinal', parseInt(this.value))">
+                        <span class="val-badge" id="medBadge">0</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Active chips -->
+            <div>
+                <div class="filter-section-heading">Active Filters</div>
+                <div class="chips-area" id="chipsArea">
+                    <span style="color:#ccc;font-size:0.8rem">None</span>
+                </div>
+            </div>
+
+            <button class="clear-all-btn" onclick="clearAllFilters()">
+                <i class="fas fa-times-circle"></i> Clear All Filters
+            </button>
+
+        </div><!-- /filter-body -->
+    </div><!-- /filter-panel -->
+
+</div><!-- /page-body -->
+
+<script>
+// ─────────────────────────────────────────────
+// DATA & STATE
+// ─────────────────────────────────────────────
+let allPlants = [];
+let zipMap = new Map(); // zipcode → {zone, zonetitle}
+
+const filters = {
+    zone:        null,   // number 1-13
+    family:      null,   // string
+    type:        null,   // string
+    growthRate:  null,   // string
+    foliage:     null,   // string
+    soil:        null,   // string
+    minEdibility:   0,
+    minMedicinal:   0,
+    month:       null,   // string (month name)
+    pollinator:  null,   // string
+};
+
+// ─────────────────────────────────────────────
+// ECHARTS INSTANCES
+// ─────────────────────────────────────────────
+let ecFamilies, ecScatter, ecCalendar, ecGrowth, ecPollinators, ecTypeMap;
+
+const ZONE_COLORS = [
+    '#8ecae6','#219ebc','#023047','#6a994e','#386641','#a7c957',
+    '#f9c74f','#f8961e','#f3722c','#f94144','#d62828','#9b2226','#6a0572'
+];
+
+const MONTHS = ['January','February','March','April','May','June',
+                'July','August','September','October','November','December'];
+
+const MONTH_SHORT = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+
+// ─────────────────────────────────────────────
+// HELPERS
+// ─────────────────────────────────────────────
+function plantZoneRange(plant) {
+    const hz = (plant.HardinessZones || '').trim();
+    const m = hz.match(/(\d+)\s+to\s+(\d+)/);
+    if (m) return [parseInt(m[1]), parseInt(m[2])];
+    const single = hz.match(/^(\d+)$/);
+    if (single) { const z = parseInt(single[1]); return [z, z]; }
+    return null;
+}
+
+function plantInZone(plant, z) {
+    const r = plantZoneRange(plant);
+    if (!r) return false;
+    return z >= r[0] && z <= r[1];
+}
+
+function parseMonths(str) {
+    if (!str) return [];
+    const out = [];
+    const m = str.match(/([A-Z][a-z]+)\s+to\s+([A-Z][a-z]+)/i);
+    if (m) {
+        let s = MONTHS.indexOf(m[1]);
+        let e = MONTHS.indexOf(m[2]);
+        if (s < 0) s = MONTHS.findIndex(mo => mo.toLowerCase().startsWith(m[1].toLowerCase().slice(0,3)));
+        if (e < 0) e = MONTHS.findIndex(mo => mo.toLowerCase().startsWith(m[2].toLowerCase().slice(0,3)));
+        if (s >= 0 && e >= 0) {
+            if (e >= s) { for (let i = s; i <= e; i++) out.push(MONTHS[i]); }
+            else { for (let i = s; i < 12; i++) out.push(MONTHS[i]); for (let i = 0; i <= e; i++) out.push(MONTHS[i]); }
+        }
+    } else {
+        MONTHS.forEach(mo => { if (str.toLowerCase().includes(mo.toLowerCase())) out.push(mo); });
+    }
+    return out;
+}
+
+function parsePollinators(str) {
+    if (!str) return [];
+    return [...str.matchAll(/['"]([^'"]+)['"]/g)].map(m => m[1]).filter(Boolean);
+}
+
+function parseSoils(str) {
+    if (!str) return [];
+    return [...str.matchAll(/['"]([^'"]+)['"]/g)].map(m => m[1].trim().toLowerCase()).filter(Boolean);
+}
+
+function utilityScore(p) {
+    return (parseInt(p.Edibility) || 0) + (parseInt(p.Medicinal) || 0) + (parseInt(p.OtherUses) || 0);
+}
+
+// ─────────────────────────────────────────────
+// FILTERING
+// ─────────────────────────────────────────────
+function getFilteredData() {
+    return allPlants.filter(p => {
+        if (filters.zone !== null && !plantInZone(p, filters.zone)) return false;
+        if (filters.family && p.Family !== filters.family) return false;
+        if (filters.type) {
+            const pt = (p.Type || '').toLowerCase();
+            if (!pt.includes(filters.type.toLowerCase())) return false;
+        }
+        if (filters.growthRate) {
+            const gr = (p.GrowthRate || '').toLowerCase();
+            if (!gr.includes(filters.growthRate.toLowerCase())) return false;
+        }
+        if (filters.foliage) {
+            const fo = (p.Foliage || '').toLowerCase();
+            if (!fo.includes(filters.foliage.toLowerCase())) return false;
+        }
+        if (filters.soil) {
+            const soils = parseSoils(p.Soils || '');
+            if (!soils.some(s => s.includes(filters.soil.toLowerCase()))) return false;
+        }
+        if (filters.minEdibility > 0 && (parseInt(p.Edibility) || 0) < filters.minEdibility) return false;
+        if (filters.minMedicinal > 0 && (parseInt(p.Medicinal) || 0) < filters.minMedicinal) return false;
+        if (filters.month) {
+            const flowerMonths = parseMonths(p.Flower || '');
+            const ripenMonths  = parseMonths(p.Ripen || '');
+            if (!flowerMonths.includes(filters.month) && !ripenMonths.includes(filters.month)) return false;
+        }
+        if (filters.pollinator) {
+            const polls = parsePollinators(p.Pollinators || '');
+            if (!polls.some(pp => pp.toLowerCase().includes(filters.pollinator.toLowerCase()))) return false;
+        }
+        return true;
+    });
+}
+
+// ─────────────────────────────────────────────
+// FILTER CONTROL
+// ─────────────────────────────────────────────
+function setFilter(key, val) {
+    filters[key] = val;
+    // sync sliders badges
+    if (key === 'minEdibility') {
+        document.getElementById('edBadge').textContent = val;
+        document.getElementById('edibilitySlider').value = val;
+    }
+    if (key === 'minMedicinal') {
+        document.getElementById('medBadge').textContent = val;
+        document.getElementById('medicinalSlider').value = val;
+    }
+    refreshAll();
+}
+
+function clearFilter(key) {
+    if (key === 'family') { filters.family = null; }
+    else if (key === 'type') { filters.type = null; document.getElementById('typeFilter').value = ''; }
+    else if (key === 'growthRate') { filters.growthRate = null; document.getElementById('growthFilter').value = ''; }
+    else if (key === 'month') { filters.month = null; }
+    else if (key === 'pollinator') { filters.pollinator = null; }
+    else if (key === 'zone') {
+        filters.zone = null;
+        updateZoneBar(null);
+        document.getElementById('zoneValLabel').textContent = '';
+    }
+    refreshAll();
+}
+
+function clearAllFilters() {
+    Object.keys(filters).forEach(k => {
+        if (typeof filters[k] === 'number' && k.startsWith('min')) filters[k] = 0;
+        else filters[k] = null;
+    });
+    // reset UI controls
+    document.getElementById('typeFilter').value = '';
+    document.getElementById('growthFilter').value = '';
+    document.getElementById('foliageFilter').value = '';
+    document.getElementById('soilFilter').value = '';
+    document.getElementById('edibilitySlider').value = 0;
+    document.getElementById('medicinalSlider').value = 0;
+    document.getElementById('edBadge').textContent = '0';
+    document.getElementById('medBadge').textContent = '0';
+    document.getElementById('edibilityValLabel').textContent = '0+';
+    document.getElementById('medicinalValLabel').textContent = '0+';
+    document.getElementById('zoneValLabel').textContent = '';
+    document.getElementById('zoneFeedback').textContent = '';
+    document.getElementById('zipInput').value = '';
+    updateZoneBar(null);
+    refreshAll();
+}
+
+function updateChips() {
+    const area = document.getElementById('chipsArea');
+    const chipDefs = [
+        { key: 'zone',        label: () => `Zone ${filters.zone}` },
+        { key: 'family',      label: () => filters.family },
+        { key: 'type',        label: () => filters.type },
+        { key: 'growthRate',  label: () => `Growth: ${filters.growthRate}` },
+        { key: 'foliage',     label: () => `Foliage: ${filters.foliage}` },
+        { key: 'soil',        label: () => `Soil: ${filters.soil}` },
+        { key: 'month',       label: () => `Month: ${filters.month}` },
+        { key: 'pollinator',  label: () => `Poll: ${filters.pollinator}` },
+        { key: 'minEdibility', label: () => `Edible ≥${filters.minEdibility}`, show: filters.minEdibility > 0 },
+        { key: 'minMedicinal', label: () => `Med ≥${filters.minMedicinal}`,   show: filters.minMedicinal > 0 },
+    ];
+
+    const active = chipDefs.filter(d => {
+        if ('show' in d) return d.show;
+        return filters[d.key] !== null;
+    });
+
+    if (active.length === 0) {
+        area.innerHTML = '<span style="color:#ccc;font-size:0.8rem">None</span>';
+        return;
+    }
+
+    area.innerHTML = active.map(d =>
+        `<span class="chip" onclick="clearFilter('${d.key}')">
+            ${d.label()} <i class="fas fa-times"></i>
+        </span>`
+    ).join('');
+}
+
+// ─────────────────────────────────────────────
+// STATS
+// ─────────────────────────────────────────────
+function updateStats(data) {
+    document.getElementById('statTotal').textContent = data.length.toLocaleString();
+    document.getElementById('statEdible').textContent =
+        data.filter(p => (parseInt(p.Edibility) || 0) >= 3).length.toLocaleString();
+    document.getElementById('statMedicinal').textContent =
+        data.filter(p => (parseInt(p.Medicinal) || 0) >= 3).length.toLocaleString();
+    document.getElementById('statPollinators').textContent =
+        data.filter(p => p.Pollinators && p.Pollinators.trim() !== '').length.toLocaleString();
+}
+
+// ─────────────────────────────────────────────
+// CHART: Families Donut
+// ─────────────────────────────────────────────
+function renderFamilies(data) {
+    if (!ecFamilies) { ecFamilies = echarts.init(document.getElementById('chartFamilies'), null, {renderer:'svg'}); }
+
+    const counts = {};
+    data.forEach(p => { counts[p.Family] = (counts[p.Family] || 0) + 1; });
+
+    const sorted = Object.entries(counts).sort((a,b) => b[1]-a[1]);
+    const top15  = sorted.slice(0, 15);
+    const others = sorted.slice(15).reduce((acc, [,v]) => acc + v, 0);
+    if (others > 0) top15.push(['Other', others]);
+
+    if (top15.length === 0) { ecFamilies.clear(); return; }
+
+    const selectedFamily = filters.family;
+
+    ecFamilies.off('click');
+    ecFamilies.setOption({
+        tooltip: { trigger: 'item', formatter: '{b}: {c} ({d}%)' },
+        legend: { show: false },
+        series: [{
+            type: 'pie',
+            radius: ['38%', '68%'],
+            center: ['50%', '50%'],
+            avoidLabelOverlap: true,
+            label: {
+                show: true,
+                formatter: params => params.name.length > 12 ? params.name.slice(0,12)+'…' : params.name,
+                fontSize: 11
+            },
+            emphasis: {
+                itemStyle: { shadowBlur: 12, shadowOffsetX: 0, shadowColor: 'rgba(0,0,0,0.3)' },
+                label: { show: true, fontSize: 13, fontWeight: 'bold' }
+            },
+            data: top15.map(([name, value]) => ({
+                name, value,
+                itemStyle: selectedFamily && name !== selectedFamily ? { opacity: 0.35 } : {}
+            }))
+        }]
+    }, true);
+
+    ecFamilies.on('click', params => {
+        if (params.name === 'Other') return;
+        if (filters.family === params.name) {
+            filters.family = null;
+        } else {
+            filters.family = params.name;
+        }
+        refreshAll();
+    });
+}
+
+// ─────────────────────────────────────────────
+// CHART: Edibility × Medicinal Scatter
+// ─────────────────────────────────────────────
+function renderScatter(data) {
+    if (!ecScatter) { ecScatter = echarts.init(document.getElementById('chartScatter'), null, {renderer:'svg'}); }
+
+    // Bucket data to avoid rendering 5000 points all at once; use aggregated bins + top plants
+    // Show individual plants only when filtered set is small, otherwise show density
+    const MAX_POINTS = 600;
+    const subset = data.length > MAX_POINTS
+        ? data.filter(p => (parseInt(p.Edibility)||0) > 0 || (parseInt(p.Medicinal)||0) > 0).slice(0, MAX_POINTS)
+        : data;
+
+    const scatterData = subset.map(p => [
+        parseInt(p.Edibility) || 0,
+        parseInt(p.Medicinal) || 0,
+        (parseInt(p.OtherUses) || 0),
+        p.CommonName || `${p.Genus} ${p.Species}`,
+        p.PFAF || ''
+    ]);
+
+    ecScatter.setOption({
+        grid: { left: '10%', right: '5%', top: '10%', bottom: '12%' },
+        xAxis: {
+            type: 'value', name: 'Edibility', min: 0, max: 5,
+            nameLocation: 'middle', nameGap: 28,
+            splitLine: { lineStyle: { type: 'dashed', color: '#f0f0f0' } }
+        },
+        yAxis: {
+            type: 'value', name: 'Medicinal', min: 0, max: 5,
+            nameLocation: 'middle', nameGap: 32,
+            splitLine: { lineStyle: { type: 'dashed', color: '#f0f0f0' } }
+        },
+        tooltip: {
+            trigger: 'item',
+            formatter: p => {
+                const d = p.data;
+                return `<div class="scatter-tip"><b>${d[3]}</b><br/>
+                    Edibility: ${d[0]} &nbsp; Medicinal: ${d[1]}<br/>
+                    Other Uses: ${d[2]}</div>`;
+            }
+        },
+        // Quadrant lines
+        markLine: {},
+        series: [{
+            type: 'scatter',
+            symbolSize: d => Math.max(6, d[2] * 3 + 5),
+            data: scatterData,
+            itemStyle: {
+                color: p => {
+                    const e = p.data[0], m = p.data[1];
+                    if (e >= 3 && m >= 3) return '#2d9e4e';
+                    if (e >= 3) return '#f9a825';
+                    if (m >= 3) return '#7b1fa2';
+                    return '#90caf9';
+                },
+                opacity: 0.75
+            },
+            emphasis: {
+                itemStyle: { opacity: 1, shadowBlur: 8 }
+            }
+        }]
+    }, true);
+}
+
+// ─────────────────────────────────────────────
+// CHART: Bloom & Harvest Calendar (bar)
+// ─────────────────────────────────────────────
+function renderCalendar(data) {
+    if (!ecCalendar) { ecCalendar = echarts.init(document.getElementById('chartCalendar'), null, {renderer:'svg'}); }
+
+    const flowerCounts = new Array(12).fill(0);
+    const ripenCounts  = new Array(12).fill(0);
+
+    data.forEach(p => {
+        parseMonths(p.Flower || '').forEach(m => {
+            const idx = MONTHS.indexOf(m);
+            if (idx >= 0) flowerCounts[idx]++;
+        });
+        parseMonths(p.Ripen || '').forEach(m => {
+            const idx = MONTHS.indexOf(m);
+            if (idx >= 0) ripenCounts[idx]++;
+        });
+    });
+
+    const activeMonth = filters.month;
+
+    ecCalendar.off('click');
+    ecCalendar.setOption({
+        tooltip: {
+            trigger: 'axis',
+            formatter: p => {
+                const mo = p[0].axisValueLabel;
+                const fl = p.find(s => s.seriesName === 'Flowering');
+                const ri = p.find(s => s.seriesName === 'Ripening');
+                return `<b>${mo}</b><br/>🌸 Flowering: ${fl ? fl.value : 0}<br/>🍎 Ripening: ${ri ? ri.value : 0}`;
+            }
+        },
+        legend: { top: 0, data: ['Flowering','Ripening'], textStyle: { fontSize: 11 } },
+        grid: { left: '8%', right: '3%', top: '14%', bottom: '14%' },
+        xAxis: {
+            type: 'category',
+            data: MONTH_SHORT,
+            axisLabel: { fontSize: 11 }
+        },
+        yAxis: { type: 'value', name: 'Plants', nameTextStyle: { fontSize: 10 } },
+        series: [
+            {
+                name: 'Flowering',
+                type: 'bar',
+                stack: 'total',
+                data: flowerCounts.map((v, i) => ({
+                    value: v,
+                    itemStyle: {
+                        color: activeMonth && MONTHS[i] !== activeMonth ? '#b3cde8' : '#5b9bd5',
+                        opacity: activeMonth && MONTHS[i] !== activeMonth ? 0.4 : 1
+                    }
+                })),
+                emphasis: { itemStyle: { color: '#2980b9' } }
+            },
+            {
+                name: 'Ripening',
+                type: 'bar',
+                stack: 'total',
+                data: ripenCounts.map((v, i) => ({
+                    value: v,
+                    itemStyle: {
+                        color: activeMonth && MONTHS[i] !== activeMonth ? '#b3d49e' : '#6b9e3e',
+                        opacity: activeMonth && MONTHS[i] !== activeMonth ? 0.4 : 1
+                    }
+                })),
+                emphasis: { itemStyle: { color: '#4a7e1e' } }
+            }
+        ]
+    }, true);
+
+    ecCalendar.on('click', params => {
+        const clickedMonth = MONTHS[MONTH_SHORT.indexOf(params.name)];
+        if (!clickedMonth) return;
+        filters.month = filters.month === clickedMonth ? null : clickedMonth;
+        refreshAll();
+    });
+}
+
+// ─────────────────────────────────────────────
+// CHART: Plant Type × Growth Rate (stacked horizontal bar)
+// ─────────────────────────────────────────────
+function renderGrowth(data) {
+    if (!ecGrowth) { ecGrowth = echarts.init(document.getElementById('chartGrowth'), null, {renderer:'svg'}); }
+
+    // Normalize type: take first word(s) before digit or comma
+    const typeCount = {};
+    const growthRates = ['slow','medium','fast','unknown'];
+    const growthColors = { slow: '#8ecae6', medium: '#6b9e3e', fast: '#f9a825', unknown: '#ccc' };
+
+    data.forEach(p => {
+        const rawType = (p.Type || 'Unknown').trim();
+        const shortType = rawType.length > 20 ? rawType.slice(0, 20) + '…' : rawType;
+        const gr = (p.GrowthRate || 'unknown').trim().toLowerCase();
+        const grKey = growthRates.includes(gr) ? gr : 'unknown';
+
+        if (!typeCount[shortType]) typeCount[shortType] = { slow:0, medium:0, fast:0, unknown:0, total:0 };
+        typeCount[shortType][grKey]++;
+        typeCount[shortType].total++;
+    });
+
+    const sorted = Object.entries(typeCount).sort((a,b) => b[1].total - a[1].total).slice(0, 12);
+    const categories = sorted.map(([k]) => k);
+
+    const series = growthRates.map(gr => ({
+        name: gr.charAt(0).toUpperCase() + gr.slice(1),
+        type: 'bar',
+        stack: 'total',
+        data: sorted.map(([,v]) => v[gr]),
+        itemStyle: { color: growthColors[gr] },
+        emphasis: { focus: 'series' }
+    }));
+
+    ecGrowth.off('click');
+    ecGrowth.setOption({
+        tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' } },
+        legend: { top: 0, data: ['Slow','Medium','Fast','Unknown'], textStyle: { fontSize: 10 } },
+        grid: { left: '30%', right: '5%', top: '14%', bottom: '5%' },
+        xAxis: { type: 'value' },
+        yAxis: {
+            type: 'category',
+            data: categories,
+            axisLabel: { fontSize: 10, width: 100, overflow: 'truncate' }
+        },
+        series
+    }, true);
+
+    ecGrowth.on('click', params => {
+        const clickedType = categories[params.componentIndex !== undefined ? params.componentIndex : params.dataIndex];
+        // Use the original type name from data
+        const fullType = data.find(p => p.Type && (p.Type.startsWith(params.name) || p.Type === params.name));
+        if (fullType) {
+            filters.type = filters.type === fullType.Type ? null : fullType.Type;
+        } else {
+            // try to match by category label
+            const match = data.find(p => {
+                const t = (p.Type || '').trim();
+                const s = t.length > 20 ? t.slice(0, 20) + '…' : t;
+                return s === params.name;
+            });
+            if (match) filters.type = filters.type === match.Type ? null : match.Type;
+        }
+        refreshAll();
+    });
+}
+
+// ─────────────────────────────────────────────
+// CHART: Pollinator Support (horizontal bar)
+// ─────────────────────────────────────────────
+function renderPollinators(data) {
+    if (!ecPollinators) { ecPollinators = echarts.init(document.getElementById('chartPollinators'), null, {renderer:'svg'}); }
+
+    const counts = {};
+    data.forEach(p => {
+        parsePollinators(p.Pollinators || '').forEach(poll => {
+            counts[poll] = (counts[poll] || 0) + 1;
+        });
+    });
+
+    const sorted = Object.entries(counts).sort((a,b) => b[1]-a[1]).slice(0, 15);
+    const names  = sorted.map(([k]) => k);
+    const values = sorted.map(([,v]) => v);
+
+    const activePoll = filters.pollinator;
+
+    ecPollinators.off('click');
+    ecPollinators.setOption({
+        tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' } },
+        grid: { left: '22%', right: '8%', top: '5%', bottom: '8%' },
+        xAxis: { type: 'value', name: 'Plants' },
+        yAxis: {
+            type: 'category',
+            data: names,
+            axisLabel: { fontSize: 11 }
+        },
+        series: [{
+            type: 'bar',
+            data: values.map((v, i) => ({
+                value: v,
+                itemStyle: {
+                    color: activePoll && names[i] !== activePoll
+                        ? '#ccc'
+                        : ZONE_COLORS[i % ZONE_COLORS.length],
+                    opacity: activePoll && names[i] !== activePoll ? 0.4 : 1
+                }
+            })),
+            emphasis: { itemStyle: { opacity: 1 } },
+            label: { show: true, position: 'right', fontSize: 10 }
+        }]
+    }, true);
+
+    ecPollinators.on('click', params => {
+        const p = names[params.dataIndex];
+        filters.pollinator = filters.pollinator === p ? null : p;
+        refreshAll();
+    });
+}
+
+// ─────────────────────────────────────────────
+// TABLE: Top Picks
+// ─────────────────────────────────────────────
+function renderTopPicks(data) {
+    const sorted = [...data].sort((a,b) => utilityScore(b) - utilityScore(a)).slice(0, 50);
+    const maxScore = Math.max(...sorted.map(utilityScore), 1);
+
+    const tbody = document.getElementById('topPicksBody');
+    if (sorted.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="10" style="text-align:center;color:#bbb;padding:2rem">
+            <i class="fas fa-seedling" style="font-size:2rem;display:block;margin-bottom:0.5rem"></i>
+            No plants match current filters</td></tr>`;
+        return;
+    }
+
+    const ratingDots = (score, max=5, color='#6b9e3e') => {
+        let h = '';
+        for (let i = 1; i <= max; i++) {
+            h += `<span class="rating-dot" style="background:${i<=score ? color : '#e0e0e0'}"></span>`;
+        }
+        return h;
+    };
+
+    tbody.innerHTML = sorted.map((p, i) => {
+        const score = utilityScore(p);
+        const pct   = Math.round((score / maxScore) * 100);
+        const zr    = plantZoneRange(p);
+        const zoneStr = zr ? `${zr[0]}–${zr[1]}` : '—';
+        const name  = p.CommonName || `${p.Genus} ${p.Species}`;
+        const sp    = `${p.Genus} ${p.Species}`.trim();
+        const ed    = parseInt(p.Edibility) || 0;
+        const med   = parseInt(p.Medicinal) || 0;
+        const oth   = parseInt(p.OtherUses) || 0;
+
+        return `<tr>
+            <td style="color:#aaa;font-size:0.75rem">${i+1}</td>
+            <td style="font-weight:600;color:var(--primary)">${name}</td>
+            <td><div style="font-size:0.78rem;color:#888">${p.Family}</div><em style="font-size:0.8rem">${sp}</em></td>
+            <td style="font-size:0.8rem">${p.Type || '—'}</td>
+            <td><span style="background:#e8f5e9;color:#2e7d32;padding:0.2rem 0.45rem;border-radius:4px;font-size:0.78rem;font-weight:600">${zoneStr}</span></td>
+            <td>${ratingDots(ed, 5, '#f9a825')}</td>
+            <td>${ratingDots(med, 5, '#7b1fa2')}</td>
+            <td>${ratingDots(oth, 5, '#1565c0')}</td>
+            <td>
+                <div class="score-bar">
+                    <div class="score-fill" style="width:${pct}%"></div>
+                    <span style="font-size:0.78rem;color:#666;margin-left:4px">${score}</span>
+                </div>
+            </td>
+            <td><a class="pfaf-link" href="${p.PFAF || '#'}" target="_blank" title="PFAF entry"><i class="fas fa-external-link-alt"></i></a></td>
+        </tr>`;
+    }).join('');
+}
+
+// ─────────────────────────────────────────────
+// MASTER REFRESH
+// ─────────────────────────────────────────────
+function refreshAll() {
+    const data = getFilteredData();
+    updateStats(data);
+    updateChips();
+    renderTypeMap(data);
+    renderFamilies(data);
+    renderScatter(data);
+    renderCalendar(data);
+    renderGrowth(data);
+    renderPollinators(data);
+    renderTopPicks(data);
+    updateZoneBar(filters.zone);
+}
+
+// ─────────────────────────────────────────────
+// CHART: Plant Type Treemap
+// ─────────────────────────────────────────────
+function renderTypeMap(data) {
+    if (!ecTypeMap) { ecTypeMap = echarts.init(document.getElementById('chartTypeMap'), null, {renderer:'svg'}); }
+
+    // Broad category classifier — maps keywords in the Type string to a group
+    const GROUPS = [
+        { name: 'Deciduous Tree',  keywords: ['deciduous tree'],  color: '#4a7c59' },
+        { name: 'Evergreen Tree',  keywords: ['evergreen tree'],  color: '#2d5a27' },
+        { name: 'Deciduous Shrub', keywords: ['deciduous shrub'], color: '#76b041' },
+        { name: 'Evergreen Shrub', keywords: ['evergreen shrub'], color: '#5a9e34' },
+        { name: 'Climber / Vine',  keywords: ['climber', 'vine'], color: '#9b59b6' },
+        { name: 'Perennial',       keywords: ['perennial'],       color: '#e67e22' },
+        { name: 'Annual / Biennial', keywords: ['annual', 'biennial'], color: '#f1c40f' },
+        { name: 'Bulb / Corm',     keywords: ['bulb', 'corm', 'rhizome'], color: '#e91e63' },
+        { name: 'Grass / Sedge',   keywords: ['grass', 'sedge', 'rush', 'bamboo'], color: '#80cbc4' },
+        { name: 'Fern / Moss',     keywords: ['fern', 'moss', 'liverwort'], color: '#4db6ac' },
+        { name: 'Aquatic',         keywords: ['aquatic', 'water'], color: '#42a5f5' },
+        { name: 'Cactus / Succulent', keywords: ['cactus', 'succulent', 'xerophyte'], color: '#ef5350' },
+        { name: 'Palm / Cycad',    keywords: ['palm', 'cycad'],   color: '#ab47bc' },
+        { name: 'Other / Unknown', keywords: [],                  color: '#90a4ae' },
+    ];
+
+    function classifyType(typeStr) {
+        const t = (typeStr || '').toLowerCase();
+        for (const g of GROUPS) {
+            if (g.keywords.some(k => t.includes(k))) return g;
+        }
+        return GROUPS[GROUPS.length - 1];
+    }
+
+    // Count all unique types
+    const typeCounts = {};
+    data.forEach(p => {
+        const t = (p.Type || 'Unknown').trim();
+        typeCounts[t] = (typeCounts[t] || 0) + 1;
+    });
+
+    // Build treemap children nested under group
+    const groupMap = {};
+    GROUPS.forEach(g => { groupMap[g.name] = { name: g.name, itemStyle: { color: g.color }, children: [], _color: g.color }; });
+
+    Object.entries(typeCounts).forEach(([type, count]) => {
+        const g = classifyType(type);
+        groupMap[g.name].children.push({
+            name: type,
+            value: count,
+            _rawType: type,
+            itemStyle: {
+                color: g.color,
+                opacity: filters.type && filters.type !== type ? 0.35 : 1
+            },
+            label: {
+                color: '#fff',
+                fontWeight: filters.type === type ? 'bold' : 'normal',
+                borderColor: filters.type === type ? '#fff' : 'transparent',
+                borderWidth: filters.type === type ? 2 : 0
+            }
+        });
+    });
+
+    // Only include groups that have children in filtered data
+    const treeData = Object.values(groupMap)
+        .filter(g => g.children.length > 0)
+        .map(g => ({
+            name: g.name,
+            itemStyle: { color: g._color },
+            children: g.children.sort((a,b) => b.value - a.value)
+        }));
+
+    ecTypeMap.off('click');
+    ecTypeMap.setOption({
+        tooltip: {
+            formatter: p => {
+                if (!p.data.value) return p.name; // group header
+                const pct = data.length > 0 ? ((p.data.value / data.length) * 100).toFixed(1) : 0;
+                return `<b>${p.name}</b><br/>${p.data.value.toLocaleString()} plants (${pct}%)`;
+            }
+        },
+        series: [{
+            type: 'treemap',
+            data: treeData,
+            width: '100%',
+            height: '100%',
+            roam: false,
+            nodeClick: false,
+            drillDownIcon: '',
+            breadcrumb: { show: true, height: 22, itemStyle: { color: 'var(--primary)' } },
+            levels: [
+                {
+                    // Group level
+                    itemStyle: { borderWidth: 3, borderColor: '#fff', gapWidth: 3 },
+                    upperLabel: {
+                        show: true,
+                        height: 24,
+                        color: '#fff',
+                        fontWeight: 'bold',
+                        fontSize: 11,
+                        backgroundColor: 'rgba(0,0,0,0.35)',
+                        padding: [4, 6]
+                    }
+                },
+                {
+                    // Leaf level
+                    itemStyle: { borderWidth: 1, borderColor: 'rgba(255,255,255,0.3)', gapWidth: 1 },
+                    label: {
+                        show: true,
+                        fontSize: 11,
+                        color: '#fff',
+                        overflow: 'truncate',
+                        ellipsis: true,
+                        padding: [4, 6]
+                    },
+                    emphasis: {
+                        label: { fontSize: 13, fontWeight: 'bold' },
+                        itemStyle: { shadowBlur: 10, shadowColor: 'rgba(0,0,0,0.4)' }
+                    }
+                }
+            ]
+        }]
+    }, true);
+
+    ecTypeMap.on('click', params => {
+        if (!params.data || !params.data._rawType) return; // clicked a group
+        const clicked = params.data._rawType;
+        filters.type = filters.type === clicked ? null : clicked;
+        document.getElementById('typeFilter').value = filters.type || '';
+        refreshAll();
+    });
+}
+
+// ─────────────────────────────────────────────
+// ZONE BAR
+// ─────────────────────────────────────────────
+function buildZoneBar() {
+    const bar = document.getElementById('zoneBar');
+    bar.innerHTML = '';
+    for (let z = 1; z <= 13; z++) {
+        const seg = document.createElement('div');
+        seg.className = 'zone-seg';
+        seg.id = `zone-seg-${z}`;
+        seg.title = `Zone ${z}`;
+        seg.textContent = z;
+        seg.style.background = ZONE_COLORS[z - 1];
+        seg.addEventListener('click', () => {
+            const newZ = (filters.zone === z) ? null : z;
+            filters.zone = newZ;
+            document.getElementById('zoneValLabel').textContent = newZ ? `Zone ${newZ}` : '';
+            refreshAll();
+        });
+        bar.appendChild(seg);
+    }
+}
+
+function updateZoneBar(activeZ) {
+    for (let z = 1; z <= 13; z++) {
+        const seg = document.getElementById(`zone-seg-${z}`);
+        if (!seg) continue;
+        seg.className = 'zone-seg';
+        if (activeZ !== null) {
+            if (z === activeZ) seg.classList.add('active');
+            else seg.classList.add('dimmed');
+        }
+    }
+}
+
+// ─────────────────────────────────────────────
+// ZIP LOOKUP
+// ─────────────────────────────────────────────
+function lookupZip() {
+    const zip = document.getElementById('zipInput').value.trim().padStart(5, '0');
+    const fb  = document.getElementById('zoneFeedback');
+
+    if (!zip || zip === '00000') {
+        fb.textContent = 'Enter a 5-digit ZIP code.';
+        fb.className = 'zone-feedback error';
+        return;
+    }
+
+    const entry = zipMap.get(zip);
+    if (!entry) {
+        fb.textContent = `ZIP ${zip} not found in database.`;
+        fb.className = 'zone-feedback error';
+        return;
+    }
+
+    // Parse zone number (e.g. "7b" → 7, "10a" → 10)
+    const zoneNum = parseInt(entry.zone);
+    filters.zone = zoneNum;
+    document.getElementById('zoneValLabel').textContent = `Zone ${zoneNum} (${entry.zone})`;
+    fb.textContent = `✓ ${entry.zonetitle} — ${entry.trange}°F`;
+    fb.className = 'zone-feedback';
+    refreshAll();
+}
+
+// ─────────────────────────────────────────────
+// TYPE DROPDOWN population
+// ─────────────────────────────────────────────
+function populateTypeDropdown() {
+    const types = new Set(allPlants.map(p => p.Type).filter(Boolean));
+    const sel = document.getElementById('typeFilter');
+    [...types].sort().forEach(t => {
+        const opt = document.createElement('option');
+        opt.value = t;
+        opt.textContent = t.length > 28 ? t.slice(0, 28) + '…' : t;
+        sel.appendChild(opt);
+    });
+}
+
+// ─────────────────────────────────────────────
+// FULLSCREEN
+// ─────────────────────────────────────────────
+function fullscreenCard(btn) {
+    const card = btn.closest('.chart-card');
+    if (card.requestFullscreen) card.requestFullscreen();
+    else if (card.webkitRequestFullscreen) card.webkitRequestFullscreen();
+}
+
+// ─────────────────────────────────────────────
+// FILTER PANEL TOGGLE
+// ─────────────────────────────────────────────
+function toggleFilterPanel() {
+    const panel = document.getElementById('filterPanel');
+    panel.classList.toggle('collapsed');
+    // trigger ECharts resize after transition
+    setTimeout(() => {
+        [ecFamilies, ecScatter, ecCalendar, ecGrowth, ecPollinators, ecTypeMap].forEach(ec => {
+            if (ec) ec.resize();
+        });
+    }, 320);
+}
+
+// ─────────────────────────────────────────────
+// ECHARTS RESIZE on window change
+// ─────────────────────────────────────────────
+window.addEventListener('resize', () => {
+    [ecFamilies, ecScatter, ecCalendar, ecGrowth, ecPollinators, ecTypeMap].forEach(ec => {
+        if (ec) ec.resize();
+    });
+});
+
+// ─────────────────────────────────────────────
+// DATA LOADING
+// ─────────────────────────────────────────────
+async function loadData() {
+    const [plantsResult, zipResult] = await Promise.all([
+        new Promise(resolve => Papa.parse('plant_data.csv', {
+            download: true, header: true, skipEmptyLines: true, complete: r => resolve(r)
+        })),
+        new Promise(resolve => Papa.parse('zip_zone.csv', {
+            download: true, header: true, skipEmptyLines: true, complete: r => resolve(r)
+        }))
+    ]);
+
+    allPlants = plantsResult.data;
+
+    zipResult.data.forEach(row => {
+        if (row.zipcode) zipMap.set(row.zipcode.padStart(5,'0'), row);
+    });
+
+    populateTypeDropdown();
+    buildZoneBar();
+    refreshAll();
+
+    document.getElementById('loader').style.display = 'none';
+}
+
+// Sync badges on slider input
+document.getElementById('edibilitySlider').addEventListener('input', function() {
+    document.getElementById('edBadge').textContent = this.value;
+});
+document.getElementById('medicinalSlider').addEventListener('input', function() {
+    document.getElementById('medBadge').textContent = this.value;
+});
+
+// Start
+loadData();
+</script>
+</body>
+</html>
