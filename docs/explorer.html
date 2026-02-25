@@ -15,7 +15,7 @@
             --light: #f5f5f5;
             --white: #ffffff;
             --filter-width: 300px;
-            --header-h: 64px;
+            --header-h: 38px;
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -36,25 +36,26 @@
             height: var(--header-h);
             display: flex;
             align-items: center;
-            padding: 0 1.5rem;
-            gap: 1rem;
+            padding: 0 0.75rem;
+            gap: 0.5rem;
             box-shadow: 0 2px 8px rgba(0,0,0,0.25);
             flex-shrink: 0;
             z-index: 100;
         }
 
         header h1 {
-            font-size: 1.4rem;
+            font-size: 0.95rem;
             display: flex;
             align-items: center;
-            gap: 0.6rem;
+            gap: 0.4rem;
             flex: 1;
+            white-space: nowrap;
         }
 
         header h1 .badge {
-            font-size: 0.7rem;
-            background: rgba(255,255,255,0.25);
-            padding: 0.2rem 0.5rem;
+            font-size: 0.6rem;
+            background: rgba(255,255,255,0.2);
+            padding: 0.1rem 0.4rem;
             border-radius: 20px;
             font-weight: 400;
             letter-spacing: 0.5px;
@@ -62,35 +63,36 @@
 
         .header-links {
             display: flex;
-            gap: 0.75rem;
+            gap: 0.35rem;
             align-items: center;
         }
 
         .header-link {
             color: white;
             text-decoration: none;
-            padding: 0.4rem 0.85rem;
-            background: rgba(255,255,255,0.15);
-            border-radius: 6px;
-            font-size: 0.85rem;
+            padding: 0.2rem 0.55rem;
+            background: rgba(255,255,255,0.12);
+            border-radius: 4px;
+            font-size: 0.72rem;
             transition: background 0.2s;
             display: flex;
             align-items: center;
-            gap: 0.4rem;
+            gap: 0.3rem;
             white-space: nowrap;
         }
 
         .header-link:hover { background: rgba(255,255,255,0.28); }
-        .header-link.v2 { opacity: 0.75; font-size: 0.8rem; }
+        .header-link.v2 { opacity: 0.75; font-size: 0.68rem; }
+        .header-link.export-btn { background: rgba(255,255,255,0.22); font-weight: 600; }
 
         /* ── Page body ── */
         .page-body {
             flex: 1;
             display: flex;
-            gap: 1.25rem;
-            padding: 1.25rem;
             align-items: flex-start;
-            overflow: hidden;
+            height: calc(100vh - var(--header-h));
+            overflow-y: auto;
+            overflow-x: hidden;
         }
 
         /* ── Main area ── */
@@ -100,13 +102,18 @@
             display: flex;
             flex-direction: column;
             gap: 1.25rem;
+            padding: 1.25rem;
         }
+
+        .page-body::-webkit-scrollbar { width: 6px; }
+        .page-body::-webkit-scrollbar-track { background: transparent; }
+        .page-body::-webkit-scrollbar-thumb { background: var(--accent); border-radius: 3px; }
 
         /* ── Stats row ── */
         .stats-row {
             display: grid;
             grid-template-columns: repeat(4, 1fr);
-            gap: 1rem;
+            gap: 0.85rem;
         }
 
         .stat-card {
@@ -143,16 +150,23 @@
         .charts-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 1.25rem;
+            gap: 0.85rem;
+            align-items: start;
+        }
+
+        /* ensure paired rows match height */
+        .charts-grid .chart-card:not(.full-width) {
+            height: 100%;
         }
 
         .chart-card {
             background: white;
-            border-radius: 12px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+            border-radius: 10px;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.08), 0 4px 12px rgba(0,0,0,0.06);
             overflow: hidden;
             display: flex;
             flex-direction: column;
+            border-top: 3px solid var(--secondary);
         }
 
         .chart-card.full-width {
@@ -232,15 +246,11 @@
             width: var(--filter-width);
             flex-shrink: 0;
             background: white;
-            border-radius: 12px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-            position: sticky;
-            top: 1.25rem;
-            max-height: calc(100vh - var(--header-h) - 2.5rem);
-            overflow: hidden;
+            border-right: 1px solid #e2ead8;
             display: flex;
             flex-direction: column;
-            transition: width 0.3s ease;
+            transition: width 0.28s ease;
+            box-shadow: 2px 0 8px rgba(0,0,0,0.06);
         }
 
         .filter-panel.collapsed {
@@ -265,35 +275,98 @@
         }
 
         .filter-toggle .toggle-icon {
-            transition: transform 0.3s;
+            transition: transform 0.28s;
             flex-shrink: 0;
         }
 
+        /* When collapsed: arrow points RIGHT (→ expand) */
         .filter-panel.collapsed .filter-toggle .toggle-icon {
             transform: rotate(180deg);
         }
 
         .filter-toggle .toggle-label {
-            transition: opacity 0.2s;
+            transition: opacity 0.15s;
         }
 
         .filter-panel.collapsed .filter-toggle .toggle-label {
             opacity: 0;
+            pointer-events: none;
         }
 
         .filter-body {
-            flex: 1;
-            overflow-y: auto;
             padding: 1rem;
             display: flex;
             flex-direction: column;
             gap: 1.1rem;
-            transition: opacity 0.2s;
+            transition: opacity 0.15s;
         }
 
         .filter-panel.collapsed .filter-body {
             opacity: 0;
             pointer-events: none;
+        }
+
+        /* ── Mobile hamburger ── */
+        .mob-hamburger {
+            display: none;
+            background: rgba(255,255,255,0.15);
+            border: none;
+            color: white;
+            width: 38px;
+            height: 38px;
+            border-radius: 7px;
+            cursor: pointer;
+            font-size: 1.1rem;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .mob-hamburger:hover { background: rgba(255,255,255,0.28); }
+
+        /* Mobile overlay */
+        .mob-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.45);
+            z-index: 200;
+        }
+
+        .mob-overlay.visible { display: block; }
+
+        /* Mobile drawer */
+        @media (max-width: 900px) {
+            .mob-hamburger { display: flex; }
+
+            .filter-panel {
+                position: fixed;
+                left: 0;
+                top: var(--header-h);
+                height: calc(100vh - var(--header-h));
+                z-index: 210;
+                transform: translateX(-100%);
+                transition: transform 0.28s ease, width 0.01s;
+                width: var(--filter-width) !important;
+                border-right: none;
+                box-shadow: 4px 0 24px rgba(0,0,0,0.2);
+            }
+
+            .filter-panel.mob-open {
+                transform: translateX(0);
+            }
+
+            .page-body { height: calc(100vh - var(--header-h)); }
+            .main-area { padding: 1rem; }
+            .stats-row { grid-template-columns: repeat(2, 1fr); }
+            .charts-grid { grid-template-columns: 1fr; }
+        }
+
+        @media (max-width: 600px) {
+            .main-area { padding: 0.75rem; }
+            .stats-row { grid-template-columns: 1fr 1fr; }
+            header h1 .badge { display: none; }
+            .header-link.v2 { display: none; }
         }
 
         .filter-section-heading {
@@ -557,6 +630,52 @@
             margin-right: 1px;
         }
 
+        /* ── Spiral tooltip ── */
+        .spiral-tooltip {
+            display: none;
+            position: absolute;
+            background: white;
+            border: 1px solid #e0ead6;
+            border-left: 4px solid var(--secondary);
+            border-radius: 8px;
+            padding: 0.55rem 0.8rem;
+            font-size: 0.8rem;
+            pointer-events: none;
+            box-shadow: 0 6px 20px rgba(0,0,0,0.15);
+            z-index: 20;
+            max-width: 170px;
+            line-height: 1.55;
+            backdrop-filter: blur(4px);
+        }
+
+        /* spiral legend */
+        .spiral-legend {
+            position: absolute;
+            bottom: 0.5rem;
+            right: 0.75rem;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: flex-end;
+            gap: 0.25rem 0.5rem;
+            max-width: 260px;
+            pointer-events: none;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 0.3rem;
+            font-size: 0.7rem;
+            color: #555;
+        }
+
+        .legend-dot {
+            width: 9px;
+            height: 9px;
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+
         /* scrollbar styling */
         .filter-body::-webkit-scrollbar { width: 5px; }
         .filter-body::-webkit-scrollbar-track { background: transparent; }
@@ -566,21 +685,13 @@
         .table-scroll::-webkit-scrollbar-track { background: transparent; }
         .table-scroll::-webkit-scrollbar-thumb { background: var(--accent); border-radius: 3px; }
 
-        /* responsive */
-        @media (max-width: 1200px) {
-            .stats-row { grid-template-columns: repeat(2, 1fr); }
-            .charts-grid { grid-template-columns: 1fr; }
-        }
-
-        @media (max-width: 900px) {
-            .filter-panel { display: none; }
+        /* responsive — desktop breakpoint */
+        @media (max-width: 1300px) {
             .stats-row { grid-template-columns: repeat(2, 1fr); }
         }
 
-        @media (max-width: 600px) {
-            .page-body { padding: 0.75rem; }
-            .stats-row { grid-template-columns: 1fr 1fr; }
-            header h1 .badge { display: none; }
+        @media (max-width: 1100px) {
+            :root { --filter-width: 260px; }
         }
     </style>
 </head>
@@ -592,14 +703,21 @@
     <p>Loading plant data…</p>
 </div>
 
+<!-- Mobile overlay -->
+<div class="mob-overlay" id="mobOverlay" onclick="closeMobileFilter()"></div>
+
 <!-- Header -->
 <header>
+    <button class="mob-hamburger" id="mobHamburger" onclick="toggleFilterPanel()" title="Filters">
+        <i class="fas fa-bars"></i>
+    </button>
     <h1>
         <i class="fas fa-leaf"></i>
         PLANTalytics Explorer
         <span class="badge">Apache ECharts · Live CSV</span>
     </h1>
     <div class="header-links">
+        <a href="#" class="header-link export-btn" onclick="exportFilteredCSV(); return false;" title="Download filtered data as CSV"><i class="fas fa-download"></i> Export CSV</a>
         <a href="index.html" class="header-link"><i class="fas fa-home"></i> Home</a>
         <a href="dashboard.html" class="header-link"><i class="fas fa-chart-bar"></i> Visual Explorer</a>
         <a href="advanced-dashboard.html" class="header-link v2" title="Power BI embedded report"><i class="fas fa-cube"></i> Power BI</a>
@@ -610,173 +728,11 @@
 <!-- Page body -->
 <div class="page-body">
 
-    <!-- Main area -->
-    <div class="main-area">
-
-        <!-- Stats -->
-        <div class="stats-row">
-            <div class="stat-card">
-                <div class="stat-icon green"><i class="fas fa-seedling"></i></div>
-                <div class="stat-info">
-                    <div class="stat-value" id="statTotal">—</div>
-                    <div class="stat-label">Matching Plants</div>
-                </div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-icon orange"><i class="fas fa-apple-alt"></i></div>
-                <div class="stat-info">
-                    <div class="stat-value" id="statEdible">—</div>
-                    <div class="stat-label">Edible Species (≥3)</div>
-                </div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-icon purple"><i class="fas fa-mortar-pestle"></i></div>
-                <div class="stat-info">
-                    <div class="stat-value" id="statMedicinal">—</div>
-                    <div class="stat-label">Medicinal Species (≥3)</div>
-                </div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-icon blue"><i class="fas fa-bug"></i></div>
-                <div class="stat-info">
-                    <div class="stat-value" id="statPollinators">—</div>
-                    <div class="stat-label">Support Pollinators</div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Charts -->
-        <div class="charts-grid">
-
-            <!-- Chart 1: Plant Type Treemap — full width -->
-            <div class="chart-card full-width">
-                <div class="card-header">
-                    <div class="card-title"><i class="fas fa-th-large"></i> Plant Type Landscape</div>
-                    <div class="card-actions">
-                        <button class="icon-btn" title="Clear type filter" onclick="clearFilter('type')"><i class="fas fa-times"></i></button>
-                        <button class="icon-btn" title="Fullscreen" onclick="fullscreenCard(this)"><i class="fas fa-expand"></i></button>
-                    </div>
-                </div>
-                <div class="card-body">
-                    <div class="chart-instance tall" id="chartTypeMap" style="height:400px"></div>
-                </div>
-                <div class="card-footer"><i class="fas fa-mouse-pointer"></i> Every plant type in the dataset — tile size = count · click to filter · grouped by growth form</div>
-            </div>
-
-            <!-- Chart 2: Top Families Donut -->
-            <div class="chart-card">
-                <div class="card-header">
-                    <div class="card-title"><i class="fas fa-chart-pie"></i> Top Plant Families</div>
-                    <div class="card-actions">
-                        <button class="icon-btn" title="Clear family filter" onclick="clearFilter('family')"><i class="fas fa-times"></i></button>
-                        <button class="icon-btn" title="Fullscreen" onclick="fullscreenCard(this)"><i class="fas fa-expand"></i></button>
-                    </div>
-                </div>
-                <div class="card-body">
-                    <div class="chart-instance" id="chartFamilies"></div>
-                </div>
-                <div class="card-footer"><i class="fas fa-mouse-pointer"></i> Click a slice to filter all charts by family</div>
-            </div>
-
-            <!-- Chart 3: Edibility × Medicinal Scatter -->
-            <div class="chart-card">
-                <div class="card-header">
-                    <div class="card-title"><i class="fas fa-circle"></i> Edibility × Medicinal Value</div>
-                    <div class="card-actions">
-                        <button class="icon-btn" title="Fullscreen" onclick="fullscreenCard(this)"><i class="fas fa-expand"></i></button>
-                    </div>
-                </div>
-                <div class="card-body">
-                    <div class="chart-instance" id="chartScatter"></div>
-                </div>
-                <div class="card-footer"><i class="fas fa-info-circle"></i> Bubble size = OtherUses score · Top-right quadrant = highest dual-value plants</div>
-            </div>
-
-            <!-- Chart 4: Harvest Calendar -->
-            <div class="chart-card">
-                <div class="card-header">
-                    <div class="card-title"><i class="fas fa-calendar-alt"></i> Bloom &amp; Harvest Calendar</div>
-                    <div class="card-actions">
-                        <button class="icon-btn" title="Clear month filter" onclick="clearFilter('month')"><i class="fas fa-times"></i></button>
-                        <button class="icon-btn" title="Fullscreen" onclick="fullscreenCard(this)"><i class="fas fa-expand"></i></button>
-                    </div>
-                </div>
-                <div class="card-body">
-                    <div class="chart-instance" id="chartCalendar"></div>
-                </div>
-                <div class="card-footer"><i class="fas fa-mouse-pointer"></i> Click a month to filter · Blue = flowering, Green = ripening</div>
-            </div>
-
-            <!-- Chart 5: Growth Rate × Plant Type -->
-            <div class="chart-card">
-                <div class="card-header">
-                    <div class="card-title"><i class="fas fa-chart-bar"></i> Plant Type &amp; Growth Rate</div>
-                    <div class="card-actions">
-                        <button class="icon-btn" title="Clear type/growth filter" onclick="clearFilter('type'); clearFilter('growthRate')"><i class="fas fa-times"></i></button>
-                        <button class="icon-btn" title="Fullscreen" onclick="fullscreenCard(this)"><i class="fas fa-expand"></i></button>
-                    </div>
-                </div>
-                <div class="card-body">
-                    <div class="chart-instance" id="chartGrowth"></div>
-                </div>
-                <div class="card-footer"><i class="fas fa-mouse-pointer"></i> Click a bar segment to filter by plant type</div>
-            </div>
-
-            <!-- Chart 6: Pollinator Support -->
-            <div class="chart-card">
-                <div class="card-header">
-                    <div class="card-title"><i class="fas fa-bug"></i> Pollinator Support</div>
-                    <div class="card-actions">
-                        <button class="icon-btn" title="Clear pollinator filter" onclick="clearFilter('pollinator')"><i class="fas fa-times"></i></button>
-                        <button class="icon-btn" title="Fullscreen" onclick="fullscreenCard(this)"><i class="fas fa-expand"></i></button>
-                    </div>
-                </div>
-                <div class="card-body">
-                    <div class="chart-instance" id="chartPollinators"></div>
-                </div>
-                <div class="card-footer"><i class="fas fa-mouse-pointer"></i> Click a bar to filter by pollinator type</div>
-            </div>
-
-            <!-- Chart 7: Top Picks Table — full width -->
-            <div class="chart-card full-width">
-                <div class="card-header">
-                    <div class="card-title"><i class="fas fa-star"></i> Top Picks for Your Selection</div>
-                    <div class="card-actions">
-                        <button class="icon-btn" title="Fullscreen" onclick="fullscreenCard(this)"><i class="fas fa-expand"></i></button>
-                    </div>
-                </div>
-                <div class="card-body">
-                    <div class="table-scroll" id="topPicksContainer">
-                        <table class="picks-table">
-                            <thead>
-                                <tr>
-                                    <th>#</th>
-                                    <th>Common Name</th>
-                                    <th>Family / Species</th>
-                                    <th>Type</th>
-                                    <th>Zone</th>
-                                    <th>Edibility</th>
-                                    <th>Medicinal</th>
-                                    <th>Other Uses</th>
-                                    <th>Utility Score</th>
-                                    <th>Link</th>
-                                </tr>
-                            </thead>
-                            <tbody id="topPicksBody"></tbody>
-                        </table>
-                    </div>
-                </div>
-                <div class="card-footer"><i class="fas fa-info-circle"></i> Sorted by Utility Score (Edibility + Medicinal + OtherUses). Showing top 50 from filtered set.</div>
-            </div>
-
-        </div><!-- /charts-grid -->
-    </div><!-- /main-area -->
-
-    <!-- Filter Panel (right, collapsible) -->
+    <!-- Filter Panel (LEFT, collapsible) -->
     <div class="filter-panel" id="filterPanel">
 
         <button class="filter-toggle" onclick="toggleFilterPanel()">
-            <i class="fas fa-chevron-right toggle-icon"></i>
+            <i class="fas fa-chevron-left toggle-icon"></i>
             <span class="toggle-label"><i class="fas fa-sliders-h" style="margin-right:0.4rem"></i>Filters</span>
         </button>
 
@@ -888,6 +844,174 @@
         </div><!-- /filter-body -->
     </div><!-- /filter-panel -->
 
+    <!-- Main area -->
+    <div class="main-area">
+
+        <!-- Stats -->
+        <div class="stats-row">
+            <div class="stat-card">
+                <div class="stat-icon green"><i class="fas fa-seedling"></i></div>
+                <div class="stat-info">
+                    <div class="stat-value" id="statTotal">—</div>
+                    <div class="stat-label">Matching Plants</div>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon orange"><i class="fas fa-apple-alt"></i></div>
+                <div class="stat-info">
+                    <div class="stat-value" id="statEdible">—</div>
+                    <div class="stat-label">Edible Species (≥3)</div>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon purple"><i class="fas fa-mortar-pestle"></i></div>
+                <div class="stat-info">
+                    <div class="stat-value" id="statMedicinal">—</div>
+                    <div class="stat-label">Medicinal Species (≥3)</div>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon blue"><i class="fas fa-bug"></i></div>
+                <div class="stat-info">
+                    <div class="stat-value" id="statPollinators">—</div>
+                    <div class="stat-label">Support Pollinators</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Charts -->
+        <div class="charts-grid">
+
+            <!-- Chart 1: Plant Type Treemap — full width -->
+            <div class="chart-card full-width">
+                <div class="card-header">
+                    <div class="card-title"><i class="fas fa-th-large"></i> Plant Type Landscape</div>
+                    <div class="card-actions">
+                        <button class="icon-btn" title="Clear type filter" onclick="clearFilter('type')"><i class="fas fa-times"></i></button>
+                        <button class="icon-btn" title="Fullscreen" onclick="fullscreenCard(this)"><i class="fas fa-expand"></i></button>
+                    </div>
+                </div>
+                <div class="card-body" style="padding:0">
+                    <div id="chartTypeMap" style="height:440px;position:relative;overflow:hidden;background:radial-gradient(ellipse at center,#f0f7e8 0%,#e6eed8 100%)">
+                        <canvas id="spiralCanvas" style="display:block;width:100%;height:100%;cursor:default"></canvas>
+                        <div class="spiral-tooltip" id="spiralTooltip"></div>
+                        <div class="spiral-legend" id="spiralLegend"></div>
+                    </div>
+                </div>
+                <div class="card-footer"><i class="fas fa-mouse-pointer"></i> Phyllotaxis spiral — every plant type · bubble size = count · photos from PFAF · click to filter</div>
+            </div>
+
+            <!-- Chart 2: Top Families Donut -->
+            <div class="chart-card">
+                <div class="card-header">
+                    <div class="card-title"><i class="fas fa-chart-pie"></i> Top Plant Families</div>
+                    <div class="card-actions">
+                        <button class="icon-btn" title="Clear family filter" onclick="clearFilter('family')"><i class="fas fa-times"></i></button>
+                        <button class="icon-btn" title="Fullscreen" onclick="fullscreenCard(this)"><i class="fas fa-expand"></i></button>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="chart-instance" id="chartFamilies"></div>
+                </div>
+                <div class="card-footer"><i class="fas fa-mouse-pointer"></i> Click a slice to filter all charts by family</div>
+            </div>
+
+            <!-- Chart 3: Edibility × Medicinal Scatter -->
+            <div class="chart-card">
+                <div class="card-header">
+                    <div class="card-title"><i class="fas fa-circle"></i> Edibility × Medicinal Value</div>
+                    <div class="card-actions">
+                        <button class="icon-btn" title="Fullscreen" onclick="fullscreenCard(this)"><i class="fas fa-expand"></i></button>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="chart-instance" id="chartScatter"></div>
+                </div>
+                <div class="card-footer"><i class="fas fa-info-circle"></i> Bubble size = OtherUses score · Top-right quadrant = highest dual-value plants</div>
+            </div>
+
+            <!-- Chart 4: Harvest Calendar -->
+            <div class="chart-card">
+                <div class="card-header">
+                    <div class="card-title"><i class="fas fa-calendar-alt"></i> Bloom &amp; Harvest Calendar</div>
+                    <div class="card-actions">
+                        <button class="icon-btn" title="Clear month filter" onclick="clearFilter('month')"><i class="fas fa-times"></i></button>
+                        <button class="icon-btn" title="Fullscreen" onclick="fullscreenCard(this)"><i class="fas fa-expand"></i></button>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="chart-instance" id="chartCalendar"></div>
+                </div>
+                <div class="card-footer"><i class="fas fa-mouse-pointer"></i> Click a month to filter · Blue = flowering, Green = ripening</div>
+            </div>
+
+            <!-- Chart 5: Growth Rate × Plant Type -->
+            <div class="chart-card">
+                <div class="card-header">
+                    <div class="card-title"><i class="fas fa-chart-bar"></i> Plant Type &amp; Growth Rate</div>
+                    <div class="card-actions">
+                        <button class="icon-btn" title="Clear type/growth filter" onclick="clearFilter('type'); clearFilter('growthRate')"><i class="fas fa-times"></i></button>
+                        <button class="icon-btn" title="Fullscreen" onclick="fullscreenCard(this)"><i class="fas fa-expand"></i></button>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="chart-instance" id="chartGrowth"></div>
+                </div>
+                <div class="card-footer"><i class="fas fa-mouse-pointer"></i> Click a bar segment to filter by plant type</div>
+            </div>
+
+            <!-- Chart 6: Pollinator Support — full width so grid has no orphan gap -->
+            <div class="chart-card full-width">
+                <div class="card-header">
+                    <div class="card-title"><i class="fas fa-bug"></i> Pollinator Support</div>
+                    <div class="card-actions">
+                        <button class="icon-btn" title="Clear pollinator filter" onclick="clearFilter('pollinator')"><i class="fas fa-times"></i></button>
+                        <button class="icon-btn" title="Fullscreen" onclick="fullscreenCard(this)"><i class="fas fa-expand"></i></button>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="chart-instance" id="chartPollinators" style="height:280px"></div>
+                </div>
+                <div class="card-footer"><i class="fas fa-mouse-pointer"></i> Click a bar to filter by pollinator type</div>
+            </div>
+
+            <!-- Chart 7: Top Picks Table — full width -->
+            <div class="chart-card full-width">
+                <div class="card-header">
+                    <div class="card-title"><i class="fas fa-star"></i> Top Picks for Your Selection</div>
+                    <div class="card-actions">
+                        <button class="icon-btn" title="Fullscreen" onclick="fullscreenCard(this)"><i class="fas fa-expand"></i></button>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="table-scroll" id="topPicksContainer">
+                        <table class="picks-table">
+                            <thead>
+                                <tr>
+                                    <th>#</th>
+                                    <th>Common Name</th>
+                                    <th>Family / Species</th>
+                                    <th>Type</th>
+                                    <th>Zone</th>
+                                    <th>Edibility</th>
+                                    <th>Medicinal</th>
+                                    <th>Other Uses</th>
+                                    <th>Utility Score</th>
+                                    <th>Link</th>
+                                </tr>
+                            </thead>
+                            <tbody id="topPicksBody"></tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="card-footer"><i class="fas fa-info-circle"></i> Sorted by Utility Score (Edibility + Medicinal + OtherUses). Showing top 50 from filtered set.</div>
+            </div>
+
+        </div><!-- /charts-grid -->
+    </div><!-- /main-area -->
+
+
+
 </div><!-- /page-body -->
 
 <script>
@@ -913,7 +1037,7 @@ const filters = {
 // ─────────────────────────────────────────────
 // ECHARTS INSTANCES
 // ─────────────────────────────────────────────
-let ecFamilies, ecScatter, ecCalendar, ecGrowth, ecPollinators, ecTypeMap;
+let ecFamilies, ecScatter, ecCalendar, ecGrowth, ecPollinators;
 
 const ZONE_COLORS = [
     '#8ecae6','#219ebc','#023047','#6a994e','#386641','#a7c957',
@@ -1485,6 +1609,41 @@ function renderTopPicks(data) {
 }
 
 // ─────────────────────────────────────────────
+// CSV EXPORT
+// ─────────────────────────────────────────────
+function exportFilteredCSV() {
+    const data = getFilteredData();
+    if (data.length === 0) { alert('No plants match current filters — nothing to export.'); return; }
+
+    const cols = ['CommonName','Family','Genus','Species','Type','GrowthRate',
+                  'HardinessZones','Foliage','Height','Width','Edibility','Medicinal',
+                  'OtherUses','Pollinators','Flower','Ripen','Soils','pH','Preferences',
+                  'Tolerances','Habitat','PFAF'];
+
+    // Helper: escape CSV field
+    const esc = v => {
+        const s = String(v == null ? '' : v);
+        return s.includes(',') || s.includes('"') || s.includes('\n')
+            ? '"' + s.replace(/"/g, '""') + '"' : s;
+    };
+
+    let csv = cols.map(esc).join(',') + '\n';
+    data.forEach(p => {
+        csv += cols.map(c => esc(p[c])).join(',') + '\n';
+    });
+
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const url  = URL.createObjectURL(blob);
+    const a    = document.createElement('a');
+    a.href     = url;
+    a.download = `plantalytics_export_${data.length}_plants.csv`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+}
+
+// ─────────────────────────────────────────────
 // MASTER REFRESH
 // ─────────────────────────────────────────────
 function refreshAll() {
@@ -1502,135 +1661,530 @@ function refreshAll() {
 }
 
 // ─────────────────────────────────────────────
-// CHART: Plant Type Treemap
+// CHART: Plant Type Phyllotaxis Spiral (Canvas)
 // ─────────────────────────────────────────────
-function renderTypeMap(data) {
-    if (!ecTypeMap) { ecTypeMap = echarts.init(document.getElementById('chartTypeMap'), null, {renderer:'svg'}); }
+const SPIRAL_GROUPS = [
+    { name: 'Deciduous Tree',     keywords: ['deciduous tree'],           color: '#5b8c5a' },
+    { name: 'Evergreen Tree',     keywords: ['evergreen tree'],           color: '#3e6b48' },
+    { name: 'Deciduous Shrub',    keywords: ['deciduous shrub'],          color: '#8fb570' },
+    { name: 'Evergreen Shrub',    keywords: ['evergreen shrub'],          color: '#6a9b6a' },
+    { name: 'Climber / Vine',     keywords: ['climber', 'vine'],          color: '#9278ab' },
+    { name: 'Perennial',          keywords: ['perennial'],                color: '#c47d5e' },
+    { name: 'Annual / Biennial',  keywords: ['annual', 'biennial'],       color: '#d4a843' },
+    { name: 'Bulb / Corm',        keywords: ['bulb', 'corm', 'rhizome'], color: '#b5607c' },
+    { name: 'Grass / Sedge',      keywords: ['grass', 'sedge', 'rush', 'bamboo'], color: '#5d9a9e' },
+    { name: 'Fern / Moss',        keywords: ['fern', 'moss', 'liverwort'], color: '#4e8a7e' },
+    { name: 'Aquatic',            keywords: ['aquatic', 'water'],        color: '#6889b1' },
+    { name: 'Cactus / Succulent', keywords: ['cactus', 'succulent'],     color: '#b07050' },
+    { name: 'Palm / Cycad',       keywords: ['palm', 'cycad'],           color: '#807aaf' },
+    { name: 'Other / Unknown',    keywords: [],                          color: '#8d99a6' },
+];
 
-    // Broad category classifier — maps keywords in the Type string to a group
-    const GROUPS = [
-        { name: 'Deciduous Tree',  keywords: ['deciduous tree'],  color: '#4a7c59' },
-        { name: 'Evergreen Tree',  keywords: ['evergreen tree'],  color: '#2d5a27' },
-        { name: 'Deciduous Shrub', keywords: ['deciduous shrub'], color: '#76b041' },
-        { name: 'Evergreen Shrub', keywords: ['evergreen shrub'], color: '#5a9e34' },
-        { name: 'Climber / Vine',  keywords: ['climber', 'vine'], color: '#9b59b6' },
-        { name: 'Perennial',       keywords: ['perennial'],       color: '#e67e22' },
-        { name: 'Annual / Biennial', keywords: ['annual', 'biennial'], color: '#f1c40f' },
-        { name: 'Bulb / Corm',     keywords: ['bulb', 'corm', 'rhizome'], color: '#e91e63' },
-        { name: 'Grass / Sedge',   keywords: ['grass', 'sedge', 'rush', 'bamboo'], color: '#80cbc4' },
-        { name: 'Fern / Moss',     keywords: ['fern', 'moss', 'liverwort'], color: '#4db6ac' },
-        { name: 'Aquatic',         keywords: ['aquatic', 'water'], color: '#42a5f5' },
-        { name: 'Cactus / Succulent', keywords: ['cactus', 'succulent', 'xerophyte'], color: '#ef5350' },
-        { name: 'Palm / Cycad',    keywords: ['palm', 'cycad'],   color: '#ab47bc' },
-        { name: 'Other / Unknown', keywords: [],                  color: '#90a4ae' },
-    ];
-
-    function classifyType(typeStr) {
-        const t = (typeStr || '').toLowerCase();
-        for (const g of GROUPS) {
-            if (g.keywords.some(k => t.includes(k))) return g;
-        }
-        return GROUPS[GROUPS.length - 1];
+function classifyType(typeStr) {
+    const t = (typeStr || '').toLowerCase();
+    for (const g of SPIRAL_GROUPS) {
+        if (g.keywords.some(k => t.includes(k))) return g;
     }
+    return SPIRAL_GROUPS[SPIRAL_GROUPS.length - 1];
+}
 
-    // Count all unique types
-    const typeCounts = {};
-    data.forEach(p => {
-        const t = (p.Type || 'Unknown').trim();
-        typeCounts[t] = (typeCounts[t] || 0) + 1;
+const imgCache = new Map();
+function getOrLoadImage(url, cb) {
+    if (!url) return null;
+    if (imgCache.has(url)) return imgCache.get(url);
+    imgCache.set(url, null);
+    const img = new Image();
+    img.crossOrigin = 'anonymous';
+    img.onload  = () => { imgCache.set(url, img); cb && cb(); };
+    img.onerror = () => { imgCache.set(url, 'err'); };
+    img.src = url;
+    return null;
+}
+
+let spiralNodes = [];
+let spiralPrevNodes = [];  // previous frame nodes for animation
+let spiralAnimProgress = 1; // 0→1
+let spiralAnimRAF = null;
+let spiralHoverIdx = -1;
+let spiralCanvasInit = false;
+const SPIRAL_ANIM_DURATION = 600; // ms
+
+function initSpiralCanvas() {
+    if (spiralCanvasInit) return;
+    spiralCanvasInit = true;
+    const canvas = document.getElementById('spiralCanvas');
+
+    canvas.addEventListener('mousemove', e => {
+        const dpr  = window.devicePixelRatio || 1;
+        const rect = canvas.getBoundingClientRect();
+        const mx = (e.clientX - rect.left) * (canvas.width  / rect.width);
+        const my = (e.clientY - rect.top)  * (canvas.height / rect.height);
+        let found = -1;
+        for (let i = spiralNodes.length - 1; i >= 0; i--) {
+            const n  = spiralNodes[i];
+            const dx = mx - n.cx, dy = my - n.cy;
+            if (Math.sqrt(dx*dx + dy*dy) <= n.r) { found = i; break; }
+        }
+        if (found !== spiralHoverIdx) {
+            spiralHoverIdx = found;
+            drawSpiral();
+        }
+        canvas.style.cursor = found >= 0 ? 'pointer' : 'default';
+
+        // Tooltip
+        const tip  = document.getElementById('spiralTooltip');
+        const cont = document.getElementById('chartTypeMap');
+        if (found >= 0) {
+            const n   = spiralNodes[found];
+            const dpr2 = window.devicePixelRatio || 1;
+            const scaleX = rect.width  / canvas.width;
+            const scaleY = rect.height / canvas.height;
+            const tx  = n.cx * scaleX + 10;
+            const ty  = n.cy * scaleY - 56;
+            const pct = spiralTotalCount > 0 ? ((n.count / spiralTotalCount) * 100).toFixed(1) : 0;
+            tip.innerHTML = `<strong style="color:var(--primary)">${n.rawType}</strong><br/>${n.count.toLocaleString()} plants &nbsp;·&nbsp; ${pct}%<br/><span style="color:${n.color};font-size:0.73rem">${n.group}</span>`;
+            tip.style.left = Math.min(tx, cont.clientWidth - 178) + 'px';
+            tip.style.top  = Math.max(4, ty) + 'px';
+            tip.style.display = 'block';
+        } else {
+            tip.style.display = 'none';
+        }
     });
 
-    // Build treemap children nested under group
-    const groupMap = {};
-    GROUPS.forEach(g => { groupMap[g.name] = { name: g.name, itemStyle: { color: g.color }, children: [], _color: g.color }; });
-
-    Object.entries(typeCounts).forEach(([type, count]) => {
-        const g = classifyType(type);
-        groupMap[g.name].children.push({
-            name: type,
-            value: count,
-            _rawType: type,
-            itemStyle: {
-                color: g.color,
-                opacity: filters.type && filters.type !== type ? 0.35 : 1
-            },
-            label: {
-                color: '#fff',
-                fontWeight: filters.type === type ? 'bold' : 'normal',
-                borderColor: filters.type === type ? '#fff' : 'transparent',
-                borderWidth: filters.type === type ? 2 : 0
-            }
-        });
+    canvas.addEventListener('mouseleave', () => {
+        spiralHoverIdx = -1;
+        document.getElementById('spiralTooltip').style.display = 'none';
+        drawSpiral();
     });
 
-    // Only include groups that have children in filtered data
-    const treeData = Object.values(groupMap)
-        .filter(g => g.children.length > 0)
-        .map(g => ({
-            name: g.name,
-            itemStyle: { color: g._color },
-            children: g.children.sort((a,b) => b.value - a.value)
-        }));
-
-    ecTypeMap.off('click');
-    ecTypeMap.setOption({
-        tooltip: {
-            formatter: p => {
-                if (!p.data.value) return p.name; // group header
-                const pct = data.length > 0 ? ((p.data.value / data.length) * 100).toFixed(1) : 0;
-                return `<b>${p.name}</b><br/>${p.data.value.toLocaleString()} plants (${pct}%)`;
-            }
-        },
-        series: [{
-            type: 'treemap',
-            data: treeData,
-            width: '100%',
-            height: '100%',
-            roam: false,
-            nodeClick: false,
-            drillDownIcon: '',
-            breadcrumb: { show: true, height: 22, itemStyle: { color: 'var(--primary)' } },
-            levels: [
-                {
-                    // Group level
-                    itemStyle: { borderWidth: 3, borderColor: '#fff', gapWidth: 3 },
-                    upperLabel: {
-                        show: true,
-                        height: 24,
-                        color: '#fff',
-                        fontWeight: 'bold',
-                        fontSize: 11,
-                        backgroundColor: 'rgba(0,0,0,0.35)',
-                        padding: [4, 6]
-                    }
-                },
-                {
-                    // Leaf level
-                    itemStyle: { borderWidth: 1, borderColor: 'rgba(255,255,255,0.3)', gapWidth: 1 },
-                    label: {
-                        show: true,
-                        fontSize: 11,
-                        color: '#fff',
-                        overflow: 'truncate',
-                        ellipsis: true,
-                        padding: [4, 6]
-                    },
-                    emphasis: {
-                        label: { fontSize: 13, fontWeight: 'bold' },
-                        itemStyle: { shadowBlur: 10, shadowColor: 'rgba(0,0,0,0.4)' }
-                    }
-                }
-            ]
-        }]
-    }, true);
-
-    ecTypeMap.on('click', params => {
-        if (!params.data || !params.data._rawType) return; // clicked a group
-        const clicked = params.data._rawType;
+    canvas.addEventListener('click', () => {
+        if (spiralHoverIdx < 0) return;
+        const clicked = spiralNodes[spiralHoverIdx].rawType;
         filters.type = filters.type === clicked ? null : clicked;
         document.getElementById('typeFilter').value = filters.type || '';
         refreshAll();
     });
+}
+
+let spiralTotalCount = 0;
+
+function drawSpiral() {
+    const canvas = document.getElementById('spiralCanvas');
+    if (!canvas) return;
+    const cont = document.getElementById('chartTypeMap');
+    const W    = cont.clientWidth  || 800;
+    const H    = cont.clientHeight || 440;
+    const dpr  = window.devicePixelRatio || 1;
+
+    // Resize canvas to container with DPR
+    if (canvas.width !== Math.round(W * dpr) || canvas.height !== Math.round(H * dpr)) {
+        canvas.width  = Math.round(W * dpr);
+        canvas.height = Math.round(H * dpr);
+    }
+
+    const ctx = canvas.getContext('2d');
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    ctx.clearRect(0, 0, W, H);
+
+    if (spiralNodes.length === 0) {
+        ctx.fillStyle = '#aaa';
+        ctx.font = '14px Segoe UI';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText('No matching plant types', W / 2, H / 2);
+        return;
+    }
+
+    // ── Draw shadow pass ──
+    spiralNodes.forEach(n => {
+        ctx.save();
+        ctx.shadowColor = 'rgba(0,0,0,0.14)';
+        ctx.shadowBlur  = 10;
+        ctx.shadowOffsetY = 2;
+        ctx.beginPath();
+        ctx.arc(n.cx, n.cy, n.r, 0, Math.PI * 2);
+        ctx.fillStyle = n.color;
+        ctx.fill();
+        ctx.restore();
+    });
+
+    // ── Draw content pass ──
+    spiralNodes.forEach((n, i) => {
+        ctx.save();
+        const isActive  = filters.type === n.rawType;
+        const isHovered = i === spiralHoverIdx;
+
+        ctx.beginPath();
+        ctx.arc(n.cx, n.cy, n.r, 0, Math.PI * 2);
+        ctx.clip();
+
+        // Try to paint image
+        const img = imgCache.get(n.imgUrl);
+        if (img && img !== 'err') {
+            // Draw image as base
+            const s = n.r * 2;
+            ctx.drawImage(img, n.cx - n.r, n.cy - n.r, s, s);
+            // Color wash over image
+            ctx.fillStyle = n.color + '99';
+            ctx.fillRect(n.cx - n.r, n.cy - n.r, s, s);
+        } else {
+            // Flat color fill (muted, minimal gradient)
+            const grad = ctx.createRadialGradient(n.cx - n.r*0.2, n.cy - n.r*0.2, n.r*0.15, n.cx, n.cy, n.r);
+            grad.addColorStop(0, lighten(n.color, 0.15));
+            grad.addColorStop(1, n.color);
+            ctx.fillStyle = grad;
+            ctx.fillRect(n.cx - n.r, n.cy - n.r, n.r*2, n.r*2);
+        }
+
+        // Dim if not active when a filter is set
+        if (filters.type && !isActive) {
+            ctx.fillStyle = 'rgba(255,255,255,0.55)';
+            ctx.fillRect(n.cx - n.r, n.cy - n.r, n.r*2, n.r*2);
+        }
+
+        ctx.restore();
+
+        // Ring for hover / active
+        if (isActive || isHovered) {
+            ctx.save();
+            ctx.beginPath();
+            ctx.arc(n.cx, n.cy, n.r + (isActive ? 3.5 : 2), 0, Math.PI * 2);
+            ctx.strokeStyle = isActive ? '#ffffff' : 'rgba(255,255,255,0.75)';
+            ctx.lineWidth   = isActive ? 3 : 2;
+            ctx.stroke();
+            ctx.restore();
+        }
+
+        // Label
+        if (n.r >= 13) {
+            ctx.save();
+            const fontSize = Math.min(13, Math.max(8, n.r * 0.28));
+            ctx.font = `${isActive ? 'bold ' : ''}${fontSize}px Segoe UI`;
+            ctx.textAlign    = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.shadowColor  = 'rgba(0,0,0,0.75)';
+            ctx.shadowBlur   = 4;
+            ctx.fillStyle    = '#ffffff';
+
+            const maxW  = n.r * 1.7;
+            const lines = wrapSpiralText(n.label, maxW, ctx);
+            const lineH = fontSize + 2;
+            // if count fits, shift label up a bit
+            const showCount = n.r >= 20;
+            const totalLines = lines.length + (showCount ? 1 : 0);
+            const startY = n.cy - ((totalLines - 1) * lineH / 2);
+
+            lines.forEach((line, li) => ctx.fillText(line, n.cx, startY + li * lineH));
+
+            if (showCount) {
+                ctx.font = `${Math.max(7, fontSize * 0.75)}px Segoe UI`;
+                ctx.fillStyle = 'rgba(255,255,255,0.82)';
+                ctx.shadowBlur = 2;
+                ctx.fillText(n.count.toLocaleString(), n.cx, startY + lines.length * lineH);
+            }
+            ctx.restore();
+        }
+    });
+}
+
+// Animated version: interpolates between previous and current node positions
+function drawSpiralInterp(prevMap, nextMap, t) {
+    const canvas = document.getElementById('spiralCanvas');
+    if (!canvas) return;
+    const cont = document.getElementById('chartTypeMap');
+    const W    = cont.clientWidth  || 800;
+    const H    = cont.clientHeight || 440;
+    const dpr  = window.devicePixelRatio || 1;
+
+    if (canvas.width !== Math.round(W * dpr) || canvas.height !== Math.round(H * dpr)) {
+        canvas.width  = Math.round(W * dpr);
+        canvas.height = Math.round(H * dpr);
+    }
+
+    const ctx = canvas.getContext('2d');
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    ctx.clearRect(0, 0, W, H);
+
+    // Build interpolated nodes
+    const interpNodes = [];
+    const cxCenter = W / 2, cyCenter = H / 2;
+
+    // Nodes present in current (target) state
+    spiralNodes.forEach((tgt, i) => {
+        const prev = prevMap.get(tgt.rawType);
+        if (prev) {
+            // Interpolate from old to new position
+            interpNodes.push({
+                ...tgt,
+                cx: prev.cx + (tgt.cx - prev.cx) * t,
+                cy: prev.cy + (tgt.cy - prev.cy) * t,
+                r:  prev.r  + (tgt.r  - prev.r)  * t,
+                _idx: i,
+                _opacity: 1
+            });
+        } else {
+            // New node: fade/grow in from center
+            interpNodes.push({
+                ...tgt,
+                cx: cxCenter + (tgt.cx - cxCenter) * t,
+                cy: cyCenter + (tgt.cy - cyCenter) * t,
+                r:  tgt.r * t,
+                _idx: i,
+                _opacity: t
+            });
+        }
+    });
+
+    // Nodes that disappeared: fade out toward center
+    spiralPrevNodes.forEach(prev => {
+        if (!nextMap.has(prev.rawType)) {
+            interpNodes.push({
+                ...prev,
+                cx: prev.cx + (cxCenter - prev.cx) * t,
+                cy: prev.cy + (cyCenter - prev.cy) * t,
+                r:  prev.r * (1 - t),
+                _idx: -1,
+                _opacity: 1 - t
+            });
+        }
+    });
+
+    if (interpNodes.length === 0) {
+        ctx.fillStyle = '#aaa';
+        ctx.font = '14px Segoe UI';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText('No matching plant types', W / 2, H / 2);
+        return;
+    }
+
+    // Shadow pass
+    interpNodes.forEach(n => {
+        if (n.r < 1) return;
+        ctx.save();
+        ctx.globalAlpha = n._opacity;
+        ctx.shadowColor = 'rgba(0,0,0,0.14)';
+        ctx.shadowBlur  = 10;
+        ctx.shadowOffsetY = 2;
+        ctx.beginPath();
+        ctx.arc(n.cx, n.cy, n.r, 0, Math.PI * 2);
+        ctx.fillStyle = n.color;
+        ctx.fill();
+        ctx.restore();
+    });
+
+    // Content pass
+    interpNodes.forEach(n => {
+        if (n.r < 1) return;
+        ctx.save();
+        ctx.globalAlpha = n._opacity;
+        const isActive  = filters.type === n.rawType;
+        const isHovered = n._idx === spiralHoverIdx;
+
+        ctx.beginPath();
+        ctx.arc(n.cx, n.cy, n.r, 0, Math.PI * 2);
+        ctx.clip();
+
+        const img = imgCache.get(n.imgUrl);
+        if (img && img !== 'err') {
+            const s = n.r * 2;
+            ctx.drawImage(img, n.cx - n.r, n.cy - n.r, s, s);
+            ctx.fillStyle = n.color + '99';
+            ctx.fillRect(n.cx - n.r, n.cy - n.r, s, s);
+        } else {
+            // Flat color fill (muted, minimal gradient)
+            const grad = ctx.createRadialGradient(n.cx - n.r*0.2, n.cy - n.r*0.2, n.r*0.15, n.cx, n.cy, n.r);
+            grad.addColorStop(0, lighten(n.color, 0.15));
+            grad.addColorStop(1, n.color);
+            ctx.fillStyle = grad;
+            ctx.fillRect(n.cx - n.r, n.cy - n.r, n.r*2, n.r*2);
+        }
+
+        if (filters.type && !isActive) {
+            ctx.fillStyle = 'rgba(255,255,255,0.55)';
+            ctx.fillRect(n.cx - n.r, n.cy - n.r, n.r*2, n.r*2);
+        }
+
+        ctx.restore();
+
+        // Ring
+        if ((isActive || isHovered) && n._opacity > 0.5) {
+            ctx.save();
+            ctx.globalAlpha = n._opacity;
+            ctx.beginPath();
+            ctx.arc(n.cx, n.cy, n.r + (isActive ? 3 : 1.5), 0, Math.PI * 2);
+            ctx.strokeStyle = isActive ? '#ffffff' : 'rgba(255,255,255,0.7)';
+            ctx.lineWidth   = isActive ? 2.5 : 1.5;
+            ctx.stroke();
+            ctx.restore();
+        }
+
+        // Label
+        if (n.r >= 13 && n._opacity > 0.4) {
+            ctx.save();
+            ctx.globalAlpha = n._opacity;
+            const fontSize = Math.min(13, Math.max(8, n.r * 0.28));
+            ctx.font = `${isActive ? 'bold ' : ''}${fontSize}px Segoe UI`;
+            ctx.textAlign    = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.shadowColor  = 'rgba(0,0,0,0.6)';
+            ctx.shadowBlur   = 3;
+            ctx.fillStyle    = '#ffffff';
+
+            const maxW  = n.r * 1.7;
+            const lines = wrapSpiralText(n.label, maxW, ctx);
+            const lineH = fontSize + 2;
+            const showCount = n.r >= 20;
+            const totalLines = lines.length + (showCount ? 1 : 0);
+            const startY = n.cy - ((totalLines - 1) * lineH / 2);
+
+            lines.forEach((line, li) => ctx.fillText(line, n.cx, startY + li * lineH));
+
+            if (showCount) {
+                ctx.font = `${Math.max(7, fontSize * 0.75)}px Segoe UI`;
+                ctx.fillStyle = 'rgba(255,255,255,0.8)';
+                ctx.shadowBlur = 2;
+                ctx.fillText(n.count.toLocaleString(), n.cx, startY + lines.length * lineH);
+            }
+            ctx.restore();
+        }
+    });
+}
+
+function lighten(hex, amt) {
+    const num = parseInt(hex.replace('#',''), 16);
+    const r = Math.min(255, ((num>>16)&0xff) + Math.round(255*amt));
+    const g = Math.min(255, ((num>>8)&0xff)  + Math.round(255*amt));
+    const b = Math.min(255, (num&0xff)        + Math.round(255*amt));
+    return `rgb(${r},${g},${b})`;
+}
+
+function darken(hex, amt) {
+    const num = parseInt(hex.replace('#',''), 16);
+    const r = Math.max(0, ((num>>16)&0xff) - Math.round(255*amt));
+    const g = Math.max(0, ((num>>8)&0xff)  - Math.round(255*amt));
+    const b = Math.max(0, (num&0xff)        - Math.round(255*amt));
+    return `rgb(${r},${g},${b})`;
+}
+
+function wrapSpiralText(text, maxWidth, ctx) {
+    const words = text.split(' ');
+    const lines = [];
+    let cur = '';
+    words.forEach(w => {
+        const test = cur ? cur + ' ' + w : w;
+        if (ctx.measureText(test).width <= maxWidth) { cur = test; }
+        else { if (cur) lines.push(cur); cur = w; }
+    });
+    if (cur) lines.push(cur);
+    return lines.length ? lines : [text];
+}
+
+function buildSpiralLegend() {
+    const leg = document.getElementById('spiralLegend');
+    if (!leg) return;
+    leg.innerHTML = SPIRAL_GROUPS.map(g =>
+        `<div class="legend-item"><div class="legend-dot" style="background:${g.color}"></div>${g.name}</div>`
+    ).join('');
+}
+
+function renderTypeMap(data) {
+    initSpiralCanvas();
+    buildSpiralLegend();
+    spiralTotalCount = data.length;
+
+    // Count types and grab a representative image URL per type
+    const typeCounts  = {};
+    const typeImgMap  = {};
+    data.forEach(p => {
+        const t = (p.Type || 'Unknown').trim();
+        typeCounts[t] = (typeCounts[t] || 0) + 1;
+        if (!typeImgMap[t]) {
+            const url = (p['Image URL'] || '').trim();
+            if (url) typeImgMap[t] = url;
+        }
+    });
+
+    const types = Object.entries(typeCounts).sort((a, b) => b[1] - a[1]);
+    const N     = types.length;
+    if (N === 0) {
+        spiralPrevNodes = spiralNodes.length ? spiralNodes.map(n => ({...n})) : [];
+        spiralNodes = [];
+        animateSpiral();
+        return;
+    }
+
+    const cont = document.getElementById('chartTypeMap');
+    const W    = cont.clientWidth  || 800;
+    const H    = cont.clientHeight || 440;
+    const cx   = W / 2;
+    const cy   = H / 2;
+
+    const GOLDEN = 2.399963229728653; // golden angle in radians
+    const maxCount = types[0][1];
+
+    // Bubble radius: sqrt-scaled between minR and maxR
+    const maxR = Math.min(52, Math.min(W, H) * 0.12);
+    const minR = 4;
+
+    // Spiral scale: outermost point + maxR must fit in the canvas
+    const margin = maxR + 12;
+    const spiralC = (Math.min(cx, cy) - margin) / Math.sqrt(N);
+
+    // Save previous positions for animation
+    spiralPrevNodes = spiralNodes.length ? spiralNodes.map(n => ({...n})) : [];
+
+    spiralNodes = types.map(([type, count], i) => {
+        const angle  = i * GOLDEN;
+        const dist   = spiralC * Math.sqrt(i + 1);
+        const ncx    = cx + dist * Math.cos(angle);
+        const ncy    = cy + dist * Math.sin(angle);
+        const r      = Math.max(minR, Math.sqrt(count / maxCount) * maxR);
+        const group  = classifyType(type);
+
+        // Shorten label for display
+        const label  = type
+            .replace(/Deciduous /i, '')
+            .replace(/Evergreen /i, '')
+            .replace(/ Tree$/i, ' Tr.')
+            .replace(/ Shrub$/i, ' Sh.');
+
+        const imgUrl = typeImgMap[type] || null;
+        if (imgUrl) getOrLoadImage(imgUrl, drawSpiral);
+
+        return { cx: ncx, cy: ncy, r, rawType: type, label, count, color: group.color, group: group.name, imgUrl };
+    });
+
+    animateSpiral();
+}
+
+// Build a lookup from rawType→node for interpolation
+function buildNodeMap(nodes) {
+    const m = new Map();
+    nodes.forEach(n => m.set(n.rawType, n));
+    return m;
+}
+
+function animateSpiral() {
+    if (spiralAnimRAF) cancelAnimationFrame(spiralAnimRAF);
+    spiralAnimProgress = 0;
+    const startTime = performance.now();
+    const prevMap = buildNodeMap(spiralPrevNodes);
+    const nextMap = buildNodeMap(spiralNodes);
+
+    function tick(now) {
+        const elapsed = now - startTime;
+        spiralAnimProgress = Math.min(1, elapsed / SPIRAL_ANIM_DURATION);
+        // ease-out cubic
+        const t = 1 - Math.pow(1 - spiralAnimProgress, 3);
+        drawSpiralInterp(prevMap, nextMap, t);
+        if (spiralAnimProgress < 1) {
+            spiralAnimRAF = requestAnimationFrame(tick);
+        } else {
+            spiralAnimRAF = null;
+        }
+    }
+    spiralAnimRAF = requestAnimationFrame(tick);
 }
 
 // ─────────────────────────────────────────────
@@ -1721,26 +2275,49 @@ function fullscreenCard(btn) {
 }
 
 // ─────────────────────────────────────────────
-// FILTER PANEL TOGGLE
+// FILTER PANEL TOGGLE (desktop + mobile)
 // ─────────────────────────────────────────────
+function isMobile() {
+    return window.innerWidth <= 900;
+}
+
 function toggleFilterPanel() {
-    const panel = document.getElementById('filterPanel');
-    panel.classList.toggle('collapsed');
-    // trigger ECharts resize after transition
-    setTimeout(() => {
-        [ecFamilies, ecScatter, ecCalendar, ecGrowth, ecPollinators, ecTypeMap].forEach(ec => {
-            if (ec) ec.resize();
-        });
-    }, 320);
+    const panel   = document.getElementById('filterPanel');
+    const overlay = document.getElementById('mobOverlay');
+
+    if (isMobile()) {
+        const isOpen = panel.classList.contains('mob-open');
+        if (isOpen) {
+            panel.classList.remove('mob-open');
+            overlay.classList.remove('visible');
+        } else {
+            panel.classList.add('mob-open');
+            overlay.classList.add('visible');
+        }
+    } else {
+        panel.classList.toggle('collapsed');
+        setTimeout(() => {
+            [ecFamilies, ecScatter, ecCalendar, ecGrowth, ecPollinators].forEach(ec => {
+                if (ec) ec.resize();
+            });
+        drawSpiral();
+        }, 300);
+    }
+}
+
+function closeMobileFilter() {
+    document.getElementById('filterPanel').classList.remove('mob-open');
+    document.getElementById('mobOverlay').classList.remove('visible');
 }
 
 // ─────────────────────────────────────────────
 // ECHARTS RESIZE on window change
 // ─────────────────────────────────────────────
 window.addEventListener('resize', () => {
-    [ecFamilies, ecScatter, ecCalendar, ecGrowth, ecPollinators, ecTypeMap].forEach(ec => {
+    [ecFamilies, ecScatter, ecCalendar, ecGrowth, ecPollinators].forEach(ec => {
         if (ec) ec.resize();
     });
+    drawSpiral();
 });
 
 // ─────────────────────────────────────────────
