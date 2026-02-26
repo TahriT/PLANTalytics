@@ -101,56 +101,57 @@
             min-width: 0;
             display: flex;
             flex-direction: column;
-            gap: 1.25rem;
-            padding: 1.25rem;
+            gap: 0.5rem;
+            padding: 0.6rem;
         }
 
         .page-body::-webkit-scrollbar { width: 6px; }
         .page-body::-webkit-scrollbar-track { background: transparent; }
         .page-body::-webkit-scrollbar-thumb { background: var(--accent); border-radius: 3px; }
 
-        /* ── Stats row ── */
+        /* ── Stats bar (single compact segmented row) ── */
         .stats-row {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 0.85rem;
-        }
-
-        .stat-card {
+            display: flex;
             background: white;
-            border-radius: 10px;
-            padding: 1rem 1.25rem;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.07);
-            display: flex;
-            align-items: center;
-            gap: 0.85rem;
+            border-radius: 6px;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+            overflow: hidden;
+            margin-bottom: -0.15rem;
         }
-
-        .stat-icon {
-            width: 44px;
-            height: 44px;
-            border-radius: 10px;
+        .stat-seg {
+            flex: 1;
             display: flex;
             align-items: center;
-            justify-content: center;
-            font-size: 1.2rem;
+            gap: 0.35rem;
+            padding: 0.28rem 0.55rem;
+            position: relative;
+        }
+        .stat-seg + .stat-seg::before {
+            content: '';
+            position: absolute;
+            left: 0; top: 22%; bottom: 22%;
+            width: 1px;
+            background: #e0e0e0;
+        }
+        .stat-seg .seg-icon {
+            font-size: 0.7rem;
+            width: 20px; height: 20px;
+            border-radius: 5px;
+            display: flex; align-items: center; justify-content: center;
             flex-shrink: 0;
         }
-
-        .stat-icon.green  { background: #e8f5e9; color: #2e7d32; }
-        .stat-icon.blue   { background: #e3f2fd; color: #1565c0; }
-        .stat-icon.orange { background: #fff3e0; color: #e65100; }
-        .stat-icon.purple { background: #f3e5f5; color: #6a1b9a; }
-
-        .stat-info { min-width: 0; }
-        .stat-value { font-size: 1.7rem; font-weight: 700; color: var(--primary); line-height: 1; }
-        .stat-label { font-size: 0.8rem; color: #777; margin-top: 0.2rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .seg-icon.green  { background: #e8f5e9; color: #2e7d32; }
+        .seg-icon.blue   { background: #e3f2fd; color: #1565c0; }
+        .seg-icon.orange  { background: #fff3e0; color: #e65100; }
+        .seg-icon.purple  { background: #f3e5f5; color: #6a1b9a; }
+        .stat-seg .seg-val { font-size: 0.9rem; font-weight: 700; color: var(--primary); line-height: 1; }
+        .stat-seg .seg-lbl { font-size: 0.65rem; color: #888; white-space: nowrap; }
 
         /* ── Charts grid ── */
         .charts-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 0.85rem;
+            gap: 0.45rem;
             align-items: start;
         }
 
@@ -161,12 +162,12 @@
 
         .chart-card {
             background: white;
-            border-radius: 10px;
-            box-shadow: 0 1px 4px rgba(0,0,0,0.08), 0 4px 12px rgba(0,0,0,0.06);
+            border-radius: 6px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.08);
             overflow: hidden;
             display: flex;
             flex-direction: column;
-            border-top: 3px solid var(--secondary);
+            border-top: 2px solid var(--secondary);
         }
 
         .chart-card.full-width {
@@ -176,7 +177,7 @@
         .card-header {
             background: linear-gradient(135deg, var(--secondary), var(--accent));
             color: white;
-            padding: 0.8rem 1.25rem;
+            padding: 0.35rem 0.7rem;
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -185,10 +186,10 @@
 
         .card-title {
             font-weight: 600;
-            font-size: 0.95rem;
+            font-size: 0.8rem;
             display: flex;
             align-items: center;
-            gap: 0.5rem;
+            gap: 0.35rem;
         }
 
         .card-actions { display: flex; gap: 0.4rem; }
@@ -197,11 +198,11 @@
             background: rgba(255,255,255,0.2);
             border: none;
             color: white;
-            width: 28px;
-            height: 28px;
-            border-radius: 4px;
+            width: 22px;
+            height: 22px;
+            border-radius: 3px;
             cursor: pointer;
-            font-size: 0.75rem;
+            font-size: 0.65rem;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -210,9 +211,38 @@
 
         .icon-btn:hover { background: rgba(255,255,255,0.35); }
 
+        /* Fullscreen mode for chart cards */
+        .chart-card:fullscreen,
+        .chart-card:-webkit-full-screen {
+            background: white;
+            display: flex;
+            flex-direction: column;
+            width: 100vw;
+            height: 100vh;
+            border-radius: 0;
+        }
+        .chart-card:fullscreen .card-body,
+        .chart-card:-webkit-full-screen .card-body {
+            flex: 1;
+            min-height: 0;
+        }
+        .chart-card:fullscreen .chart-instance,
+        .chart-card:-webkit-full-screen .chart-instance {
+            height: 100% !important;
+        }
+        .chart-card:fullscreen #chartTypeMap,
+        .chart-card:-webkit-full-screen #chartTypeMap {
+            height: 100% !important;
+        }
+        .chart-card:fullscreen .table-scroll,
+        .chart-card:-webkit-full-screen .table-scroll {
+            max-height: none !important;
+            height: 100%;
+        }
+
         .card-body {
             flex: 1;
-            padding: 0.5rem;
+            padding: 0.25rem;
             min-height: 0;
         }
 
@@ -357,14 +387,16 @@
             }
 
             .page-body { height: calc(100vh - var(--header-h)); }
-            .main-area { padding: 1rem; }
-            .stats-row { grid-template-columns: repeat(2, 1fr); }
+            .main-area { padding: 0.5rem; }
+            .stats-row { flex-wrap: wrap; }
+            .stat-seg { flex: 1 1 45%; }
             .charts-grid { grid-template-columns: 1fr; }
         }
 
         @media (max-width: 600px) {
-            .main-area { padding: 0.75rem; }
-            .stats-row { grid-template-columns: 1fr 1fr; }
+            .main-area { padding: 0.4rem; }
+            .stats-row { flex-wrap: wrap; }
+            .stat-seg { flex: 1 1 45%; }
             header h1 .badge { display: none; }
             .header-link.v2 { display: none; }
         }
@@ -687,7 +719,7 @@
 
         /* responsive — desktop breakpoint */
         @media (max-width: 1300px) {
-            .stats-row { grid-template-columns: repeat(2, 1fr); }
+            .stat-seg .seg-lbl { display: none; }
         }
 
         @media (max-width: 1100px) {
@@ -847,35 +879,27 @@
     <!-- Main area -->
     <div class="main-area">
 
-        <!-- Stats -->
+        <!-- Stats (compact segmented bar) -->
         <div class="stats-row">
-            <div class="stat-card">
-                <div class="stat-icon green"><i class="fas fa-seedling"></i></div>
-                <div class="stat-info">
-                    <div class="stat-value" id="statTotal">—</div>
-                    <div class="stat-label">Matching Plants</div>
-                </div>
+            <div class="stat-seg">
+                <div class="seg-icon green"><i class="fas fa-seedling"></i></div>
+                <span class="seg-val" id="statTotal">—</span>
+                <span class="seg-lbl">Plants</span>
             </div>
-            <div class="stat-card">
-                <div class="stat-icon orange"><i class="fas fa-apple-alt"></i></div>
-                <div class="stat-info">
-                    <div class="stat-value" id="statEdible">—</div>
-                    <div class="stat-label">Edible Species (≥3)</div>
-                </div>
+            <div class="stat-seg">
+                <div class="seg-icon orange"><i class="fas fa-apple-alt"></i></div>
+                <span class="seg-val" id="statEdible">—</span>
+                <span class="seg-lbl">Edible ≥3</span>
             </div>
-            <div class="stat-card">
-                <div class="stat-icon purple"><i class="fas fa-mortar-pestle"></i></div>
-                <div class="stat-info">
-                    <div class="stat-value" id="statMedicinal">—</div>
-                    <div class="stat-label">Medicinal Species (≥3)</div>
-                </div>
+            <div class="stat-seg">
+                <div class="seg-icon purple"><i class="fas fa-mortar-pestle"></i></div>
+                <span class="seg-val" id="statMedicinal">—</span>
+                <span class="seg-lbl">Medicinal ≥3</span>
             </div>
-            <div class="stat-card">
-                <div class="stat-icon blue"><i class="fas fa-bug"></i></div>
-                <div class="stat-info">
-                    <div class="stat-value" id="statPollinators">—</div>
-                    <div class="stat-label">Support Pollinators</div>
-                </div>
+            <div class="stat-seg">
+                <div class="seg-icon blue"><i class="fas fa-bug"></i></div>
+                <span class="seg-val" id="statPollinators">—</span>
+                <span class="seg-lbl">Pollinators</span>
             </div>
         </div>
 
@@ -898,7 +922,7 @@
                         <div class="spiral-legend" id="spiralLegend"></div>
                     </div>
                 </div>
-                <div class="card-footer"><i class="fas fa-mouse-pointer"></i> Phyllotaxis spiral — every plant type · bubble size = count · photos from PFAF · click to filter</div>
+                <div class="card-footer"><i class="fas fa-mouse-pointer"></i> Phyllotaxis spiral — plant photos from PFAF · no-photo plants cluster at center · click to filter by type</div>
             </div>
 
             <!-- Chart 2: Top Families Donut -->
@@ -1694,7 +1718,6 @@ function getOrLoadImage(url, cb) {
     if (imgCache.has(url)) return imgCache.get(url);
     imgCache.set(url, null);
     const img = new Image();
-    img.crossOrigin = 'anonymous';
     img.onload  = () => { imgCache.set(url, img); cb && cb(); };
     img.onerror = () => { imgCache.set(url, 'err'); };
     img.src = url;
@@ -1715,10 +1738,9 @@ function initSpiralCanvas() {
     const canvas = document.getElementById('spiralCanvas');
 
     canvas.addEventListener('mousemove', e => {
-        const dpr  = window.devicePixelRatio || 1;
         const rect = canvas.getBoundingClientRect();
-        const mx = (e.clientX - rect.left) * (canvas.width  / rect.width);
-        const my = (e.clientY - rect.top)  * (canvas.height / rect.height);
+        const mx = e.clientX - rect.left;
+        const my = e.clientY - rect.top;
         let found = -1;
         for (let i = spiralNodes.length - 1; i >= 0; i--) {
             const n  = spiralNodes[i];
@@ -1736,13 +1758,13 @@ function initSpiralCanvas() {
         const cont = document.getElementById('chartTypeMap');
         if (found >= 0) {
             const n   = spiralNodes[found];
-            const dpr2 = window.devicePixelRatio || 1;
             const scaleX = rect.width  / canvas.width;
             const scaleY = rect.height / canvas.height;
             const tx  = n.cx * scaleX + 10;
             const ty  = n.cy * scaleY - 56;
-            const pct = spiralTotalCount > 0 ? ((n.count / spiralTotalCount) * 100).toFixed(1) : 0;
-            tip.innerHTML = `<strong style="color:var(--primary)">${n.rawType}</strong><br/>${n.count.toLocaleString()} plants &nbsp;·&nbsp; ${pct}%<br/><span style="color:${n.color};font-size:0.73rem">${n.group}</span>`;
+            const name = n.plantName || n.rawType;
+            const fam  = n.family ? `<br/><span style="font-size:0.72rem;color:#888">${n.family}</span>` : '';
+            tip.innerHTML = `<strong style="color:var(--primary)">${name}</strong>${fam}<br/><span style="color:${n.color};font-size:0.73rem">${n.rawType}</span>`;
             tip.style.left = Math.min(tx, cont.clientWidth - 178) + 'px';
             tip.style.top  = Math.max(4, ty) + 'px';
             tip.style.display = 'block';
@@ -1795,12 +1817,16 @@ function drawSpiral() {
         return;
     }
 
-    // ── Draw shadow pass ──
-    spiralNodes.forEach(n => {
+    // ── Draw shadow pass (photo nodes only) — depth: inner = bigger shadow ──
+    spiralNodes.forEach((n, i) => {
+        if (!n.hasPhoto) return;
+        const t = spiralNodes.filter(x => x.hasPhoto).indexOf(n);
+        const total = spiralNodes.filter(x => x.hasPhoto).length;
+        const depth = total > 1 ? 1 - (t / (total - 1)) : 1; // 1=center, 0=edge
         ctx.save();
-        ctx.shadowColor = 'rgba(0,0,0,0.14)';
-        ctx.shadowBlur  = 10;
-        ctx.shadowOffsetY = 2;
+        ctx.shadowColor = `rgba(0,0,0,${(0.08 + 0.18 * depth).toFixed(2)})`;
+        ctx.shadowBlur  = 4 + 12 * depth;
+        ctx.shadowOffsetY = 1 + 3 * depth;
         ctx.beginPath();
         ctx.arc(n.cx, n.cy, n.r, 0, Math.PI * 2);
         ctx.fillStyle = n.color;
@@ -1808,80 +1834,119 @@ function drawSpiral() {
         ctx.restore();
     });
 
-    // ── Draw content pass ──
+    // ── Draw center cluster (no-photo nodes) ──
     spiralNodes.forEach((n, i) => {
+        if (n.hasPhoto) return;
+        const isActive  = filters.type === n.rawType;
+        ctx.save();
+        ctx.beginPath();
+        ctx.arc(n.cx, n.cy, n.r, 0, Math.PI * 2);
+        ctx.fillStyle = (filters.type && !isActive) ? lighten(n.color, 0.35) : n.color;
+        ctx.globalAlpha = (filters.type && !isActive) ? 0.4 : 0.7;
+        ctx.fill();
+        ctx.restore();
+    });
+
+    // Center label for no-photo cluster
+    const hasCenter = spiralNodes.some(n => !n.hasPhoto);
+    if (hasCenter) {
+        const noPhotoCount = spiralTotalCount - spiralNodes.filter(n => n.hasPhoto).length;
+        if (noPhotoCount > 0) {
+            ctx.save();
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.font = 'bold 11px Segoe UI';
+            ctx.fillStyle = 'rgba(0,0,0,0.45)';
+            ctx.fillText(`${noPhotoCount.toLocaleString()} plants`, W / 2, H / 2 - 6);
+            ctx.font = '9px Segoe UI';
+            ctx.fillStyle = 'rgba(0,0,0,0.3)';
+            ctx.fillText('no photo', W / 2, H / 2 + 8);
+            ctx.restore();
+        }
+    }
+
+    // ── Draw photo nodes ──
+    const photoNodes = spiralNodes.filter(n => n.hasPhoto);
+    const photoTotal = photoNodes.length;
+    spiralNodes.forEach((n, i) => {
+        if (!n.hasPhoto) return;
+        const posIdx = photoNodes.indexOf(n);
+        const depth  = photoTotal > 1 ? 1 - (posIdx / (photoTotal - 1)) : 1;
         ctx.save();
         const isActive  = filters.type === n.rawType;
         const isHovered = i === spiralHoverIdx;
+
+        // Outer nodes slightly faded for depth perception
+        ctx.globalAlpha = 0.6 + 0.4 * depth;
 
         ctx.beginPath();
         ctx.arc(n.cx, n.cy, n.r, 0, Math.PI * 2);
         ctx.clip();
 
-        // Try to paint image
+        // Photo-first: show real plant image prominently
         const img = imgCache.get(n.imgUrl);
         if (img && img !== 'err') {
-            // Draw image as base
             const s = n.r * 2;
             ctx.drawImage(img, n.cx - n.r, n.cy - n.r, s, s);
-            // Color wash over image
-            ctx.fillStyle = n.color + '99';
+            // Very light tint at bottom for readability
+            const grad = ctx.createLinearGradient(n.cx, n.cy - n.r, n.cx, n.cy + n.r);
+            grad.addColorStop(0, 'rgba(0,0,0,0)');
+            grad.addColorStop(0.65, 'rgba(0,0,0,0)');
+            grad.addColorStop(1, 'rgba(0,0,0,0.35)');
+            ctx.fillStyle = grad;
             ctx.fillRect(n.cx - n.r, n.cy - n.r, s, s);
         } else {
-            // Flat color fill (muted, minimal gradient)
-            const grad = ctx.createRadialGradient(n.cx - n.r*0.2, n.cy - n.r*0.2, n.r*0.15, n.cx, n.cy, n.r);
-            grad.addColorStop(0, lighten(n.color, 0.15));
-            grad.addColorStop(1, n.color);
-            ctx.fillStyle = grad;
+            // No photo: flat color fill
+            ctx.fillStyle = n.color;
             ctx.fillRect(n.cx - n.r, n.cy - n.r, n.r*2, n.r*2);
         }
 
-        // Dim if not active when a filter is set
+        // Dim if not active when a type filter is set
         if (filters.type && !isActive) {
-            ctx.fillStyle = 'rgba(255,255,255,0.55)';
+            ctx.fillStyle = 'rgba(255,255,255,0.6)';
             ctx.fillRect(n.cx - n.r, n.cy - n.r, n.r*2, n.r*2);
         }
 
         ctx.restore();
 
-        // Ring for hover / active
+        // Colored ring to indicate type group
+        ctx.save();
+        ctx.beginPath();
+        ctx.arc(n.cx, n.cy, n.r - 1, 0, Math.PI * 2);
+        ctx.strokeStyle = n.color;
+        ctx.lineWidth   = isActive ? 3.5 : (isHovered ? 3 : 2);
+        ctx.stroke();
+        ctx.restore();
+
+        // Extra bright ring on hover/active
         if (isActive || isHovered) {
             ctx.save();
+            ctx.globalAlpha = 1;
             ctx.beginPath();
-            ctx.arc(n.cx, n.cy, n.r + (isActive ? 3.5 : 2), 0, Math.PI * 2);
-            ctx.strokeStyle = isActive ? '#ffffff' : 'rgba(255,255,255,0.75)';
-            ctx.lineWidth   = isActive ? 3 : 2;
+            ctx.arc(n.cx, n.cy, n.r + 2, 0, Math.PI * 2);
+            ctx.strokeStyle = isActive ? '#fff' : 'rgba(255,255,255,0.85)';
+            ctx.lineWidth   = isActive ? 2.5 : 1.5;
             ctx.stroke();
             ctx.restore();
         }
 
-        // Label
-        if (n.r >= 13) {
+        // Label: only show on hover (avoids clutter and blocking)
+        if (isHovered && n.r >= 8) {
             ctx.save();
-            const fontSize = Math.min(13, Math.max(8, n.r * 0.28));
-            ctx.font = `${isActive ? 'bold ' : ''}${fontSize}px Segoe UI`;
+            ctx.globalAlpha = 1;
+            const fontSize = Math.min(12, Math.max(8, n.r * 0.3));
+            ctx.font = `bold ${fontSize}px Segoe UI`;
             ctx.textAlign    = 'center';
-            ctx.textBaseline = 'middle';
-            ctx.shadowColor  = 'rgba(0,0,0,0.75)';
+            ctx.textBaseline = 'bottom';
+            ctx.shadowColor  = 'rgba(0,0,0,0.9)';
             ctx.shadowBlur   = 4;
             ctx.fillStyle    = '#ffffff';
-
-            const maxW  = n.r * 1.7;
-            const lines = wrapSpiralText(n.label, maxW, ctx);
-            const lineH = fontSize + 2;
-            // if count fits, shift label up a bit
-            const showCount = n.r >= 20;
-            const totalLines = lines.length + (showCount ? 1 : 0);
-            const startY = n.cy - ((totalLines - 1) * lineH / 2);
-
-            lines.forEach((line, li) => ctx.fillText(line, n.cx, startY + li * lineH));
-
-            if (showCount) {
-                ctx.font = `${Math.max(7, fontSize * 0.75)}px Segoe UI`;
-                ctx.fillStyle = 'rgba(255,255,255,0.82)';
-                ctx.shadowBlur = 2;
-                ctx.fillText(n.count.toLocaleString(), n.cx, startY + lines.length * lineH);
+            let displayName = n.label;
+            const maxW = n.r * 2;
+            while (ctx.measureText(displayName).width > maxW && displayName.length > 3) {
+                displayName = displayName.slice(0, -2) + '…';
             }
+            ctx.fillText(displayName, n.cx, n.cy + n.r - 2);
             ctx.restore();
         }
     });
@@ -1911,7 +1976,7 @@ function drawSpiralInterp(prevMap, nextMap, t) {
 
     // Nodes present in current (target) state
     spiralNodes.forEach((tgt, i) => {
-        const prev = prevMap.get(tgt.rawType);
+        const prev = prevMap.get(tgt.nodeKey || tgt.rawType);
         if (prev) {
             // Interpolate from old to new position
             interpNodes.push({
@@ -1937,7 +2002,7 @@ function drawSpiralInterp(prevMap, nextMap, t) {
 
     // Nodes that disappeared: fade out toward center
     spiralPrevNodes.forEach(prev => {
-        if (!nextMap.has(prev.rawType)) {
+        if (!nextMap.has(prev.nodeKey || prev.rawType)) {
             interpNodes.push({
                 ...prev,
                 cx: prev.cx + (cxCenter - prev.cx) * t,
@@ -1958,14 +2023,18 @@ function drawSpiralInterp(prevMap, nextMap, t) {
         return;
     }
 
-    // Shadow pass
+    // Shadow pass (photo nodes only) — depth: inner = bigger shadow
+    const interpPhotoNodes = interpNodes.filter(n => n.r >= 1 && n.hasPhoto);
+    const interpPhotoTotal = interpPhotoNodes.length;
     interpNodes.forEach(n => {
-        if (n.r < 1) return;
+        if (n.r < 1 || !n.hasPhoto) return;
+        const posIdx = interpPhotoNodes.indexOf(n);
+        const depth  = interpPhotoTotal > 1 ? 1 - (posIdx / (interpPhotoTotal - 1)) : 1;
         ctx.save();
         ctx.globalAlpha = n._opacity;
-        ctx.shadowColor = 'rgba(0,0,0,0.14)';
-        ctx.shadowBlur  = 10;
-        ctx.shadowOffsetY = 2;
+        ctx.shadowColor = `rgba(0,0,0,${(0.08 + 0.18 * depth).toFixed(2)})`;
+        ctx.shadowBlur  = 4 + 12 * depth;
+        ctx.shadowOffsetY = 1 + 3 * depth;
         ctx.beginPath();
         ctx.arc(n.cx, n.cy, n.r, 0, Math.PI * 2);
         ctx.fillStyle = n.color;
@@ -1973,11 +2042,44 @@ function drawSpiralInterp(prevMap, nextMap, t) {
         ctx.restore();
     });
 
-    // Content pass
+    // Center cluster (no-photo nodes)
     interpNodes.forEach(n => {
-        if (n.r < 1) return;
+        if (n.r < 0.5 || n.hasPhoto !== false) return;
+        const isActive = filters.type === n.rawType;
         ctx.save();
-        ctx.globalAlpha = n._opacity;
+        ctx.globalAlpha = n._opacity * ((filters.type && !isActive) ? 0.35 : 0.65);
+        ctx.beginPath();
+        ctx.arc(n.cx, n.cy, n.r, 0, Math.PI * 2);
+        ctx.fillStyle = n.color;
+        ctx.fill();
+        ctx.restore();
+    });
+
+    // Center label
+    const hasCenter2 = interpNodes.some(n => n.hasPhoto === false);
+    if (hasCenter2) {
+        const noPhotoCount = spiralTotalCount - spiralNodes.filter(n => n.hasPhoto).length;
+        if (noPhotoCount > 0) {
+            ctx.save();
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.font = 'bold 11px Segoe UI';
+            ctx.fillStyle = 'rgba(0,0,0,0.4)';
+            ctx.fillText(`${noPhotoCount.toLocaleString()} plants`, W / 2, H / 2 - 6);
+            ctx.font = '9px Segoe UI';
+            ctx.fillStyle = 'rgba(0,0,0,0.28)';
+            ctx.fillText('no photo', W / 2, H / 2 + 8);
+            ctx.restore();
+        }
+    }
+
+    // Photo content pass
+    interpNodes.forEach(n => {
+        if (n.r < 1 || !n.hasPhoto) return;
+        const posIdx2 = interpPhotoNodes.indexOf(n);
+        const depth2  = interpPhotoTotal > 1 ? 1 - (posIdx2 / (interpPhotoTotal - 1)) : 1;
+        ctx.save();
+        ctx.globalAlpha = n._opacity * (0.6 + 0.4 * depth2);
         const isActive  = filters.type === n.rawType;
         const isHovered = n._idx === spiralHoverIdx;
 
@@ -1989,63 +2091,65 @@ function drawSpiralInterp(prevMap, nextMap, t) {
         if (img && img !== 'err') {
             const s = n.r * 2;
             ctx.drawImage(img, n.cx - n.r, n.cy - n.r, s, s);
-            ctx.fillStyle = n.color + '99';
+            const grad = ctx.createLinearGradient(n.cx, n.cy - n.r, n.cx, n.cy + n.r);
+            grad.addColorStop(0, 'rgba(0,0,0,0)');
+            grad.addColorStop(0.65, 'rgba(0,0,0,0)');
+            grad.addColorStop(1, 'rgba(0,0,0,0.35)');
+            ctx.fillStyle = grad;
             ctx.fillRect(n.cx - n.r, n.cy - n.r, s, s);
         } else {
-            // Flat color fill (muted, minimal gradient)
-            const grad = ctx.createRadialGradient(n.cx - n.r*0.2, n.cy - n.r*0.2, n.r*0.15, n.cx, n.cy, n.r);
-            grad.addColorStop(0, lighten(n.color, 0.15));
-            grad.addColorStop(1, n.color);
-            ctx.fillStyle = grad;
+            ctx.fillStyle = n.color;
             ctx.fillRect(n.cx - n.r, n.cy - n.r, n.r*2, n.r*2);
         }
 
         if (filters.type && !isActive) {
-            ctx.fillStyle = 'rgba(255,255,255,0.55)';
+            ctx.fillStyle = 'rgba(255,255,255,0.6)';
             ctx.fillRect(n.cx - n.r, n.cy - n.r, n.r*2, n.r*2);
         }
 
         ctx.restore();
 
-        // Ring
+        // Colored ring
+        if (n._opacity > 0.3) {
+            ctx.save();
+            ctx.globalAlpha = n._opacity;
+            ctx.beginPath();
+            ctx.arc(n.cx, n.cy, n.r - 1, 0, Math.PI * 2);
+            ctx.strokeStyle = n.color;
+            ctx.lineWidth   = isActive ? 3.5 : (isHovered ? 3 : 2);
+            ctx.stroke();
+            ctx.restore();
+        }
+
+        // Extra ring on hover/active
         if ((isActive || isHovered) && n._opacity > 0.5) {
             ctx.save();
             ctx.globalAlpha = n._opacity;
             ctx.beginPath();
-            ctx.arc(n.cx, n.cy, n.r + (isActive ? 3 : 1.5), 0, Math.PI * 2);
-            ctx.strokeStyle = isActive ? '#ffffff' : 'rgba(255,255,255,0.7)';
+            ctx.arc(n.cx, n.cy, n.r + 2, 0, Math.PI * 2);
+            ctx.strokeStyle = isActive ? '#fff' : 'rgba(255,255,255,0.85)';
             ctx.lineWidth   = isActive ? 2.5 : 1.5;
             ctx.stroke();
             ctx.restore();
         }
 
-        // Label
-        if (n.r >= 13 && n._opacity > 0.4) {
+        // Label: only show on hover (avoids clutter and blocking)
+        if (isHovered && n.r >= 8 && n._opacity > 0.4) {
             ctx.save();
-            ctx.globalAlpha = n._opacity;
-            const fontSize = Math.min(13, Math.max(8, n.r * 0.28));
-            ctx.font = `${isActive ? 'bold ' : ''}${fontSize}px Segoe UI`;
+            ctx.globalAlpha = 1;
+            const fontSize = Math.min(12, Math.max(8, n.r * 0.3));
+            ctx.font = `bold ${fontSize}px Segoe UI`;
             ctx.textAlign    = 'center';
-            ctx.textBaseline = 'middle';
-            ctx.shadowColor  = 'rgba(0,0,0,0.6)';
-            ctx.shadowBlur   = 3;
+            ctx.textBaseline = 'bottom';
+            ctx.shadowColor  = 'rgba(0,0,0,0.9)';
+            ctx.shadowBlur   = 4;
             ctx.fillStyle    = '#ffffff';
-
-            const maxW  = n.r * 1.7;
-            const lines = wrapSpiralText(n.label, maxW, ctx);
-            const lineH = fontSize + 2;
-            const showCount = n.r >= 20;
-            const totalLines = lines.length + (showCount ? 1 : 0);
-            const startY = n.cy - ((totalLines - 1) * lineH / 2);
-
-            lines.forEach((line, li) => ctx.fillText(line, n.cx, startY + li * lineH));
-
-            if (showCount) {
-                ctx.font = `${Math.max(7, fontSize * 0.75)}px Segoe UI`;
-                ctx.fillStyle = 'rgba(255,255,255,0.8)';
-                ctx.shadowBlur = 2;
-                ctx.fillText(n.count.toLocaleString(), n.cx, startY + lines.length * lineH);
+            let displayName = n.label;
+            const maxW = n.r * 2;
+            while (ctx.measureText(displayName).width > maxW && displayName.length > 3) {
+                displayName = displayName.slice(0, -2) + '…';
             }
+            ctx.fillText(displayName, n.cx, n.cy + n.r - 2);
             ctx.restore();
         }
     });
@@ -2088,26 +2192,33 @@ function buildSpiralLegend() {
     ).join('');
 }
 
+const SPIRAL_MAX_NODES = 150;
+
 function renderTypeMap(data) {
     initSpiralCanvas();
     buildSpiralLegend();
     spiralTotalCount = data.length;
 
-    // Count types and grab a representative image URL per type
-    const typeCounts  = {};
-    const typeImgMap  = {};
+    // Separate plants with and without images
+    const withImg  = [];
+    const noImg    = [];
     data.forEach(p => {
-        const t = (p.Type || 'Unknown').trim();
-        typeCounts[t] = (typeCounts[t] || 0) + 1;
-        if (!typeImgMap[t]) {
-            const url = (p['Image URL'] || '').trim();
-            if (url) typeImgMap[t] = url;
-        }
+        const url = (p['Image URL'] || '').trim();
+        if (url) withImg.push(p);
+        else noImg.push(p);
     });
 
-    const types = Object.entries(typeCounts).sort((a, b) => b[1] - a[1]);
-    const N     = types.length;
-    if (N === 0) {
+    // Sort by utility score descending
+    const byScore = (a, b) => utilityScore(b) - utilityScore(a);
+    withImg.sort(byScore);
+    noImg.sort(byScore);
+
+    // Photo plants fill the spiral; no-photo plants cluster at center
+    const photoPlants = withImg.slice(0, SPIRAL_MAX_NODES);
+    const centerPlants = noImg.slice(0, 50);
+
+    const N = photoPlants.length;
+    if (N === 0 && centerPlants.length === 0) {
         spiralPrevNodes = spiralNodes.length ? spiralNodes.map(n => ({...n})) : [];
         spiralNodes = [];
         animateSpiral();
@@ -2117,51 +2228,89 @@ function renderTypeMap(data) {
     const cont = document.getElementById('chartTypeMap');
     const W    = cont.clientWidth  || 800;
     const H    = cont.clientHeight || 440;
-    const cx   = W / 2;
-    const cy   = H / 2;
+    const cxC  = W / 2;
+    const cyC  = H / 2;
 
-    const GOLDEN = 2.399963229728653; // golden angle in radians
-    const maxCount = types[0][1];
+    const GOLDEN = 2.399963229728653;
 
-    // Bubble radius: sqrt-scaled between minR and maxR
-    const maxR = Math.min(52, Math.min(W, H) * 0.12);
-    const minR = 4;
+    // Radii: large at center, shrinking outward
+    const maxR   = Math.max(14, Math.min(36, Math.min(W, H) * 0.065));
+    const minR   = Math.max(6, maxR * 0.28);
+    const maxScore = Math.max(...photoPlants.map(utilityScore), 1);
 
-    // Spiral scale: outermost point + maxR must fit in the canvas
-    const margin = maxR + 12;
-    const spiralC = (Math.min(cx, cy) - margin) / Math.sqrt(N);
+    // Reserve center space for no-photo cluster
+    const centerReserve = centerPlants.length > 0 ? maxR * 2.2 : 0;
 
-    // Save previous positions for animation
+    // Spiral spacing — generous to avoid overlap
+    // We compute spacing so outermost node + its radius fits in canvas
+    const canvasR = Math.min(cxC, cyC) - minR - 8;
+    const spiralC = N > 0 ? (canvasR - centerReserve) / Math.sqrt(N) : 0;
+
     spiralPrevNodes = spiralNodes.length ? spiralNodes.map(n => ({...n})) : [];
 
-    spiralNodes = types.map(([type, count], i) => {
-        const angle  = i * GOLDEN;
-        const dist   = spiralC * Math.sqrt(i + 1);
-        const ncx    = cx + dist * Math.cos(angle);
-        const ncy    = cy + dist * Math.sin(angle);
-        const r      = Math.max(minR, Math.sqrt(count / maxCount) * maxR);
-        const group  = classifyType(type);
+    const newNodes = [];
 
-        // Shorten label for display
-        const label  = type
-            .replace(/Deciduous /i, '')
-            .replace(/Evergreen /i, '')
-            .replace(/ Tree$/i, ' Tr.')
-            .replace(/ Shrub$/i, ' Sh.');
+    // 1) Photo plants spiral outward — radius decreases with index
+    photoPlants.forEach((p, i) => {
+        const angle = i * GOLDEN;
+        // t goes 0→1 from innermost to outermost
+        const t     = N > 1 ? i / (N - 1) : 0;
+        const dist  = centerReserve + spiralC * Math.sqrt(i + 1);
+        const ncx   = cxC + dist * Math.cos(angle);
+        const ncy   = cyC + dist * Math.sin(angle);
+        const score = utilityScore(p);
+        // Radius: lerp from maxR to minR based on position, with small score boost
+        const posR  = maxR - (maxR - minR) * t;
+        const r     = posR * (0.85 + 0.15 * (score / maxScore));
+        const type  = (p.Type || 'Unknown').trim();
+        const group = classifyType(type);
+        const name  = p.CommonName || `${p.Genus} ${p.Species}`;
+        const label = name.length > 18 ? name.slice(0, 16) + '…' : name;
+        const imgUrl = (p['Image URL'] || '').trim();
+        const nodeKey = `${p.Genus}_${p.Species}_${p.Family}`;
 
-        const imgUrl = typeImgMap[type] || null;
-        if (imgUrl) getOrLoadImage(imgUrl, drawSpiral);
+        getOrLoadImage(imgUrl, drawSpiral);
 
-        return { cx: ncx, cy: ncy, r, rawType: type, label, count, color: group.color, group: group.name, imgUrl };
+        newNodes.push({
+            cx: ncx, cy: ncy, r,
+            rawType: type, label, count: 1,
+            color: group.color, group: group.name,
+            imgUrl, plantName: name, family: p.Family,
+            nodeKey, hasPhoto: true
+        });
     });
 
+    // 2) No-photo plants: small dots clustered at center
+    const cSmallR = Math.max(2.5, maxR * 0.12);
+    const cClusterR = centerReserve * 0.7;
+    centerPlants.forEach((p, i) => {
+        const angle = i * GOLDEN;
+        const dist  = cClusterR * Math.sqrt(i + 1) / Math.sqrt(Math.max(centerPlants.length, 1));
+        const ncx   = cxC + dist * Math.cos(angle);
+        const ncy   = cyC + dist * Math.sin(angle);
+        const type  = (p.Type || 'Unknown').trim();
+        const group = classifyType(type);
+        const name  = p.CommonName || `${p.Genus} ${p.Species}`;
+        const label = name.length > 14 ? name.slice(0, 12) + '…' : name;
+        const nodeKey = `nophoto_${p.Genus}_${p.Species}_${p.Family}`;
+
+        newNodes.push({
+            cx: ncx, cy: ncy, r: cSmallR,
+            rawType: type, label, count: 1,
+            color: group.color, group: group.name,
+            imgUrl: null, plantName: name, family: p.Family,
+            nodeKey, hasPhoto: false
+        });
+    });
+
+    spiralNodes = newNodes;
     animateSpiral();
 }
 
 // Build a lookup from rawType→node for interpolation
 function buildNodeMap(nodes) {
     const m = new Map();
-    nodes.forEach(n => m.set(n.rawType, n));
+    nodes.forEach(n => m.set(n.nodeKey || n.rawType, n));
     return m;
 }
 
@@ -2270,9 +2419,31 @@ function populateTypeDropdown() {
 // ─────────────────────────────────────────────
 function fullscreenCard(btn) {
     const card = btn.closest('.chart-card');
-    if (card.requestFullscreen) card.requestFullscreen();
-    else if (card.webkitRequestFullscreen) card.webkitRequestFullscreen();
+    if (document.fullscreenElement === card) {
+        document.exitFullscreen();
+    } else {
+        const req = card.requestFullscreen || card.webkitRequestFullscreen;
+        if (req) req.call(card).then(() => {
+            // Resize all charts after entering fullscreen
+            setTimeout(() => {
+                [ecFamilies, ecScatter, ecCalendar, ecGrowth, ecPollinators].forEach(ec => {
+                    if (ec) ec.resize();
+                });
+                drawSpiral();
+            }, 150);
+        });
+    }
 }
+
+// Resize charts when exiting fullscreen too
+document.addEventListener('fullscreenchange', () => {
+    setTimeout(() => {
+        [ecFamilies, ecScatter, ecCalendar, ecGrowth, ecPollinators].forEach(ec => {
+            if (ec) ec.resize();
+        });
+        drawSpiral();
+    }, 150);
+});
 
 // ─────────────────────────────────────────────
 // FILTER PANEL TOGGLE (desktop + mobile)
