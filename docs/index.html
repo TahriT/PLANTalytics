@@ -1025,6 +1025,19 @@
                 </div>
             </div>
 
+            <!-- Plant name search -->
+            <div>
+                <div class="filter-section-heading"><i class="fas fa-search"></i> Search</div>
+                <div class="filter-group">
+                    <label>Common or Latin name</label>
+                    <div class="zip-row">
+                        <input type="text" id="nameSearchInput" placeholder="e.g. Oak, Quercus…" autocomplete="off"
+                            oninput="setFilter('nameSearch', this.value.trim())">
+                        <button class="zip-btn" onclick="document.getElementById('nameSearchInput').value=''; setFilter('nameSearch','');" title="Clear"><i class="fas fa-times"></i></button>
+                    </div>
+                </div>
+            </div>
+
             <!-- Hardiness Zone visual bar -->
             <div>
                 <div class="filter-section-heading"><i class="fas fa-thermometer-half"></i> Hardiness Zone</div>
@@ -1311,6 +1324,7 @@ const filters = {
     minMedicinal:   0,
     month:       null,   // string (month name)
     pollinator:  null,   // string
+    nameSearch:  '',     // common name or latin name text search
 };
 
 // ─────────────────────────────────────────────
@@ -1413,6 +1427,12 @@ function getFilteredData() {
             const polls = parsePollinators(p.Pollinators || '');
             if (!polls.some(pp => pp.toLowerCase().includes(filters.pollinator.toLowerCase()))) return false;
         }
+        if (filters.nameSearch) {
+            const q = filters.nameSearch.toLowerCase();
+            const common = (p.CommonName || '').toLowerCase();
+            const latin  = ((p.Genus || '') + ' ' + (p.Species || '')).toLowerCase().trim();
+            if (!common.includes(q) && !latin.includes(q)) return false;
+        }
         return true;
     });
 }
@@ -1440,6 +1460,7 @@ function clearFilter(key) {
     else if (key === 'growthRate') { filters.growthRate = null; document.getElementById('growthFilter').value = ''; }
     else if (key === 'month') { filters.month = null; }
     else if (key === 'pollinator') { filters.pollinator = null; }
+    else if (key === 'nameSearch') { filters.nameSearch = ''; const el = document.getElementById('nameSearchInput'); if (el) el.value = ''; }
     else if (key === 'zone') {
         filters.zone = null;
         updateZoneBar(null);
@@ -1484,6 +1505,7 @@ function updateChips() {
         { key: 'soil',        label: () => `Soil: ${filters.soil}` },
         { key: 'month',       label: () => `Month: ${filters.month}` },
         { key: 'pollinator',  label: () => `Poll: ${filters.pollinator}` },
+        { key: 'nameSearch',  label: () => `"${filters.nameSearch}"`, show: filters.nameSearch !== '' },
         { key: 'minEdibility', label: () => `Edible ≥${filters.minEdibility}`, show: filters.minEdibility > 0 },
         { key: 'minMedicinal', label: () => `Med ≥${filters.minMedicinal}`,   show: filters.minMedicinal > 0 },
     ];
