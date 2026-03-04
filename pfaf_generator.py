@@ -117,11 +117,11 @@ def get_plant_info(genus, species=""):
     if reproduction_match:
         reproduction = reproduction_match[0].capitalize()
 
-    preferences_match = re.findall("prefers (.*?)\ and", description)
+    preferences_match = re.findall(r"prefers (.*?) and", description)
     if preferences_match:
         preferences = preferences_match[0].strip().capitalize()
 
-    tolerances_match = re.findall("can tolerate (.*?)\.", description)
+    tolerances_match = re.findall(r"can tolerate (.*?)\.", description)
     if tolerances_match:
         tolerances = tolerances_match[0].capitalize()
 

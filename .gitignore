@@ -162,3 +162,4 @@ cython_debug/
 
 # Documentation folder (internal development notes)
 docs/documentation/
+scrape_log.txt
