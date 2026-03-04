@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>PLANTalytics — Original Power BI (Legacy)</title>
-    <script src="https://cdn.jsdelivr.net/npm/powerbi-client@2.23.1/dist/powerbi.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
@@ -120,10 +119,10 @@
             <span class="badge">Original Power BI · Legacy</span>
         </div>
         <div class="hd-right">
-            <button class="hd-btn" onclick="refreshReport()" title="Reload report data">
+            <button class="hd-btn" onclick="document.getElementById('reportContainer').src = document.getElementById('reportContainer').src" title="Reload report">
                 <i class="fas fa-sync-alt"></i> Refresh
             </button>
-            <button class="hd-btn" onclick="toggleFullscreen()" title="Power BI fullscreen">
+            <button class="hd-btn" onclick="document.getElementById('reportContainer').requestFullscreen && document.getElementById('reportContainer').requestFullscreen()" title="Fullscreen">
                 <i class="fas fa-expand"></i> Fullscreen
             </button>
             <a href="index.html" class="hd-btn">
@@ -132,55 +131,15 @@
         </div>
     </header>
 
-    <div id="reportContainer"></div>
+    <iframe
+        id="reportContainer"
+        src="https://app.powerbi.com/view?r=eyJrIjoiYzI0ZmIyZmYtOWNjZS00NWIzLThjMmMtYmMyOTgwOThlYTUzIiwidCI6IjA5MmUzOThlLTIzYTktNGFjMS04MmJmLWIwMzQ2NTRlMGZjMyJ9"
+        frameborder="0"
+        allowFullScreen="true"
+        title="PLANTalytics Power BI Report">
+    </iframe>
 
     <div id="toast"></div>
 
-    <script>
-        const embedConfig = {
-            type: 'report',
-            tokenType: window.powerbi.models.TokenType.Embed,
-            accessToken: 'eyJrIjoiYzI0ZmIyZmYtOWNjZS00NWIzLThjMmMtYmMyOTgwOThlYTUzIiwidCI6IjA5MmUzOThlLTIzYTktNGFjMS04MmJmLWIwMzQ2NTRlMGZjMyJ9',
-            embedUrl: 'https://app.powerbi.com/view?r=eyJrIjoiYzI0ZmIyZmYtOWNjZS00NWIzLThjMmMtYmMyOTgwOThlYTUzIiwidCI6IjA5MmUzOThlLTIzYTktNGFjMS04MmJmLWIwMzQ2NTRlMGZjMyJ9',
-            id: 'c24fb2ff-9cce-45b3-8c2c-bc298098ea53',
-            permissions: window.powerbi.models.Permissions.Read,
-            settings: {
-                filterPaneEnabled: true,
-                navContentPaneEnabled: true,
-                background: window.powerbi.models.BackgroundType.Transparent
-            }
-        };
-
-        let report;
-
-        function loadReport() {
-            report = window.powerbi.embed(document.getElementById('reportContainer'), embedConfig);
-            report.on('loaded',   () => toast('Report loaded', 'ok'));
-            report.on('error', e  => toast('Load error: ' + (e.detail || 'unknown'), 'err'));
-        }
-
-        function refreshReport() {
-            if (!report) return;
-            report.refresh()
-                .then(() => toast('Refreshed', 'ok'))
-                .catch(() => toast('Refresh failed', 'err'));
-        }
-
-        function toggleFullscreen() {
-            if (!report) return;
-            report.fullscreen().catch(() => toast('Fullscreen unavailable', 'err'));
-        }
-
-        let _toastTimer;
-        function toast(msg, type) {
-            const el = document.getElementById('toast');
-            el.textContent = msg;
-            el.className = 'show ' + type;
-            clearTimeout(_toastTimer);
-            _toastTimer = setTimeout(() => { el.className = ''; }, 4000);
-        }
-
-        window.addEventListener('load', loadReport);
-    </script>
 </body>
 </html>
