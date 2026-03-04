@@ -810,16 +810,6 @@
             :root { --filter-width: 260px; }
         }
 
-        /* ── Legacy "·· ·" overflow dropdown ── */
-        .hdr-more { position: relative; }
-        .more-btn { cursor: pointer; border: none; background: rgba(255,255,255,0.12); color: white; border-radius: 4px; font-size: 1rem; padding: 0.15rem 0.5rem; line-height: 1.4; letter-spacing: 0.06em; transition: background 0.2s; }
-        .more-btn:hover { background: rgba(255,255,255,0.28); }
-        .more-dropdown { display: none; position: absolute; right: 0; top: calc(100% + 6px); background: white; border-radius: 7px; box-shadow: 0 6px 20px rgba(0,0,0,0.18); min-width: 190px; z-index: 300; padding: 0.3rem; }
-        .hdr-more:hover .more-dropdown, .hdr-more:focus-within .more-dropdown { display: flex; flex-direction: column; gap: 2px; }
-        .more-dropdown a { color: var(--primary); text-decoration: none; padding: 0.4rem 0.7rem; border-radius: 5px; font-size: 0.78rem; display: flex; align-items: center; gap: 0.4rem; }
-        .more-dropdown a:hover { background: #f0f7e8; }
-        .more-dropdown .more-sep { font-size: 0.62rem; color: #bbb; text-transform: uppercase; letter-spacing: 0.8px; padding: 0.3rem 0.7rem 0.1rem; font-weight: 700; }
-
         /* ── Support / attribution banner ── */
         .pfaf-banner {
             background: linear-gradient(135deg, #1a2e0f 0%, #243d14 100%);
@@ -961,17 +951,9 @@
     </h1>
     <div class="header-links">
         <a href="index.html" class="header-link"><i class="fas fa-home"></i> Home</a>
-        <a href="dashboard.html" class="header-link"><i class="fas fa-chart-bar"></i> Visual Explorer</a>
+        <a href="advanced-dashboard.html" class="header-link"><i class="fas fa-cube"></i> Power BI</a>
         <a href="https://sproutcast.io" target="_blank" rel="noopener noreferrer" class="header-link" title="Track your plants"><i class="fas fa-map-marker-alt"></i> Sproutcast</a>
         <a href="https://github.com/TahriT/PLANTalytics" target="_blank" rel="noopener noreferrer" class="header-link" title="GitHub"><i class="fab fa-github"></i></a>
-        <div class="hdr-more">
-            <button class="more-btn" title="More pages">···</button>
-            <div class="more-dropdown">
-                <span class="more-sep">Legacy Versions</span>
-                <a href="advanced-dashboard.html"><i class="fas fa-cube"></i> Original Power BI</a>
-                <a href="custom-layout.html"><i class="fas fa-history"></i> Legacy v2</a>
-            </div>
-        </div>
     </div>
 </header>
 
