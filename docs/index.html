@@ -795,6 +795,15 @@
         .plant-card-badge.med { background: #f3e5f5; color: #6a1b9a; }
         .plant-card-badge.oth { background: #e3f2fd; color: #1565c0; }
         .photo-grid-msg { grid-column: 1 / -1; text-align: center; padding: 1.2rem 0.75rem; color: #999; font-size: 0.82rem; }
+        /* Pagination */
+        .grid-pager { grid-column: 1 / -1; display: flex; align-items: center; justify-content: space-between; padding: 0.6rem 0.25rem 0.35rem; flex-wrap: wrap; gap: 0.4rem; }
+        .pager-info { font-size: 0.72rem; color: #888; white-space: nowrap; }
+        .pager-btns { display: flex; align-items: center; gap: 0.25rem; flex-wrap: wrap; }
+        .pager-btn { min-width: 2rem; height: 2rem; padding: 0 0.45rem; border: 1px solid #ddd; background: white; border-radius: 6px; font-size: 0.76rem; cursor: pointer; color: #444; transition: background 0.15s, border-color 0.15s; line-height: 1; display: inline-flex; align-items: center; justify-content: center; }
+        .pager-btn:hover:not(.disabled):not(.active) { background: #f0f7e8; border-color: #6aaa2a; color: #2d5016; }
+        .pager-btn.active { background: #2d5016; color: white; border-color: #2d5016; font-weight: 700; }
+        .pager-btn.disabled { opacity: 0.35; cursor: default; }
+        .pager-ellipsis { font-size: 0.76rem; color: #aaa; padding: 0 0.1rem; line-height: 2rem; }
 
         /* scrollbar styling */
         .filter-body::-webkit-scrollbar { width: 5px; }
@@ -1173,7 +1182,7 @@
                     <div id="photoGridTypeTabs" class="photo-type-tabs"></div>
                     <div id="photoGrid" class="photo-grid"></div>
                 </div>
-                <div class="card-footer"><i class="fas fa-mouse-pointer"></i> Click a type tab to filter · click a card to open its plant page · top plants by utility score shown first</div>
+                <div class="card-footer"><i class="fas fa-mouse-pointer"></i> Click a type tab to filter &middot; click a card to open its plant page &middot; sorted by utility score &middot; 48 per page</div>
             </div>
 
             <!-- Chart 2: Top Families Donut -->
@@ -2442,9 +2451,12 @@ const SPIRAL_MAX_NODES = 90;
 // ─────────────────────────────────────────────
 // CHART: Plant Type Photo Grid
 // ─────────────────────────────────────────────
-const PHOTO_GRID_MAX = 60;
+const PHOTO_GRID_PAGE_SIZE = 48;
+let   gridCurrentPage = 1;
 
-function renderTypeMap(data) {
+function renderTypeMap(data, page) {
+    if (page !== undefined) gridCurrentPage = page;
+    else gridCurrentPage = 1;
     const tabsEl = document.getElementById('photoGridTypeTabs');
     const gridEl = document.getElementById('photoGrid');
     if (!tabsEl || !gridEl) return;
@@ -2487,7 +2499,10 @@ function renderTypeMap(data) {
         if (hb !== ha) return hb - ha;
         return utilityScore(b) - utilityScore(a);
     });
-    const shown = sorted.slice(0, PHOTO_GRID_MAX);
+    const totalPages = Math.max(1, Math.ceil(sorted.length / PHOTO_GRID_PAGE_SIZE));
+    if (gridCurrentPage > totalPages) gridCurrentPage = totalPages;
+    const pageStart = (gridCurrentPage - 1) * PHOTO_GRID_PAGE_SIZE;
+    const shown = sorted.slice(pageStart, pageStart + PHOTO_GRID_PAGE_SIZE);
 
     gridEl.innerHTML = '';
     gridEl.scrollTop = 0;
@@ -2502,6 +2517,7 @@ function renderTypeMap(data) {
     if (filters.minEdibility > 0) activeFilters.push(`Edible ≥${filters.minEdibility}`);
     if (filters.minMedicinal > 0) activeFilters.push(`Med ≥${filters.minMedicinal}`);
     if (filters.growthRate)      activeFilters.push(filters.growthRate);
+    if (filters.nameSearch)      activeFilters.push(`"${filters.nameSearch}"`);
 
     if (activeFilters.length > 0) {
         const banner = document.createElement('div');
@@ -2575,11 +2591,58 @@ function renderTypeMap(data) {
         gridEl.appendChild(card);
     });
 
-    if (data.length > PHOTO_GRID_MAX) {
-        const more = document.createElement('div');
-        more.className = 'photo-grid-msg';
-        more.textContent = `Showing top ${PHOTO_GRID_MAX} of ${data.length.toLocaleString()} plants — use filters to narrow results`;
-        gridEl.appendChild(more);
+    // Pagination controls
+    if (totalPages > 1) {
+        const pager = document.createElement('div');
+        pager.className = 'grid-pager';
+
+        const info = document.createElement('span');
+        info.className = 'pager-info';
+        info.textContent = `${pageStart + 1}–${Math.min(pageStart + PHOTO_GRID_PAGE_SIZE, sorted.length)} of ${sorted.length.toLocaleString()}`;
+        pager.appendChild(info);
+
+        const btnGroup = document.createElement('div');
+        btnGroup.className = 'pager-btns';
+
+        // Prev
+        const prev = document.createElement('button');
+        prev.className = 'pager-btn' + (gridCurrentPage === 1 ? ' disabled' : '');
+        prev.innerHTML = '<i class="fas fa-chevron-left"></i>';
+        prev.disabled = gridCurrentPage === 1;
+        prev.addEventListener('click', () => { renderTypeMap(data, gridCurrentPage - 1); document.getElementById('photoGrid').scrollIntoView({behavior:'smooth', block:'start'}); });
+        btnGroup.appendChild(prev);
+
+        // Page number buttons (show up to 7 around current)
+        const range = [];
+        for (let i = 1; i <= totalPages; i++) {
+            if (i === 1 || i === totalPages || (i >= gridCurrentPage - 2 && i <= gridCurrentPage + 2)) range.push(i);
+        }
+        let lastAdded = 0;
+        range.forEach(i => {
+            if (lastAdded && i - lastAdded > 1) {
+                const ellipsis = document.createElement('span');
+                ellipsis.className = 'pager-ellipsis';
+                ellipsis.textContent = '…';
+                btnGroup.appendChild(ellipsis);
+            }
+            const btn = document.createElement('button');
+            btn.className = 'pager-btn' + (i === gridCurrentPage ? ' active' : '');
+            btn.textContent = i;
+            btn.addEventListener('click', (()=>{ const pg=i; return ()=>{ renderTypeMap(data, pg); document.getElementById('photoGrid').scrollIntoView({behavior:'smooth', block:'start'}); }; })());
+            btnGroup.appendChild(btn);
+            lastAdded = i;
+        });
+
+        // Next
+        const next = document.createElement('button');
+        next.className = 'pager-btn' + (gridCurrentPage === totalPages ? ' disabled' : '');
+        next.innerHTML = '<i class="fas fa-chevron-right"></i>';
+        next.disabled = gridCurrentPage === totalPages;
+        next.addEventListener('click', () => { renderTypeMap(data, gridCurrentPage + 1); document.getElementById('photoGrid').scrollIntoView({behavior:'smooth', block:'start'}); });
+        btnGroup.appendChild(next);
+
+        pager.appendChild(btnGroup);
+        gridEl.appendChild(pager);
     }
 }
 
