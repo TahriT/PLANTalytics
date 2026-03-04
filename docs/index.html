@@ -113,21 +113,20 @@
         .page-body::-webkit-scrollbar-track { background: transparent; }
         .page-body::-webkit-scrollbar-thumb { background: var(--accent); border-radius: 3px; }
 
-        /* ── Stats bar (single compact segmented row) ── */
+        /* ── Stats bar (inline inside quick-filter-bar) ── */
         .stats-row {
             display: flex;
-            background: white;
-            border-radius: 6px;
-            box-shadow: 0 1px 4px rgba(0,0,0,0.06);
             overflow: hidden;
-            margin-bottom: -0.15rem;
+            flex: 1;
+            min-width: 0;
+            gap: 0;
         }
         .stat-seg {
             flex: 1;
             display: flex;
             align-items: center;
-            gap: 0.35rem;
-            padding: 0.28rem 0.55rem;
+            gap: 0.25rem;
+            padding: 0.18rem 0.4rem;
             position: relative;
         }
         .stat-seg + .stat-seg::before {
@@ -138,9 +137,9 @@
             background: #e0e0e0;
         }
         .stat-seg .seg-icon {
-            font-size: 0.7rem;
-            width: 20px; height: 20px;
-            border-radius: 5px;
+            font-size: 0.62rem;
+            width: 18px; height: 18px;
+            border-radius: 4px;
             display: flex; align-items: center; justify-content: center;
             flex-shrink: 0;
         }
@@ -148,8 +147,8 @@
         .seg-icon.blue   { background: #e3f2fd; color: #1565c0; }
         .seg-icon.orange  { background: #fff3e0; color: #e65100; }
         .seg-icon.purple  { background: #f3e5f5; color: #6a1b9a; }
-        .stat-seg .seg-val { font-size: 0.9rem; font-weight: 700; color: var(--primary); line-height: 1; }
-        .stat-seg .seg-lbl { font-size: 0.65rem; color: #888; white-space: nowrap; }
+        .stat-seg .seg-val { font-size: 0.82rem; font-weight: 700; color: var(--primary); line-height: 1; }
+        .stat-seg .seg-lbl { font-size: 0.6rem; color: #888; white-space: nowrap; }
 
         /* ── Charts grid ── */
         .charts-grid {
@@ -401,8 +400,13 @@
 
             .page-body { height: calc(100vh - var(--header-h)); }
             .main-area { padding: 0.5rem; }
-            .stats-row { flex-wrap: wrap; gap: 1px; }
-            .stat-seg { flex: 1 1 45%; min-height: 44px; padding: 0.4rem 0.55rem; }
+
+            /* Show ZIP/zone/toggle on mobile */
+            .qf-zip, .qf-zone-wrap, .qf-toggle { display: flex; }
+            .qf-zone-wrap { display: flex; }
+
+            .stats-row { flex-wrap: wrap; gap: 1px; width: 100%; }
+            .stat-seg { flex: 1 1 45%; min-height: 38px; padding: 0.3rem 0.45rem; }
             .charts-grid { grid-template-columns: 1fr; gap: 0.55rem; }
             #chartCardScatter { order: 4; }
             #chartCardCalendar { order: 3; }
@@ -504,9 +508,9 @@
             @keyframes toastIn  { from { opacity: 0; transform: translateX(-50%) translateY(20px); } to { opacity: 1; transform: translateX(-50%) translateY(0); } }
             @keyframes toastOut { to { opacity: 0; transform: translateX(-50%) translateY(20px); } }
 
-            /* Quick filter bar compact on mobile */
+            /* Quick filter bar on mobile — show ZIP/zone controls */
             .qf-sep { display: none; }
-            .quick-filter-bar { padding: 0.35rem 0.5rem; gap: 0.4rem; }
+            .quick-filter-bar { padding: 0.35rem 0.5rem; gap: 0.4rem; flex-direction: column; align-items: stretch; }
             .qf-zip input { min-height: 36px; font-size: 0.82rem; }
             .qf-zip-btn { width: 36px; height: 36px; }
             .qf-zone-bar { height: 28px; }
@@ -538,7 +542,7 @@
             .main-area { padding: 0.35rem; }
 
             /* Quick filter bar stacks on small phones */
-            .quick-filter-bar { flex-direction: column; align-items: stretch; gap: 0.35rem; padding: 0.35rem 0.45rem; }
+            .quick-filter-bar { gap: 0.3rem; padding: 0.3rem 0.4rem; }
             .qf-zip { flex-wrap: wrap; gap: 0.25rem; }
             .qf-zip input { flex: 1; min-width: 0; }
             .qf-zip-btn { width: 34px; height: 34px; }
@@ -546,10 +550,11 @@
             .qf-toggle { margin-left: 0; width: 100%; }
             .qf-toggle-btn { width: 100%; justify-content: center; }
 
-            .stats-row { flex-wrap: wrap; gap: 1px; border-radius: 8px; }
-            .stat-seg { flex: 1 1 48%; padding: 0.38rem 0.45rem; }
-            .stat-seg .seg-val { font-size: 0.82rem; }
-            .stat-seg .seg-lbl { font-size: 0.6rem; }
+            .stats-row { flex-wrap: wrap; gap: 1px; }
+            .stat-seg { flex: 1 1 48%; padding: 0.28rem 0.35rem; }
+            .stat-seg .seg-val { font-size: 0.75rem; }
+            .stat-seg .seg-lbl { font-size: 0.55rem; }
+            .stat-seg .seg-icon { width: 16px; height: 16px; font-size: 0.55rem; }
 
             /* Photo grid single or 2 column */
             .photo-grid {
@@ -1119,17 +1124,19 @@
         }
         .tip-toast-dismiss:hover { color: #388e3c; }
 
-        /* ── Quick Filter Bar ── */
+        /* ── Quick Filter Bar (mobile only for ZIP/zone, always for stats) ── */
         .quick-filter-bar {
             background: white;
             border-radius: 8px;
             box-shadow: 0 1px 4px rgba(0,0,0,0.07);
-            padding: 0.4rem 0.65rem;
+            padding: 0.25rem 0.5rem;
             display: flex;
             align-items: center;
-            gap: 0.5rem;
+            gap: 0.4rem;
             flex-wrap: wrap;
         }
+        /* Hide ZIP/zone/toggle on desktop — they live in the sidebar */
+        .qf-zip, .qf-sep, .qf-zone-wrap, .qf-toggle { display: none; }
         .qf-zip {
             display: flex;
             align-items: center;
@@ -1452,12 +1459,12 @@
 
         <!-- Tip toast (New Here) -->
         <div id="tipToast" class="tip-toast">
-            <span><i class="fas fa-lightbulb" style="margin-right:0.3rem"></i><strong>Tip:</strong> Enter ZIP below to find plants for your zone, then click charts to filter.</span>
+            <span><i class="fas fa-lightbulb" style="margin-right:0.3rem"></i><strong>Tip:</strong> <span class="mob-hide-text">Enter your ZIP in the left panel to find plants for your zone.</span><span class="mob-show-text">Enter ZIP below to find plants for your zone.</span> Click charts to filter.</span>
             <button class="tip-toast-dismiss" onclick="dismissTip()" title="Dismiss"><i class="fas fa-times"></i></button>
         </div>
         <script>try{if(localStorage.getItem('pltx_tip_dismissed')==='1')document.getElementById('tipToast').style.display='none';}catch(e){}</script>
 
-        <!-- Quick Filter Bar (always visible) -->
+        <!-- Quick Filter Bar (stats always, ZIP/zone on mobile only) -->
         <div class="quick-filter-bar" id="quickFilterBar">
             <div class="qf-zip">
                 <label><i class="fas fa-map-marker-alt"></i> ZIP</label>
@@ -1470,34 +1477,32 @@
                 <span class="qf-zone-label">Hardiness Zone <span id="qfZoneValLabel"></span></span>
                 <div class="qf-zone-bar" id="qfZoneBar"></div>
             </div>
+            <div class="stats-row">
+                <div class="stat-seg" title="Total plants matching current filters out of the full dataset">
+                    <div class="seg-icon green"><i class="fas fa-seedling"></i></div>
+                    <span class="seg-val" id="statTotal">—</span>
+                    <span class="seg-lbl">Plants<span id="statTotalOf" style="opacity:0.6;font-weight:400"></span></span>
+                </div>
+                <div class="stat-seg" title="PFAF edibility scale 1–5: score 3 = good food plant, 4 = important food source, 5 = staple crop. Showing plants rated 3 or above.">
+                    <div class="seg-icon orange"><i class="fas fa-apple-alt"></i></div>
+                    <span class="seg-val" id="statEdible">—</span>
+                    <span class="seg-lbl">Edible ≥3</span>
+                </div>
+                <div class="stat-seg" title="PFAF medicinal scale 1–5: score 3 = used in herbalism, 5 = major medicinal plant. Showing plants rated 3 or above.">
+                    <div class="seg-icon purple"><i class="fas fa-mortar-pestle"></i></div>
+                    <span class="seg-val" id="statMedicinal">—</span>
+                    <span class="seg-lbl">Medicinal ≥3</span>
+                </div>
+                <div class="stat-seg" title="Plants that support at least one listed pollinator species (bees, butterflies, moths, etc.)">
+                    <div class="seg-icon blue"><i class="fas fa-bug"></i></div>
+                    <span class="seg-val" id="statPollinators">—</span>
+                    <span class="seg-lbl">Pollinators</span>
+                </div>
+            </div>
             <div class="qf-toggle">
                 <button class="qf-toggle-btn" id="advFilterToggle" onclick="toggleAdvancedFilters()" title="Show all filters">
                     <i class="fas fa-sliders-h"></i> <span class="mob-hide-text">Advanced</span> Filters
                 </button>
-            </div>
-        </div>
-
-        <!-- Stats (compact segmented bar) -->
-        <div class="stats-row">
-            <div class="stat-seg" title="Total plants matching current filters out of the full dataset">
-                <div class="seg-icon green"><i class="fas fa-seedling"></i></div>
-                <span class="seg-val" id="statTotal">—</span>
-                <span class="seg-lbl">Plants<span id="statTotalOf" style="opacity:0.6;font-weight:400"></span></span>
-            </div>
-            <div class="stat-seg" title="PFAF edibility scale 1–5: score 3 = good food plant, 4 = important food source, 5 = staple crop. Showing plants rated 3 or above.">
-                <div class="seg-icon orange"><i class="fas fa-apple-alt"></i></div>
-                <span class="seg-val" id="statEdible">—</span>
-                <span class="seg-lbl">Edible ≥3</span>
-            </div>
-            <div class="stat-seg" title="PFAF medicinal scale 1–5: score 3 = used in herbalism, 5 = major medicinal plant. Showing plants rated 3 or above.">
-                <div class="seg-icon purple"><i class="fas fa-mortar-pestle"></i></div>
-                <span class="seg-val" id="statMedicinal">—</span>
-                <span class="seg-lbl">Medicinal ≥3</span>
-            </div>
-            <div class="stat-seg" title="Plants that support at least one listed pollinator species (bees, butterflies, moths, etc.)">
-                <div class="seg-icon blue"><i class="fas fa-bug"></i></div>
-                <span class="seg-val" id="statPollinators">—</span>
-                <span class="seg-lbl">Pollinators</span>
             </div>
         </div>
 
