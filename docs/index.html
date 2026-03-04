@@ -343,14 +343,15 @@
             background: rgba(255,255,255,0.15);
             border: none;
             color: white;
-            width: 38px;
-            height: 38px;
+            width: 42px;
+            height: 42px;
             border-radius: 7px;
             cursor: pointer;
             font-size: 1.1rem;
             align-items: center;
             justify-content: center;
             flex-shrink: 0;
+            -webkit-tap-highlight-color: transparent;
         }
 
         .mob-hamburger:hover { background: rgba(255,255,255,0.28); }
@@ -378,7 +379,7 @@
                 z-index: 210;
                 transform: translateX(-100%);
                 transition: transform 0.28s ease, width 0.01s;
-                width: var(--filter-width) !important;
+                width: min(var(--filter-width), 85vw) !important;
                 border-right: none;
                 box-shadow: 4px 0 24px rgba(0,0,0,0.2);
             }
@@ -387,20 +388,152 @@
                 transform: translateX(0);
             }
 
+            .filter-body {
+                overflow-y: auto;
+                -webkit-overflow-scrolling: touch;
+                max-height: calc(100vh - var(--header-h) - 50px);
+                padding: 0.75rem;
+                gap: 0.9rem;
+            }
+
             .page-body { height: calc(100vh - var(--header-h)); }
             .main-area { padding: 0.5rem; }
-            .stats-row { flex-wrap: wrap; }
-            .stat-seg { flex: 1 1 45%; }
-            .charts-grid { grid-template-columns: 1fr; }
-            .mob-close-filter-btn { display: flex; }
+            .stats-row { flex-wrap: wrap; gap: 1px; }
+            .stat-seg { flex: 1 1 45%; min-height: 44px; padding: 0.4rem 0.55rem; }
+            .charts-grid { grid-template-columns: 1fr; gap: 0.55rem; }
+            .chart-instance { height: 300px; }
+            .chart-instance.tall { height: 350px; }
+            .mob-close-filter-btn { display: flex; min-height: 44px; }
+
+            /* Header links — icon only */
+            .header-link span.link-text { display: none; }
+            .header-link { padding: 0.25rem 0.45rem; min-width: 34px; min-height: 34px; justify-content: center; }
+
+            /* Banner stacking */
+            .pfaf-banner { flex-direction: column; align-items: flex-start; gap: 0.4rem; padding: 0.45rem 0.75rem; }
+            .pfaf-banner .ban-right { margin-left: 0; width: 100%; }
+
+            /* Zone bar taller touch targets */
+            .zone-bar { height: 40px; }
+            .zone-seg { font-size: 0.72rem; min-width: 0; }
+
+            /* Filter inputs/selects larger */
+            .filter-group input[type="text"],
+            .filter-group select {
+                padding: 0.6rem 0.7rem;
+                font-size: 0.92rem;
+                min-height: 44px;
+            }
+            .zip-btn { min-width: 44px; min-height: 44px; font-size: 0.9rem; }
+
+            /* Photo grid 2 columns */
+            .photo-grid {
+                grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+                gap: 0.45rem;
+                padding: 0.45rem;
+                max-height: 500px;
+            }
+
+            /* Photo type tabs scrollable */
+            .photo-type-tabs {
+                flex-wrap: nowrap;
+                overflow-x: auto;
+                -webkit-overflow-scrolling: touch;
+                scrollbar-width: none;
+                padding-bottom: 0.5rem;
+            }
+            .photo-type-tabs::-webkit-scrollbar { display: none; }
+            .photo-type-tab { flex-shrink: 0; min-height: 36px; padding: 0.3rem 0.7rem; }
+
+            /* Pagination bigger touch targets */
+            .pager-btn { min-width: 2.5rem; height: 2.5rem; font-size: 0.82rem; }
+
+            /* Table scroll */
+            .table-scroll { -webkit-overflow-scrolling: touch; }
+
+            /* Top picks table mobile-friendly */
+            .picks-table { font-size: 0.76rem; }
+            .picks-table th, .picks-table td { padding: 0.4rem 0.5rem; white-space: nowrap; }
+
+            /* Slider row touch */
+            .slider-row input[type="range"] { height: 28px; }
+
+            /* Clear/export buttons easier to tap */
+            .clear-all-btn, .export-filter-btn { min-height: 44px; font-size: 0.85rem; }
+
+            /* Tip strip smaller text */
+            .tip-strip { font-size: 0.74rem; padding: 0.45rem 0.65rem; }
+
+            /* Plant card overlay visible on tapped state */
+            .plant-card.tapped .plant-card-overlay {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
 
         @media (max-width: 600px) {
-            .main-area { padding: 0.4rem; }
-            .stats-row { flex-wrap: wrap; }
-            .stat-seg { flex: 1 1 45%; }
+            :root { --header-h: 44px; }
+
+            header { padding: 0 0.5rem; gap: 0.35rem; }
+            header h1 { font-size: 0.85rem; }
             header h1 .badge { display: none; }
+            .header-sub { display: none; }
             .header-link.v2 { display: none; }
+            .header-link { padding: 0.2rem 0.35rem; font-size: 0.68rem; min-width: 32px; min-height: 32px; }
+
+            .main-area { padding: 0.35rem; }
+            .stats-row { flex-wrap: wrap; gap: 1px; border-radius: 8px; }
+            .stat-seg { flex: 1 1 48%; padding: 0.38rem 0.45rem; }
+            .stat-seg .seg-val { font-size: 0.82rem; }
+            .stat-seg .seg-lbl { font-size: 0.6rem; }
+
+            /* Photo grid single or 2 column */
+            .photo-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 0.4rem;
+                padding: 0.35rem;
+            }
+            .plant-card-name { font-size: 0.73rem; }
+            .plant-card-family { font-size: 0.62rem; }
+            .plant-card-badge { font-size: 0.58rem; padding: 0.06rem 0.22rem; }
+
+            /* Charts smaller on phones */
+            .chart-instance { height: 260px; }
+            .chart-instance.tall { height: 300px; }
+
+            /* Card footer smaller */
+            .card-footer { font-size: 0.7rem; padding: 0.45rem 0.75rem; }
+
+            /* Banner even more compact */
+            .pfaf-banner { font-size: 0.68rem; padding: 0.35rem 0.6rem; }
+            .pfaf-banner a.ban-btn { font-size: 0.66rem; padding: 0.18rem 0.5rem; }
+
+            /* Pager buttons */
+            .grid-pager { padding: 0.4rem 0.15rem 0.25rem; }
+            .pager-btn { min-width: 2.2rem; height: 2.2rem; }
+            .pager-info { font-size: 0.68rem; }
+
+            /* Filter panel full width on smallest screens */
+            .filter-panel {
+                width: 100vw !important;
+            }
+
+            /* Top picks table card-like scroll */
+            .table-scroll { max-height: 300px; overflow-x: auto; }
+            .picks-table th, .picks-table td { font-size: 0.72rem; padding: 0.35rem 0.4rem; }
+
+            /* Zone bar slightly bigger */
+            .zone-bar { height: 42px; border-radius: 8px; }
+            .zone-seg { font-size: 0.68rem; }
+        }
+
+        /* Extra small screens (≤380px) */
+        @media (max-width: 380px) {
+            .photo-grid { grid-template-columns: repeat(2, 1fr); }
+            .stat-seg { flex: 1 1 100%; }
+            .stat-seg + .stat-seg::before { display: none; }
+            .header-links { gap: 0.2rem; }
+            .header-link { min-width: 28px; min-height: 28px; padding: 0.15rem 0.3rem; }
         }
 
         .filter-section-heading {
@@ -934,6 +1067,14 @@
             min-height: 1rem;
             font-weight: 600;
         }
+
+        /* ── Mobile conditional text ── */
+        .mob-show-text { display: none; }
+        .mob-hide-text { display: inline; }
+        @media (max-width: 900px) {
+            .mob-show-text { display: inline; }
+            .mob-hide-text { display: none; }
+        }
     </style>
 </head>
 <body>
@@ -959,9 +1100,9 @@
         <span class="header-sub">Explore 7,400+ plants by zone, edibility &amp; use</span>
     </h1>
     <div class="header-links">
-        <a href="index.html" class="header-link"><i class="fas fa-home"></i> Home</a>
-        <a href="advanced-dashboard.html" class="header-link"><i class="fas fa-cube"></i> Power BI</a>
-        <a href="https://sproutcast.io" target="_blank" rel="noopener noreferrer" class="header-link" title="Track your plants"><i class="fas fa-map-marker-alt"></i> Sproutcast</a>
+        <a href="index.html" class="header-link"><i class="fas fa-home"></i><span class="link-text"> Home</span></a>
+        <a href="advanced-dashboard.html" class="header-link"><i class="fas fa-cube"></i><span class="link-text"> Power BI</span></a>
+        <a href="https://sproutcast.io" target="_blank" rel="noopener noreferrer" class="header-link" title="Track your plants"><i class="fas fa-map-marker-alt"></i><span class="link-text"> Sproutcast</span></a>
         <a href="https://github.com/TahriT/PLANTalytics" target="_blank" rel="noopener noreferrer" class="header-link" title="GitHub"><i class="fab fa-github"></i></a>
     </div>
 </header>
@@ -1137,7 +1278,7 @@
 
         <!-- Stats (compact segmented bar) -->
         <div id="tipStrip" class="tip-strip" style="display:flex">
-            <span><i class="fas fa-lightbulb" style="margin-right:0.35rem"></i><strong>New here?</strong> Enter your ZIP code in the left panel to instantly see plants suited to your climate zone. Then click any chart to filter.</span>
+            <span><i class="fas fa-lightbulb" style="margin-right:0.35rem"></i><strong>New here?</strong> Enter your ZIP code in the <span class="mob-hide-text">left panel</span><span class="mob-show-text"><i class="fas fa-bars"></i> menu</span> to instantly see plants suited to your climate zone. Then click any chart to filter.</span>
             <button class="tip-strip-dismiss" onclick="document.getElementById('tipStrip').style.display='none'; try{localStorage.setItem('pltx_tip_dismissed','1')}catch(e){}" title="Dismiss"><i class="fas fa-times"></i></button>
         </div>
         <script>try{if(localStorage.getItem('pltx_tip_dismissed')==='1')document.getElementById('tipStrip').style.display='none';}catch(e){}</script>
@@ -2891,6 +3032,47 @@ document.getElementById('edibilitySlider').addEventListener('input', function() 
 document.getElementById('medicinalSlider').addEventListener('input', function() {
     document.getElementById('medBadge').textContent = this.value;
 });
+
+// ─────────────────────────────────────────────
+// MOBILE: Tap-to-reveal card overlay
+// ─────────────────────────────────────────────
+(function() {
+    let lastTapped = null;
+    document.addEventListener('click', function(e) {
+        // Only on touch/mobile
+        if (window.innerWidth > 900) return;
+        const card = e.target.closest('.plant-card');
+        if (!card) {
+            // Tapped outside a card — clear any tapped state
+            if (lastTapped) { lastTapped.classList.remove('tapped'); lastTapped = null; }
+            return;
+        }
+        // If card is already tapped, allow the link to navigate
+        if (card.classList.contains('tapped')) return;
+        // First tap: show overlay, prevent navigation
+        e.preventDefault();
+        if (lastTapped && lastTapped !== card) lastTapped.classList.remove('tapped');
+        card.classList.add('tapped');
+        lastTapped = card;
+    }, true);
+})();
+
+// ─────────────────────────────────────────────
+// MOBILE: Close filter on swipe-left
+// ─────────────────────────────────────────────
+(function() {
+    let startX = 0;
+    const panel = document.getElementById('filterPanel');
+    panel.addEventListener('touchstart', function(e) {
+        startX = e.touches[0].clientX;
+    }, { passive: true });
+    panel.addEventListener('touchend', function(e) {
+        const diff = e.changedTouches[0].clientX - startX;
+        if (diff < -60 && panel.classList.contains('mob-open')) {
+            closeMobileFilter();
+        }
+    }, { passive: true });
+})();
 
 // Start
 loadData().catch(e => {
