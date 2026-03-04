@@ -2582,10 +2582,14 @@ window.addEventListener('resize', () => {
 async function loadData() {
     const [plantsResult, zipResult] = await Promise.all([
         new Promise(resolve => Papa.parse('plant_data.csv', {
-            download: true, header: true, skipEmptyLines: true, complete: r => resolve(r)
+            download: true, header: true, skipEmptyLines: true,
+            complete: r => resolve(r),
+            error: () => resolve({ data: [] })
         })),
         new Promise(resolve => Papa.parse('zip_zone.csv', {
-            download: true, header: true, skipEmptyLines: true, complete: r => resolve(r)
+            download: true, header: true, skipEmptyLines: true,
+            complete: r => resolve(r),
+            error: () => resolve({ data: [] })
         }))
     ]);
 
@@ -2595,11 +2599,15 @@ async function loadData() {
         if (row.zipcode) zipMap.set(row.zipcode.padStart(5,'0'), row);
     });
 
-    populateTypeDropdown();
-    buildZoneBar();
-    refreshAll();
-
-    document.getElementById('loader').style.display = 'none';
+    try {
+        populateTypeDropdown();
+        buildZoneBar();
+        refreshAll();
+    } catch(e) {
+        console.error('Error initialising charts:', e);
+    } finally {
+        document.getElementById('loader').style.display = 'none';
+    }
 }
 
 // Sync badges on slider input
@@ -2611,7 +2619,10 @@ document.getElementById('medicinalSlider').addEventListener('input', function() 
 });
 
 // Start
-loadData();
+loadData().catch(e => {
+    console.error('loadData failed:', e);
+    document.getElementById('loader').style.display = 'none';
+});
 </script>
 </body>
 </html>
