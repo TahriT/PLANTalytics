@@ -20,6 +20,7 @@
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; }
+        html, body { overflow-x: hidden; max-width: 100vw; }
 
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -51,6 +52,8 @@
             gap: 0.4rem;
             flex: 1;
             white-space: nowrap;
+            min-width: 0;
+            overflow: hidden;
         }
 
         header h1 .badge {
@@ -401,6 +404,8 @@
             .stats-row { flex-wrap: wrap; gap: 1px; }
             .stat-seg { flex: 1 1 45%; min-height: 44px; padding: 0.4rem 0.55rem; }
             .charts-grid { grid-template-columns: 1fr; gap: 0.55rem; }
+            #chartCardScatter { order: 4; }
+            #chartCardCalendar { order: 3; }
             .chart-instance { height: 300px; }
             .chart-instance.tall { height: 350px; }
             .mob-close-filter-btn { display: flex; min-height: 44px; }
@@ -410,8 +415,25 @@
             .header-link { padding: 0.25rem 0.45rem; min-width: 34px; min-height: 34px; justify-content: center; }
 
             /* Banner stacking */
-            .pfaf-banner { flex-direction: column; align-items: flex-start; gap: 0.4rem; padding: 0.45rem 0.75rem; }
-            .pfaf-banner .ban-right { margin-left: 0; width: 100%; }
+            .pfaf-banner {
+                flex-direction: row;
+                flex-wrap: wrap;
+                align-items: center;
+                gap: 0.25rem 0.5rem;
+                padding: 0.35rem 0.6rem;
+                font-size: 0.68rem;
+            }
+            .pfaf-banner .ban-label { font-size: 0.63rem; }
+            .pfaf-banner .ban-sep { display: none; }
+            .pfaf-banner .ban-right {
+                margin-left: auto;
+                width: auto;
+                flex-wrap: wrap;
+                gap: 0.3rem;
+                justify-content: flex-end;
+            }
+            .pfaf-banner a.ban-link { font-size: 0.68rem; }
+            .pfaf-banner a.ban-btn { font-size: 0.62rem; padding: 0.15rem 0.45rem; }
 
             /* Zone bar taller touch targets */
             .zone-bar { height: 40px; }
@@ -461,8 +483,35 @@
             /* Clear/export buttons easier to tap */
             .clear-all-btn, .export-filter-btn { min-height: 44px; font-size: 0.85rem; }
 
-            /* Tip strip smaller text */
-            .tip-strip { font-size: 0.74rem; padding: 0.45rem 0.65rem; }
+            /* Tip toast — floating bubble on mobile */
+            .tip-toast {
+                position: fixed;
+                bottom: 1rem;
+                left: 50%;
+                transform: translateX(-50%);
+                z-index: 300;
+                width: calc(100vw - 1.5rem);
+                max-width: 380px;
+                border-radius: 12px;
+                box-shadow: 0 4px 20px rgba(0,0,0,0.18);
+                font-size: 0.72rem;
+                padding: 0.55rem 0.7rem;
+                border-left: none;
+                border: 1px solid #c8e6c9;
+                animation: toastIn 0.3s ease;
+            }
+            .tip-toast.dismissed { animation: toastOut 0.25s ease forwards; }
+            @keyframes toastIn  { from { opacity: 0; transform: translateX(-50%) translateY(20px); } to { opacity: 1; transform: translateX(-50%) translateY(0); } }
+            @keyframes toastOut { to { opacity: 0; transform: translateX(-50%) translateY(20px); } }
+
+            /* Quick filter bar compact on mobile */
+            .qf-sep { display: none; }
+            .quick-filter-bar { padding: 0.35rem 0.5rem; gap: 0.4rem; }
+            .qf-zip input { min-height: 36px; font-size: 0.82rem; }
+            .qf-zip-btn { width: 36px; height: 36px; }
+            .qf-zone-bar { height: 28px; }
+            .qf-zone-bar .zone-seg { font-size: 0.6rem; }
+            .qf-toggle-btn { min-height: 36px; font-size: 0.72rem; padding: 0.25rem 0.5rem; }
 
             /* Plant card overlay visible on tapped state */
             .plant-card.tapped .plant-card-overlay {
@@ -474,14 +523,29 @@
         @media (max-width: 600px) {
             :root { --header-h: 44px; }
 
-            header { padding: 0 0.5rem; gap: 0.35rem; }
-            header h1 { font-size: 0.85rem; }
+            header { padding: 0 0.5rem; gap: 0.35rem; max-width: 100vw; }
+            header h1 { font-size: 0.85rem; overflow: hidden; text-overflow: ellipsis; }
             header h1 .badge { display: none; }
             .header-sub { display: none; }
             .header-link.v2 { display: none; }
             .header-link { padding: 0.2rem 0.35rem; font-size: 0.68rem; min-width: 32px; min-height: 32px; }
 
+            /* Banner even more compact on small phones */
+            .pfaf-banner { font-size: 0.63rem; padding: 0.3rem 0.5rem; }
+            .pfaf-banner .ban-right { flex-wrap: wrap; gap: 0.25rem; }
+            .pfaf-banner a.ban-btn { font-size: 0.6rem; padding: 0.12rem 0.4rem; }
+
             .main-area { padding: 0.35rem; }
+
+            /* Quick filter bar stacks on small phones */
+            .quick-filter-bar { flex-direction: column; align-items: stretch; gap: 0.35rem; padding: 0.35rem 0.45rem; }
+            .qf-zip { flex-wrap: wrap; gap: 0.25rem; }
+            .qf-zip input { flex: 1; min-width: 0; }
+            .qf-zip-btn { width: 34px; height: 34px; }
+            .qf-zone-wrap { width: 100%; }
+            .qf-toggle { margin-left: 0; width: 100%; }
+            .qf-toggle-btn { width: 100%; justify-content: center; }
+
             .stats-row { flex-wrap: wrap; gap: 1px; border-radius: 8px; }
             .stat-seg { flex: 1 1 48%; padding: 0.38rem 0.45rem; }
             .stat-seg .seg-val { font-size: 0.82rem; }
@@ -503,10 +567,6 @@
 
             /* Card footer smaller */
             .card-footer { font-size: 0.7rem; padding: 0.45rem 0.75rem; }
-
-            /* Banner even more compact */
-            .pfaf-banner { font-size: 0.68rem; padding: 0.35rem 0.6rem; }
-            .pfaf-banner a.ban-btn { font-size: 0.66rem; padding: 0.18rem 0.5rem; }
 
             /* Pager buttons */
             .grid-pager { padding: 0.4rem 0.15rem 0.25rem; }
@@ -1034,21 +1094,21 @@
         /* ── Filter section heading icons ── */
         .filter-section-heading i { margin-right: 0.3rem; opacity: 0.65; }
 
-        /* ── Tip strip ── */
-        .tip-strip {
+        /* ── Tip toast (New Here) ── */
+        .tip-toast {
             background: linear-gradient(135deg, #e8f5e9, #f1f8e9);
             border: 1px solid #c8e6c9;
             border-left: 4px solid var(--secondary);
             border-radius: 6px;
-            padding: 0.5rem 0.8rem;
-            font-size: 0.78rem;
+            padding: 0.4rem 0.7rem;
+            font-size: 0.75rem;
             color: #33691e;
             display: flex;
             align-items: center;
-            gap: 0.5rem;
+            gap: 0.45rem;
             justify-content: space-between;
         }
-        .tip-strip-dismiss {
+        .tip-toast-dismiss {
             background: none;
             border: none;
             color: #81c784;
@@ -1057,7 +1117,121 @@
             padding: 0 0.2rem;
             flex-shrink: 0;
         }
-        .tip-strip-dismiss:hover { color: #388e3c; }
+        .tip-toast-dismiss:hover { color: #388e3c; }
+
+        /* ── Quick Filter Bar ── */
+        .quick-filter-bar {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.07);
+            padding: 0.4rem 0.65rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+        .qf-zip {
+            display: flex;
+            align-items: center;
+            gap: 0.3rem;
+            flex-shrink: 0;
+        }
+        .qf-zip label {
+            font-size: 0.7rem;
+            font-weight: 600;
+            color: #555;
+            white-space: nowrap;
+        }
+        .qf-zip input {
+            width: 5.5rem;
+            padding: 0.28rem 0.45rem;
+            border: 1.5px solid #d0d0d0;
+            border-radius: 5px;
+            font-size: 0.78rem;
+            outline: none;
+            transition: border-color 0.15s;
+        }
+        .qf-zip input:focus { border-color: var(--secondary); }
+        .qf-zip-btn {
+            background: var(--secondary);
+            color: white;
+            border: none;
+            border-radius: 5px;
+            width: 28px; height: 28px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.72rem;
+            flex-shrink: 0;
+            transition: background 0.15s;
+        }
+        .qf-zip-btn:hover { background: var(--primary); }
+        .qf-sep {
+            width: 1px;
+            height: 22px;
+            background: #e0e0e0;
+            flex-shrink: 0;
+        }
+        .qf-zone-wrap {
+            flex: 1;
+            min-width: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 0.15rem;
+        }
+        .qf-zone-label {
+            font-size: 0.65rem;
+            color: #888;
+            font-weight: 600;
+        }
+        .qf-zone-bar {
+            display: flex;
+            height: 24px;
+            border-radius: 5px;
+            overflow: hidden;
+            cursor: pointer;
+            gap: 1px;
+        }
+        .qf-zone-bar .zone-seg {
+            font-size: 0.58rem;
+        }
+        .qf-zone-feedback {
+            font-size: 0.66rem;
+            color: var(--secondary);
+            font-weight: 600;
+            min-height: 0;
+            white-space: nowrap;
+        }
+        .qf-zone-feedback.error { color: #c62828; }
+        .qf-toggle {
+            display: flex;
+            align-items: center;
+            gap: 0.3rem;
+            margin-left: auto;
+            flex-shrink: 0;
+        }
+        .qf-toggle-btn {
+            background: rgba(45,80,22,0.08);
+            border: 1.5px solid rgba(45,80,22,0.18);
+            color: var(--primary);
+            border-radius: 5px;
+            padding: 0.25rem 0.55rem;
+            font-size: 0.7rem;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 0.3rem;
+            transition: background 0.15s, border-color 0.15s;
+            white-space: nowrap;
+        }
+        .qf-toggle-btn:hover { background: rgba(45,80,22,0.15); border-color: rgba(45,80,22,0.3); }
+        .qf-toggle-btn.active {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
 
         /* ── Zone temp hint ── */
         .zone-temp-hint {
@@ -1276,12 +1450,32 @@
     <!-- Main area -->
     <div class="main-area">
 
-        <!-- Stats (compact segmented bar) -->
-        <div id="tipStrip" class="tip-strip" style="display:flex">
-            <span><i class="fas fa-lightbulb" style="margin-right:0.35rem"></i><strong>New here?</strong> Enter your ZIP code in the <span class="mob-hide-text">left panel</span><span class="mob-show-text"><i class="fas fa-bars"></i> menu</span> to instantly see plants suited to your climate zone. Then click any chart to filter.</span>
-            <button class="tip-strip-dismiss" onclick="document.getElementById('tipStrip').style.display='none'; try{localStorage.setItem('pltx_tip_dismissed','1')}catch(e){}" title="Dismiss"><i class="fas fa-times"></i></button>
+        <!-- Tip toast (New Here) -->
+        <div id="tipToast" class="tip-toast">
+            <span><i class="fas fa-lightbulb" style="margin-right:0.3rem"></i><strong>Tip:</strong> Enter ZIP below to find plants for your zone, then click charts to filter.</span>
+            <button class="tip-toast-dismiss" onclick="dismissTip()" title="Dismiss"><i class="fas fa-times"></i></button>
         </div>
-        <script>try{if(localStorage.getItem('pltx_tip_dismissed')==='1')document.getElementById('tipStrip').style.display='none';}catch(e){}</script>
+        <script>try{if(localStorage.getItem('pltx_tip_dismissed')==='1')document.getElementById('tipToast').style.display='none';}catch(e){}</script>
+
+        <!-- Quick Filter Bar (always visible) -->
+        <div class="quick-filter-bar" id="quickFilterBar">
+            <div class="qf-zip">
+                <label><i class="fas fa-map-marker-alt"></i> ZIP</label>
+                <input type="text" id="qfZipInput" placeholder="e.g. 90210" maxlength="5" onkeydown="if(event.key==='Enter') qfLookupZip()">
+                <button class="qf-zip-btn" onclick="qfLookupZip()" title="Find zone"><i class="fas fa-search"></i></button>
+                <span class="qf-zone-feedback" id="qfZoneFeedback"></span>
+            </div>
+            <div class="qf-sep"></div>
+            <div class="qf-zone-wrap">
+                <span class="qf-zone-label">Hardiness Zone <span id="qfZoneValLabel"></span></span>
+                <div class="qf-zone-bar" id="qfZoneBar"></div>
+            </div>
+            <div class="qf-toggle">
+                <button class="qf-toggle-btn" id="advFilterToggle" onclick="toggleAdvancedFilters()" title="Show all filters">
+                    <i class="fas fa-sliders-h"></i> <span class="mob-hide-text">Advanced</span> Filters
+                </button>
+            </div>
+        </div>
 
         <!-- Stats (compact segmented bar) -->
         <div class="stats-row">
@@ -1342,7 +1536,7 @@
             </div>
 
             <!-- Chart 3: Edibility × Medicinal Scatter -->
-            <div class="chart-card" style="border-top-color:#f9a825">
+            <div class="chart-card" id="chartCardScatter" style="border-top-color:#f9a825">
                 <div class="card-header">
                     <div class="card-title"><i class="fas fa-circle"></i> Edibility × Medicinal Value</div>
                     <div class="card-actions">
@@ -1356,7 +1550,7 @@
             </div>
 
             <!-- Chart 4: Harvest Calendar -->
-            <div class="chart-card" style="border-top-color:#1565c0">
+            <div class="chart-card" id="chartCardCalendar" style="border-top-color:#1565c0">
                 <div class="card-header">
                     <div class="card-title"><i class="fas fa-calendar-alt"></i> Bloom &amp; Harvest Calendar</div>
                     <div class="card-actions">
@@ -1596,9 +1790,9 @@ function clearFilter(key) {
     else if (key === 'nameSearch') { filters.nameSearch = ''; const el = document.getElementById('nameSearchInput'); if (el) el.value = ''; }
     else if (key === 'zone') {
         filters.zone = null;
-        updateZoneBar(null);
-        document.getElementById('zoneValLabel').textContent = '';
-        setZoneTempHint(null);
+        syncZoneUI(null);
+        const qfFb = document.getElementById('qfZoneFeedback');
+        if (qfFb) qfFb.textContent = '';
     }
     refreshAll();
 }
@@ -1622,8 +1816,16 @@ function clearAllFilters() {
     document.getElementById('zoneValLabel').textContent = '';
     document.getElementById('zoneFeedback').textContent = '';
     document.getElementById('zipInput').value = '';
+    // Reset quick filter bar
+    const qfZip = document.getElementById('qfZipInput');
+    const qfFb = document.getElementById('qfZoneFeedback');
+    const qfLbl = document.getElementById('qfZoneValLabel');
+    if (qfZip) qfZip.value = '';
+    if (qfFb) qfFb.textContent = '';
+    if (qfLbl) qfLbl.textContent = '';
     setZoneTempHint(null);
     updateZoneBar(null);
+    updateQfZoneBar(null);
     refreshAll();
 }
 
@@ -2093,6 +2295,7 @@ function refreshAll() {
     renderPollinators(data);
     renderTopPicks(data);
     updateZoneBar(filters.zone);
+    updateQfZoneBar(filters.zone);
 }
 
 // ─────────────────────────────────────────────
@@ -2854,8 +3057,7 @@ function buildZoneBar() {
         seg.addEventListener('click', () => {
             const newZ = (filters.zone === z) ? null : z;
             filters.zone = newZ;
-            document.getElementById('zoneValLabel').textContent = newZ ? `Zone ${newZ}` : '';
-            setZoneTempHint(newZ);
+            syncZoneUI(newZ);
             refreshAll();
         });
         bar.appendChild(seg);
@@ -2900,7 +3102,13 @@ function lookupZip() {
     document.getElementById('zoneValLabel').textContent = `Zone ${zoneNum} (${entry.zone})`;
     fb.textContent = `✓ ${entry.zonetitle} — ${entry.trange}°F`;
     fb.className = 'zone-feedback';
-    setZoneTempHint(zoneNum);
+
+    // Sync quick filter bar
+    document.getElementById('qfZipInput').value = document.getElementById('zipInput').value.trim();
+    const qfFb = document.getElementById('qfZoneFeedback');
+    qfFb.textContent = `✓ Zone ${zoneNum}`;
+    qfFb.className = 'qf-zone-feedback';
+    syncZoneUI(zoneNum);
     refreshAll();
 }
 
@@ -3017,6 +3225,7 @@ async function loadData() {
     try {
         populateTypeDropdown();
         buildZoneBar();
+        buildQfZoneBar();
         refreshAll();
     } catch(e) {
         console.error('Error initialising charts:', e);
@@ -3073,6 +3282,130 @@ document.getElementById('medicinalSlider').addEventListener('input', function() 
         }
     }, { passive: true });
 })();
+
+// ─────────────────────────────────────────────
+// QUICK FILTER BAR
+// ─────────────────────────────────────────────
+function buildQfZoneBar() {
+    const bar = document.getElementById('qfZoneBar');
+    if (!bar) return;
+    bar.innerHTML = '';
+    for (let z = 1; z <= 13; z++) {
+        const seg = document.createElement('div');
+        seg.className = 'zone-seg';
+        seg.id = `qf-zone-seg-${z}`;
+        seg.title = `Zone ${z}`;
+        seg.textContent = z;
+        seg.style.background = ZONE_COLORS[z - 1];
+        seg.addEventListener('click', () => {
+            const newZ = (filters.zone === z) ? null : z;
+            filters.zone = newZ;
+            syncZoneUI(newZ);
+            refreshAll();
+        });
+        bar.appendChild(seg);
+    }
+}
+
+function updateQfZoneBar(activeZ) {
+    for (let z = 1; z <= 13; z++) {
+        const seg = document.getElementById(`qf-zone-seg-${z}`);
+        if (!seg) continue;
+        seg.className = 'zone-seg';
+        if (activeZ !== null && activeZ !== undefined) {
+            if (z === activeZ) seg.classList.add('active');
+            else seg.classList.add('dimmed');
+        }
+    }
+}
+
+function syncZoneUI(z) {
+    // Sync both zone bars and labels
+    const lbl = z ? `Zone ${z}` : '';
+    const el1 = document.getElementById('zoneValLabel');
+    const el2 = document.getElementById('qfZoneValLabel');
+    if (el1) el1.textContent = lbl;
+    if (el2) el2.textContent = lbl ? `(${lbl})` : '';
+    setZoneTempHint(z);
+    updateZoneBar(z);
+    updateQfZoneBar(z);
+}
+
+function qfLookupZip() {
+    const inp = document.getElementById('qfZipInput');
+    const zip = inp.value.trim().padStart(5, '0');
+    const fb  = document.getElementById('qfZoneFeedback');
+
+    if (!zip || zip === '00000') {
+        fb.textContent = 'Enter ZIP';
+        fb.className = 'qf-zone-feedback error';
+        return;
+    }
+
+    const entry = zipMap.get(zip);
+    if (!entry) {
+        fb.textContent = 'Not found';
+        fb.className = 'qf-zone-feedback error';
+        return;
+    }
+
+    const zoneNum = parseInt(entry.zone);
+    filters.zone = zoneNum;
+    fb.textContent = `✓ Zone ${zoneNum} (${entry.zone})`;
+    fb.className = 'qf-zone-feedback';
+
+    // Sync to sidebar too
+    document.getElementById('zipInput').value = inp.value.trim();
+    document.getElementById('zoneFeedback').textContent = `✓ ${entry.zonetitle} — ${entry.trange}°F`;
+    document.getElementById('zoneFeedback').className = 'zone-feedback';
+
+    syncZoneUI(zoneNum);
+    refreshAll();
+    dismissTip();
+}
+
+function toggleAdvancedFilters() {
+    const btn = document.getElementById('advFilterToggle');
+    if (isMobile()) {
+        toggleFilterPanel();
+        return;
+    }
+    const panel = document.getElementById('filterPanel');
+    panel.classList.toggle('collapsed');
+    btn.classList.toggle('active', !panel.classList.contains('collapsed'));
+    setTimeout(() => {
+        [ecFamilies, ecScatter, ecCalendar, ecGrowth, ecPollinators].forEach(ec => {
+            if (ec) ec.resize();
+        });
+    }, 300);
+}
+
+// ─────────────────────────────────────────────
+// TIP TOAST
+// ─────────────────────────────────────────────
+function dismissTip() {
+    const t = document.getElementById('tipToast');
+    if (!t || t.style.display === 'none') return;
+    if (window.innerWidth <= 900) {
+        t.classList.add('dismissed');
+        setTimeout(() => { t.style.display = 'none'; }, 260);
+    } else {
+        t.style.display = 'none';
+    }
+    try { localStorage.setItem('pltx_tip_dismissed', '1'); } catch(e) {}
+}
+
+// Auto-dismiss tip on mobile after scroll or interaction
+if (window.innerWidth <= 900) {
+    let tipDismissed = false;
+    const autoDismiss = () => {
+        if (tipDismissed) return;
+        tipDismissed = true;
+        setTimeout(dismissTip, 3000);
+    };
+    document.addEventListener('scroll', autoDismiss, { once: true, passive: true });
+    document.addEventListener('touchstart', autoDismiss, { once: true, passive: true });
+}
 
 // Start
 loadData().catch(e => {
