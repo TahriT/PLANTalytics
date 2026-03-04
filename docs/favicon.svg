@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
+  <!-- dark green background circle -->
+  <circle cx="16" cy="16" r="16" fill="#1a2e0f"/>
+  <!-- stem -->
+  <line x1="16" y1="26" x2="16" y2="14" stroke="#6aaa2a" stroke-width="2" stroke-linecap="round"/>
+  <!-- left leaf -->
+  <path d="M16 20 Q9 14 10 7 Q14 10 16 20Z" fill="#4a8c1c"/>
+  <!-- right leaf -->
+  <path d="M16 20 Q23 14 22 7 Q18 10 16 20Z" fill="#6aaa2a"/>
+  <!-- leaf vein highlights -->
+  <path d="M16 20 Q11 13 10.5 8" stroke="#8ecc44" stroke-width="0.7" fill="none" stroke-linecap="round" opacity="0.7"/>
+  <path d="M16 20 Q21 13 21.5 8" stroke="#a8e05a" stroke-width="0.7" fill="none" stroke-linecap="round" opacity="0.7"/>
+</svg>
