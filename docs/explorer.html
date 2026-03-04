@@ -663,51 +663,6 @@
             margin-right: 1px;
         }
 
-        /* ── Spiral tooltip ── */
-        .spiral-tooltip {
-            display: none;
-            position: absolute;
-            background: white;
-            border: 1px solid #e0ead6;
-            border-left: 4px solid var(--secondary);
-            border-radius: 8px;
-            padding: 0.55rem 0.8rem;
-            font-size: 0.8rem;
-            pointer-events: none;
-            box-shadow: 0 6px 20px rgba(0,0,0,0.15);
-            z-index: 20;
-            max-width: 170px;
-            line-height: 1.55;
-            backdrop-filter: blur(4px);
-        }
-
-        /* spiral legend */
-        .spiral-legend {
-            position: absolute;
-            bottom: 0.5rem;
-            right: 0.75rem;
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: flex-end;
-            gap: 0.25rem 0.5rem;
-            max-width: 260px;
-            pointer-events: none;
-        }
-
-        .legend-item {
-            display: flex;
-            align-items: center;
-            gap: 0.3rem;
-            font-size: 0.7rem;
-            color: #555;
-        }
-
-        .legend-dot {
-            width: 9px;
-            height: 9px;
-            border-radius: 50%;
-            flex-shrink: 0;
-        }
 
         /* scrollbar styling */
         .filter-body::-webkit-scrollbar { width: 5px; }
@@ -992,13 +947,9 @@
                     </div>
                 </div>
                 <div class="card-body" style="padding:0">
-                    <div id="chartTypeMap" style="height:440px;position:relative;overflow:hidden;background:radial-gradient(ellipse at center,#f0f7e8 0%,#e6eed8 100%)">
-                        <canvas id="spiralCanvas" style="display:block;width:100%;height:100%;cursor:default"></canvas>
-                        <div class="spiral-tooltip" id="spiralTooltip"></div>
-                        <div class="spiral-legend" id="spiralLegend"></div>
-                    </div>
+                    <div id="chartTypeFlower" class="chart-instance" style="height:420px;background:radial-gradient(ellipse at center,#f0f7e8 0%,#e6eed8 100%)"></div>
                 </div>
-                <div class="card-footer"><i class="fas fa-mouse-pointer"></i> Plant photo mosaic — click any plant to filter by type · plants without photos shown at centre</div>
+                <div class="card-footer"><i class="fas fa-mouse-pointer"></i> Click any petal to filter by plant type · petal length = number of matching plants · click again to clear</div>
             </div>
 
             <!-- Chart 2: Top Families Donut -->
@@ -1137,7 +1088,7 @@ const filters = {
 // ─────────────────────────────────────────────
 // ECHARTS INSTANCES
 // ─────────────────────────────────────────────
-let ecFamilies, ecScatter, ecCalendar, ecGrowth, ecPollinators;
+let ecFamilies, ecScatter, ecCalendar, ecGrowth, ecPollinators, ecTypeFlower;
 
 const ZONE_COLORS = [
     '#8ecae6','#219ebc','#023047','#6a994e','#386641','#a7c957',
@@ -2255,117 +2206,125 @@ function buildSpiralLegend() {
 
 const SPIRAL_MAX_NODES = 90;
 
+// ─────────────────────────────────────────────
+// CHART: Plant Type Flower (ECharts Polar Bar)
+// ─────────────────────────────────────────────
 function renderTypeMap(data) {
-    initSpiralCanvas();
-    buildSpiralLegend();
-    spiralTotalCount = data.length;
+    const container = document.getElementById('chartTypeFlower');
+    if (!container) return;
 
-    // Separate plants with and without images
-    const withImg  = [];
-    const noImg    = [];
-    data.forEach(p => {
-        const url = (p['Image URL'] || '').trim();
-        if (url) withImg.push(p);
-        else noImg.push(p);
-    });
-
-    // Sort by utility score descending
-    const byScore = (a, b) => utilityScore(b) - utilityScore(a);
-    withImg.sort(byScore);
-    noImg.sort(byScore);
-
-    // Photo plants fill the spiral; no-photo plants cluster at center
-    const photoPlants = withImg.slice(0, SPIRAL_MAX_NODES);
-    const centerPlants = noImg.slice(0, 20);
-
-    const N = photoPlants.length;
-    if (N === 0 && centerPlants.length === 0) {
-        spiralPrevNodes = spiralNodes.length ? spiralNodes.map(n => ({...n})) : [];
-        spiralNodes = [];
-        animateSpiral();
-        return;
+    if (!ecTypeFlower) {
+        ecTypeFlower = echarts.init(container, null, { renderer: 'canvas' });
+        ecTypeFlower.on('click', params => {
+            if (params.componentType !== 'series') return;
+            const group = SPIRAL_GROUPS.find(g => g.name === params.name);
+            if (!group) return;
+            if (group.keywords.length === 0) {
+                // "Other / Unknown" — clear type filter
+                filters.type = null;
+                document.getElementById('typeFilter').value = '';
+                refreshAll();
+                return;
+            }
+            const kw = group.keywords[0];
+            filters.type = (filters.type === kw) ? null : kw;
+            document.getElementById('typeFilter').value = filters.type || '';
+            refreshAll();
+        });
     }
 
-    const cont = document.getElementById('chartTypeMap');
-    const W    = cont.clientWidth  || 800;
-    const H    = cont.clientHeight || 440;
-    const cxC  = W / 2;
-    const cyC  = H / 2;
-
-    const GOLDEN = 2.399963229728653;
-
-    // Radii: large at center, shrinking outward
-    const maxR   = Math.max(14, Math.min(36, Math.min(W, H) * 0.065));
-    const minR   = Math.max(6, maxR * 0.28);
-    const maxScore = Math.max(...photoPlants.map(utilityScore), 1);
-
-    // Reserve center space for no-photo cluster
-    const centerReserve = centerPlants.length > 0 ? maxR * 2.2 : 0;
-
-    // Spiral spacing — generous to avoid overlap
-    // We compute spacing so outermost node + its radius fits in canvas
-    const canvasR = Math.min(cxC, cyC) - minR - 8;
-    const spiralC = N > 0 ? (canvasR - centerReserve) / Math.sqrt(N) : 0;
-
-    spiralPrevNodes = spiralNodes.length ? spiralNodes.map(n => ({...n})) : [];
-
-    const newNodes = [];
-
-    // 1) Photo plants spiral outward — radius decreases with index
-    photoPlants.forEach((p, i) => {
-        const angle = i * GOLDEN;
-        // t goes 0→1 from innermost to outermost
-        const t     = N > 1 ? i / (N - 1) : 0;
-        const dist  = centerReserve + spiralC * Math.sqrt(i + 1);
-        const ncx   = cxC + dist * Math.cos(angle);
-        const ncy   = cyC + dist * Math.sin(angle);
-        const score = utilityScore(p);
-        // Radius: lerp from maxR to minR based on position, with small score boost
-        const posR  = maxR - (maxR - minR) * t;
-        const r     = posR * (0.85 + 0.15 * (score / maxScore));
-        const type  = (p.Type || 'Unknown').trim();
-        const group = classifyType(type);
-        const name  = p.CommonName || `${p.Genus} ${p.Species}`;
-        const label = name.length > 18 ? name.slice(0, 16) + '…' : name;
-        const imgUrl = (p['Image URL'] || '').trim();
-        const nodeKey = `${p.Genus}_${p.Species}_${p.Family}`;
-
-        getOrLoadImage(imgUrl, drawSpiral);
-
-        newNodes.push({
-            cx: ncx, cy: ncy, r,
-            rawType: type, label, count: 1,
-            color: group.color, group: group.name,
-            imgUrl, plantName: name, family: p.Family,
-            nodeKey, hasPhoto: true
-        });
+    // Aggregate counts per SPIRAL_GROUP
+    const counts = new Array(SPIRAL_GROUPS.length).fill(0);
+    data.forEach(p => {
+        const g = classifyType(p.Type);
+        const idx = SPIRAL_GROUPS.indexOf(g);
+        if (idx >= 0) counts[idx]++;
     });
 
-    // 2) No-photo plants: small dots clustered at center
-    const cSmallR = Math.max(2.5, maxR * 0.12);
-    const cClusterR = centerReserve * 0.7;
-    centerPlants.forEach((p, i) => {
-        const angle = i * GOLDEN;
-        const dist  = cClusterR * Math.sqrt(i + 1) / Math.sqrt(Math.max(centerPlants.length, 1));
-        const ncx   = cxC + dist * Math.cos(angle);
-        const ncy   = cyC + dist * Math.sin(angle);
-        const type  = (p.Type || 'Unknown').trim();
-        const group = classifyType(type);
-        const name  = p.CommonName || `${p.Genus} ${p.Species}`;
-        const label = name.length > 14 ? name.slice(0, 12) + '…' : name;
-        const nodeKey = `nophoto_${p.Genus}_${p.Species}_${p.Family}`;
+    const activeKw = (filters.type || '').toLowerCase();
 
-        newNodes.push({
-            cx: ncx, cy: ncy, r: cSmallR,
-            rawType: type, label, count: 1,
-            color: group.color, group: group.name,
-            imgUrl: null, plantName: name, family: p.Family,
-            nodeKey, hasPhoto: false
-        });
+    const seriesData = SPIRAL_GROUPS.map((g, i) => {
+        const isActive   = activeKw && g.keywords.some(k => k === activeKw);
+        const isFiltered = activeKw && !isActive;
+        return {
+            value: counts[i],
+            name: g.name,
+            itemStyle: {
+                color: g.color,
+                opacity: isFiltered ? 0.2 : 1,
+                shadowBlur: isActive ? 14 : 0,
+                shadowColor: isActive ? g.color : 'transparent'
+            },
+            emphasis: {
+                itemStyle: { opacity: 1, shadowBlur: 18, shadowColor: g.color }
+            }
+        };
     });
 
-    spiralNodes = newNodes;
-    animateSpiral();
+    const LABEL_MAP = {
+        'Deciduous Tree':    'Dec. Tree',
+        'Evergreen Tree':    'Evg. Tree',
+        'Deciduous Shrub':   'Dec. Shrub',
+        'Evergreen Shrub':   'Evg. Shrub',
+        'Climber / Vine':    'Climber',
+        'Annual / Biennial': 'Annual',
+        'Bulb / Corm':       'Bulb/Corm',
+        'Grass / Sedge':     'Grass',
+        'Fern / Moss':       'Fern',
+        'Cactus / Succulent':'Cactus',
+        'Palm / Cycad':      'Palm',
+        'Other / Unknown':   'Other'
+    };
+
+    ecTypeFlower.setOption({
+        backgroundColor: 'transparent',
+        polar: { radius: ['14%', '80%'], center: ['50%', '50%'] },
+        angleAxis: {
+            type: 'category',
+            data: SPIRAL_GROUPS.map(g => g.name),
+            startAngle: 90,
+            axisLine: { show: false },
+            axisTick: { show: false },
+            splitLine: { show: true, lineStyle: { color: 'rgba(0,0,0,0.07)', type: 'dashed' } },
+            axisLabel: {
+                fontSize: 10,
+                color: '#555',
+                formatter: v => LABEL_MAP[v] || v
+            }
+        },
+        radiusAxis: {
+            type: 'value',
+            axisLine: { show: false },
+            axisTick: { show: false },
+            axisLabel: { show: false },
+            splitLine: { lineStyle: { color: 'rgba(0,0,0,0.04)' } }
+        },
+        tooltip: {
+            trigger: 'item',
+            backgroundColor: 'rgba(255,255,255,0.97)',
+            borderColor: '#e0ead6',
+            borderWidth: 1,
+            padding: [8, 14],
+            textStyle: { color: '#333', fontSize: 13 },
+            formatter: params => {
+                if (!params.name) return '';
+                const pct = data.length > 0 ? ((params.value / data.length) * 100).toFixed(1) : '0.0';
+                const col = SPIRAL_GROUPS.find(g => g.name === params.name)?.color || '#6b9e3e';
+                return `<b style="color:${col}">${params.name}</b><br/>`
+                     + `<span style="font-size:1.05em">${(params.value || 0).toLocaleString()}</span> plants`
+                     + ` <span style="color:#aaa">(${pct}%)</span><br/>`
+                     + `<span style="font-size:0.8em;color:#aaa">Click to filter · click again to clear</span>`;
+            }
+        },
+        series: [{
+            type: 'bar',
+            data: seriesData,
+            coordinateSystem: 'polar',
+            roundCap: true,
+            barMaxWidth: 32,
+            emphasis: { focus: 'self' }
+        }]
+    }, true);
 }
 
 // Build a lookup from rawType→node for interpolation
@@ -2511,10 +2470,9 @@ function fullscreenCard(btn) {
         if (req) req.call(card).then(() => {
             // Resize all charts after entering fullscreen
             setTimeout(() => {
-                [ecFamilies, ecScatter, ecCalendar, ecGrowth, ecPollinators].forEach(ec => {
+                [ecFamilies, ecScatter, ecCalendar, ecGrowth, ecPollinators, ecTypeFlower].forEach(ec => {
                     if (ec) ec.resize();
                 });
-                drawSpiral();
             }, 150);
         });
     }
@@ -2523,10 +2481,9 @@ function fullscreenCard(btn) {
 // Resize charts when exiting fullscreen too
 document.addEventListener('fullscreenchange', () => {
     setTimeout(() => {
-        [ecFamilies, ecScatter, ecCalendar, ecGrowth, ecPollinators].forEach(ec => {
+        [ecFamilies, ecScatter, ecCalendar, ecGrowth, ecPollinators, ecTypeFlower].forEach(ec => {
             if (ec) ec.resize();
         });
-        drawSpiral();
     }, 150);
 });
 
@@ -2553,10 +2510,9 @@ function toggleFilterPanel() {
     } else {
         panel.classList.toggle('collapsed');
         setTimeout(() => {
-            [ecFamilies, ecScatter, ecCalendar, ecGrowth, ecPollinators].forEach(ec => {
+            [ecFamilies, ecScatter, ecCalendar, ecGrowth, ecPollinators, ecTypeFlower].forEach(ec => {
                 if (ec) ec.resize();
             });
-        drawSpiral();
         }, 300);
     }
 }
@@ -2570,10 +2526,9 @@ function closeMobileFilter() {
 // ECHARTS RESIZE on window change
 // ─────────────────────────────────────────────
 window.addEventListener('resize', () => {
-    [ecFamilies, ecScatter, ecCalendar, ecGrowth, ecPollinators].forEach(ec => {
+    [ecFamilies, ecScatter, ecCalendar, ecGrowth, ecPollinators, ecTypeFlower].forEach(ec => {
         if (ec) ec.resize();
     });
-    drawSpiral();
 });
 
 // ─────────────────────────────────────────────
