@@ -517,11 +517,11 @@
             }
             .zip-btn { min-width: 44px; min-height: 44px; font-size: 0.9rem; }
 
-            /* Photo grid 2 columns — more vertical space */
+            /* Photo grid 3 columns — more plants visible */
             .photo-grid {
-                grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
-                gap: 0.4rem;
-                padding: 0.4rem;
+                grid-template-columns: repeat(3, 1fr);
+                gap: 0.35rem;
+                padding: 0.35rem;
                 max-height: 60vh;
             }
 
@@ -619,14 +619,14 @@
 
             /* Photo grid tighter on small phones */
             .photo-grid {
-                grid-template-columns: repeat(2, 1fr);
-                gap: 0.35rem;
-                padding: 0.3rem;
+                grid-template-columns: repeat(3, 1fr);
+                gap: 0.3rem;
+                padding: 0.25rem;
                 max-height: 55vh;
             }
-            .plant-card-name { font-size: 0.73rem; }
-            .plant-card-family { font-size: 0.62rem; }
-            .plant-card-badge { font-size: 0.58rem; padding: 0.06rem 0.22rem; }
+            .plant-card-name { font-size: 0.68rem; }
+            .plant-card-family { font-size: 0.58rem; }
+            .plant-card-badge { font-size: 0.54rem; padding: 0.05rem 0.18rem; }
 
             /* Charts smaller on phones */
             .chart-instance { height: 260px; }
@@ -653,7 +653,7 @@
 
         /* Extra small screens (≤380px) */
         @media (max-width: 380px) {
-            .photo-grid { grid-template-columns: repeat(2, 1fr); }
+            .photo-grid { grid-template-columns: repeat(3, 1fr); }
             .header-links { gap: 0.2rem; }
             .header-link { min-width: 28px; min-height: 28px; padding: 0.15rem 0.3rem; }
         }
