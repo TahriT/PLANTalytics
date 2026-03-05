@@ -492,27 +492,17 @@
             .header-link span.link-text { display: none; }
             .header-link { padding: 0.25rem 0.45rem; min-width: 34px; min-height: 34px; justify-content: center; }
 
-            /* Banner stacking */
+            /* Banner — collapse to zero height on mobile; tip-toast is fixed so still renders */
             .pfaf-banner {
-                flex-direction: row;
-                flex-wrap: wrap;
-                align-items: center;
-                gap: 0.25rem 0.5rem;
-                padding: 0.35rem 0.6rem;
-                font-size: 0.68rem;
+                height: 0;
+                min-height: 0;
+                padding: 0;
+                margin: 0;
+                overflow: visible;
+                border: none;
+                background: transparent;
             }
-            .pfaf-banner .ban-label { font-size: 0.63rem; }
-            .pfaf-banner .ban-sep { display: none; }
-            .ban-zip { display: none !important; }
-            .pfaf-banner .ban-right {
-                margin-left: auto;
-                width: auto;
-                flex-wrap: wrap;
-                gap: 0.3rem;
-                justify-content: flex-end;
-            }
-            .pfaf-banner a.ban-link { font-size: 0.68rem; }
-            .pfaf-banner a.ban-btn { font-size: 0.62rem; padding: 0.15rem 0.45rem; }
+            .pfaf-banner > *:not(.tip-toast) { display: none !important; }
 
             /* Zone bar taller touch targets */
             .zone-bar { height: 40px; }
@@ -620,10 +610,7 @@
             .header-link.v2 { display: none; }
             .header-link { padding: 0.2rem 0.35rem; font-size: 0.68rem; min-width: 32px; min-height: 32px; }
 
-            /* Banner even more compact on small phones */
-            .pfaf-banner { font-size: 0.63rem; padding: 0.3rem 0.5rem; }
-            .pfaf-banner .ban-right { flex-wrap: wrap; gap: 0.25rem; }
-            .pfaf-banner a.ban-btn { font-size: 0.6rem; padding: 0.12rem 0.4rem; }
+            /* Banner already collapsed at 768px — no additional styles needed */
 
             .main-area { padding: 0.35rem; }
 
