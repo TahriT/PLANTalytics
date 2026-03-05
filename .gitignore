@@ -166,3 +166,6 @@ scrape_log.txt
 
 # OG image generator (utility script, not needed in repo)
 generate_og_image.py
+
+# Claude config
+.claude/
