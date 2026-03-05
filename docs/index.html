@@ -519,7 +519,7 @@
 
             /* Photo grid 3 columns — more plants visible */
             .photo-grid {
-                grid-template-columns: repeat(3, 1fr);
+                grid-template-columns: repeat(3, 1fr) !important;
                 gap: 0.35rem;
                 padding: 0.35rem;
                 max-height: 60vh;
@@ -619,7 +619,7 @@
 
             /* Photo grid tighter on small phones */
             .photo-grid {
-                grid-template-columns: repeat(3, 1fr);
+                grid-template-columns: repeat(3, 1fr) !important;
                 gap: 0.3rem;
                 padding: 0.25rem;
                 max-height: 55vh;
@@ -653,7 +653,7 @@
 
         /* Extra small screens (≤380px) */
         @media (max-width: 380px) {
-            .photo-grid { grid-template-columns: repeat(3, 1fr); }
+            .photo-grid { grid-template-columns: repeat(3, 1fr) !important; }
             .header-links { gap: 0.2rem; }
             .header-link { min-width: 28px; min-height: 28px; padding: 0.15rem 0.3rem; }
         }
