@@ -399,14 +399,15 @@
             }
 
             .page-body { height: calc(100vh - var(--header-h)); }
-            .main-area { padding: 0.5rem; }
+            .main-area { padding: 0.5rem; gap: 0.35rem; }
 
             /* Show ZIP/zone/toggle on mobile */
             .qf-zip, .qf-zone-wrap, .qf-toggle { display: flex; }
             .qf-zone-wrap { display: flex; }
 
-            .stats-row { flex-wrap: wrap; gap: 1px; width: 100%; }
-            .stat-seg { flex: 1 1 45%; min-height: 38px; padding: 0.3rem 0.45rem; }
+            /* Hide stats on mobile — not useful on small screens */
+            .stats-row { display: none; }
+
             .charts-grid { grid-template-columns: 1fr; gap: 0.55rem; }
             #chartCardScatter { order: 4; }
             #chartCardCalendar { order: 3; }
@@ -452,24 +453,40 @@
             }
             .zip-btn { min-width: 44px; min-height: 44px; font-size: 0.9rem; }
 
-            /* Photo grid 2 columns */
+            /* Photo grid 2 columns — more vertical space */
             .photo-grid {
                 grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
-                gap: 0.45rem;
-                padding: 0.45rem;
-                max-height: 500px;
+                gap: 0.4rem;
+                padding: 0.4rem;
+                max-height: 60vh;
             }
 
-            /* Photo type tabs scrollable */
+            /* Photo type tabs — compact single-row horizontal scroll */
             .photo-type-tabs {
                 flex-wrap: nowrap;
                 overflow-x: auto;
                 -webkit-overflow-scrolling: touch;
                 scrollbar-width: none;
-                padding-bottom: 0.5rem;
+                padding: 0.35rem 0.5rem;
+                gap: 0.25rem;
             }
             .photo-type-tabs::-webkit-scrollbar { display: none; }
-            .photo-type-tab { flex-shrink: 0; min-height: 36px; padding: 0.3rem 0.7rem; }
+            .photo-type-tab {
+                flex-shrink: 0;
+                min-height: 28px;
+                padding: 0.18rem 0.5rem;
+                font-size: 0.66rem;
+                border-width: 1px;
+            }
+            .photo-type-tab .tab-count { font-size: 0.58rem; padding: 0.02rem 0.22rem; }
+            .photo-type-tab .tab-dot { width: 6px; height: 6px; }
+
+            /* Hide card footers on mobile — saves space */
+            .card-footer { display: none; }
+
+            /* Compact card headers on mobile */
+            .card-header { padding: 0.3rem 0.55rem; }
+            .card-title { font-size: 0.74rem; gap: 0.25rem; }
 
             /* Pagination bigger touch targets */
             .pager-btn { min-width: 2.5rem; height: 2.5rem; font-size: 0.82rem; }
@@ -511,11 +528,14 @@
             /* Quick filter bar on mobile — show ZIP/zone controls */
             .qf-sep { display: none; }
             .quick-filter-bar { padding: 0.35rem 0.5rem; gap: 0.4rem; flex-direction: column; align-items: stretch; }
-            .qf-zip input { min-height: 36px; font-size: 0.82rem; }
+            .qf-zip { flex-wrap: wrap; gap: 0.25rem; }
+            .qf-zip input { min-height: 36px; font-size: 0.82rem; flex: 1; min-width: 0; }
             .qf-zip-btn { width: 36px; height: 36px; }
             .qf-zone-bar { height: 28px; }
             .qf-zone-bar .zone-seg { font-size: 0.6rem; }
-            .qf-toggle-btn { min-height: 36px; font-size: 0.72rem; padding: 0.25rem 0.5rem; }
+            .qf-zone-wrap { width: 100%; }
+            .qf-toggle { margin-left: 0; width: 100%; }
+            .qf-toggle-btn { min-height: 36px; font-size: 0.72rem; padding: 0.25rem 0.5rem; width: 100%; justify-content: center; }
 
             /* Plant card overlay visible on tapped state */
             .plant-card.tapped .plant-card-overlay {
@@ -543,24 +563,13 @@
 
             /* Quick filter bar stacks on small phones */
             .quick-filter-bar { gap: 0.3rem; padding: 0.3rem 0.4rem; }
-            .qf-zip { flex-wrap: wrap; gap: 0.25rem; }
-            .qf-zip input { flex: 1; min-width: 0; }
-            .qf-zip-btn { width: 34px; height: 34px; }
-            .qf-zone-wrap { width: 100%; }
-            .qf-toggle { margin-left: 0; width: 100%; }
-            .qf-toggle-btn { width: 100%; justify-content: center; }
 
-            .stats-row { flex-wrap: wrap; gap: 1px; }
-            .stat-seg { flex: 1 1 48%; padding: 0.28rem 0.35rem; }
-            .stat-seg .seg-val { font-size: 0.75rem; }
-            .stat-seg .seg-lbl { font-size: 0.55rem; }
-            .stat-seg .seg-icon { width: 16px; height: 16px; font-size: 0.55rem; }
-
-            /* Photo grid single or 2 column */
+            /* Photo grid tighter on small phones */
             .photo-grid {
                 grid-template-columns: repeat(2, 1fr);
-                gap: 0.4rem;
-                padding: 0.35rem;
+                gap: 0.35rem;
+                padding: 0.3rem;
+                max-height: 55vh;
             }
             .plant-card-name { font-size: 0.73rem; }
             .plant-card-family { font-size: 0.62rem; }
@@ -569,9 +578,6 @@
             /* Charts smaller on phones */
             .chart-instance { height: 260px; }
             .chart-instance.tall { height: 300px; }
-
-            /* Card footer smaller */
-            .card-footer { font-size: 0.7rem; padding: 0.45rem 0.75rem; }
 
             /* Pager buttons */
             .grid-pager { padding: 0.4rem 0.15rem 0.25rem; }
@@ -595,8 +601,6 @@
         /* Extra small screens (≤380px) */
         @media (max-width: 380px) {
             .photo-grid { grid-template-columns: repeat(2, 1fr); }
-            .stat-seg { flex: 1 1 100%; }
-            .stat-seg + .stat-seg::before { display: none; }
             .header-links { gap: 0.2rem; }
             .header-link { min-width: 28px; min-height: 28px; padding: 0.15rem 0.3rem; }
         }
@@ -1733,8 +1737,18 @@ function getFilteredData() {
         if (filters.zone !== null && !plantInZone(p, filters.zone)) return false;
         if (filters.family && p.Family !== filters.family) return false;
         if (filters.type) {
-            const pt = (p.Type || '').toLowerCase();
-            if (!pt.includes(filters.type.toLowerCase())) return false;
+            if (filters.type.startsWith('__group:')) {
+                // Group-based filter: match using same classifyType logic
+                const groupName = filters.type.slice(8);
+                const group = SPIRAL_GROUPS.find(g => g.name === groupName);
+                if (group) {
+                    const pt = (p.Type || '').toLowerCase();
+                    if (!group.keywords.some(k => pt.includes(k))) return false;
+                } else return false;
+            } else {
+                const pt = (p.Type || '').toLowerCase();
+                if (!pt.includes(filters.type.toLowerCase())) return false;
+            }
         }
         if (filters.growthRate) {
             const gr = (p.GrowthRate || '').toLowerCase();
@@ -1839,7 +1853,7 @@ function updateChips() {
     const chipDefs = [
         { key: 'zone',        label: () => `Zone ${filters.zone}` },
         { key: 'family',      label: () => filters.family },
-        { key: 'type',        label: () => filters.type },
+        { key: 'type',        label: () => filters.type.startsWith('__group:') ? filters.type.slice(8) : filters.type },
         { key: 'growthRate',  label: () => `Growth: ${filters.growthRate}` },
         { key: 'foliage',     label: () => `Foliage: ${filters.foliage}` },
         { key: 'soil',        label: () => `Soil: ${filters.soil}` },
@@ -2817,7 +2831,7 @@ function renderTypeMap(data, page) {
         if (idx >= 0) counts[idx]++;
     });
 
-    const activeKw = (filters.type || '').toLowerCase();
+    const activeType = filters.type || '';
 
     // --- Type tabs
     tabsEl.innerHTML = '';
@@ -2829,14 +2843,14 @@ function renderTypeMap(data, page) {
 
     SPIRAL_GROUPS.forEach((g, i) => {
         if (counts[i] === 0) return;
-        const isActive = activeKw && g.keywords.some(k => k === activeKw);
+        const groupKey = '__group:' + g.name;
+        const isActive = activeType === groupKey;
         const tab = document.createElement('button');
         tab.className = 'photo-type-tab' + (isActive ? ' active' : '');
         tab.innerHTML = `<span class="tab-dot" style="background:${g.color}"></span>${g.name} <span class="tab-count">${counts[i]}</span>`;
         tab.addEventListener('click', () => {
-            const kw = g.keywords[0] || null;
-            if (!kw || filters.type === kw) { clearFilter('type'); }
-            else { filters.type = kw; document.getElementById('typeFilter').value = kw; refreshAll(); }
+            if (filters.type === groupKey) { clearFilter('type'); }
+            else { filters.type = groupKey; document.getElementById('typeFilter').value = ''; refreshAll(); }
         });
         tabsEl.appendChild(tab);
     });
@@ -2859,7 +2873,7 @@ function renderTypeMap(data, page) {
     // Active filter banner
     const activeFilters = [];
     if (filters.zone  !== null) activeFilters.push(`Zone ${filters.zone}`);
-    if (filters.type)            activeFilters.push(filters.type);
+    if (filters.type)            activeFilters.push(filters.type.startsWith('__group:') ? filters.type.slice(8) : filters.type);
     if (filters.family)          activeFilters.push(filters.family);
     if (filters.month)           activeFilters.push(filters.month);
     if (filters.pollinator)      activeFilters.push(filters.pollinator);
