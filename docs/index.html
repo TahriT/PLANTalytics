@@ -523,8 +523,14 @@
                 padding: 0.55rem 0.7rem;
                 border-left: none;
                 border: 1px solid #c8e6c9;
+                background: linear-gradient(135deg, #e8f5e9, #f1f8e9);
+                color: #33691e;
+                white-space: normal;
                 animation: toastIn 0.3s ease;
             }
+            .tip-toast strong { color: #33691e; }
+            .tip-toast-dismiss { color: #81c784; font-size: 0.85rem; }
+            .tip-toast-dismiss:hover { color: #388e3c; }
             .tip-toast.dismissed { animation: toastOut 0.25s ease forwards; }
             @keyframes toastIn  { from { opacity: 0; transform: translateX(-50%) translateY(20px); } to { opacity: 1; transform: translateX(-50%) translateY(0); } }
             @keyframes toastOut { to { opacity: 0; transform: translateX(-50%) translateY(20px); } }
@@ -1029,11 +1035,11 @@
         .pfaf-banner {
             background: linear-gradient(135deg, #1a2e0f 0%, #243d14 100%);
             border-bottom: 1px solid #3a5c1a;
-            padding: 0.38rem 1rem;
+            padding: clamp(0.25rem, 0.5vw, 0.45rem) clamp(0.5rem, 1.5vw, 1.2rem);
             display: flex;
             align-items: center;
-            gap: 0.65rem;
-            font-size: 0.74rem;
+            gap: clamp(0.35rem, 0.8vw, 0.65rem);
+            font-size: clamp(0.65rem, 0.9vw, 0.76rem);
             color: rgba(255,255,255,0.75);
             flex-shrink: 0;
             z-index: 90;
@@ -1169,30 +1175,34 @@
         /* ── Filter section heading icons ── */
         .filter-section-heading i { margin-right: 0.3rem; opacity: 0.65; }
 
-        /* ── Tip toast (New Here) ── */
+        /* ── Tip toast (New Here) — inline in banner on desktop ── */
         .tip-toast {
-            background: linear-gradient(135deg, #e8f5e9, #f1f8e9);
-            border: 1px solid #c8e6c9;
-            border-left: 4px solid var(--secondary);
-            border-radius: 6px;
-            padding: 0.4rem 0.7rem;
-            font-size: 0.75rem;
-            color: #33691e;
-            display: flex;
+            background: rgba(158,196,114,0.15);
+            border: 1px solid rgba(158,196,114,0.3);
+            border-left: none;
+            border-radius: 20px;
+            padding: 0.18rem 0.6rem;
+            font-size: 0.68rem;
+            color: #c5e89a;
+            display: inline-flex;
             align-items: center;
-            gap: 0.45rem;
-            justify-content: space-between;
+            gap: 0.3rem;
+            white-space: nowrap;
+            flex-shrink: 1;
+            min-width: 0;
+            overflow: hidden;
         }
+        .tip-toast strong { color: #9ec472; font-weight: 700; }
         .tip-toast-dismiss {
             background: none;
             border: none;
-            color: #81c784;
+            color: rgba(255,255,255,0.4);
             cursor: pointer;
-            font-size: 0.85rem;
-            padding: 0 0.2rem;
+            font-size: 0.72rem;
+            padding: 0 0.15rem;
             flex-shrink: 0;
         }
-        .tip-toast-dismiss:hover { color: #388e3c; }
+        .tip-toast-dismiss:hover { color: rgba(255,255,255,0.8); }
 
         /* ── Quick Filter Bar (mobile only) ── */
         .quick-filter-bar {
@@ -1356,7 +1366,7 @@
     <div class="header-links">
         <a href="index.html" class="header-link"><i class="fas fa-home"></i><span class="link-text"> Home</span></a>
         <a href="advanced-dashboard.html" class="header-link"><i class="fas fa-cube"></i><span class="link-text"> Power BI</span></a>
-        <a href="https://sproutcast.io" target="_blank" rel="noopener noreferrer" class="header-link" title="Track your plants"><i class="fas fa-map-marker-alt"></i><span class="link-text"> Sproutcast</span></a>
+        <a href="https://sproutcast.io" target="_blank" rel="noopener noreferrer" class="header-link sprout-cta" title="Track plant health with Sproutcast"><i class="fas fa-heartbeat"></i><span class="link-text"> Plant Health</span></a>
         <a href="https://github.com/TahriT/PLANTalytics" target="_blank" rel="noopener noreferrer" class="header-link" title="GitHub"><i class="fab fa-github"></i></a>
     </div>
 </header>
@@ -1378,12 +1388,18 @@
         <button class="ban-zip-btn" onclick="bannerLookupZip()" title="Find zone"><i class="fas fa-search"></i></button>
         <span class="ban-zip-feedback" id="bannerZipFeedback"></span>
     </div>
+    <!-- Tip toast (inline on desktop, floating on mobile) -->
+    <div id="tipToast" class="tip-toast">
+        <span><i class="fas fa-lightbulb" style="margin-right:0.25rem"></i><strong>Tip:</strong> <span class="mob-hide-text">Enter your ZIP to find plants for your zone.</span><span class="mob-show-text">Enter ZIP below to find plants for your zone.</span></span>
+        <button class="tip-toast-dismiss" onclick="dismissTip()" title="Dismiss"><i class="fas fa-times"></i></button>
+    </div>
+    <script>try{if(localStorage.getItem('pltx_tip_dismissed')==='1')document.getElementById('tipToast').style.display='none';}catch(e){}</script>
     <div class="ban-right">
         <a href="https://pfaf.org/user/cmspage.aspx?pageid=313" target="_blank" rel="noopener noreferrer" class="ban-btn">
             <i class="fas fa-hand-holding-heart"></i> Support PFAF
         </a>
-        <a href="https://sproutcast.io" target="_blank" rel="noopener noreferrer" class="ban-btn sprout" title="Track your plants with Sproutcast">
-            <i class="fas fa-map-marker-alt"></i> Track plants &rarr; Sproutcast
+        <a href="https://sproutcast.io" target="_blank" rel="noopener noreferrer" class="ban-btn sprout" title="Track plant health with Sproutcast">
+            <i class="fas fa-heartbeat"></i> Track Plant Health &rarr; Sproutcast
         </a>
         <a href="https://github.com/TahriT/PLANTalytics" target="_blank" rel="noopener noreferrer" class="ban-btn" title="View source on GitHub">
             <i class="fab fa-github"></i> GitHub
@@ -1536,13 +1552,6 @@
 
     <!-- Main area -->
     <div class="main-area">
-
-        <!-- Tip toast (New Here) -->
-        <div id="tipToast" class="tip-toast">
-            <span><i class="fas fa-lightbulb" style="margin-right:0.3rem"></i><strong>Tip:</strong> <span class="mob-hide-text">Enter your ZIP in the banner above to find plants for your zone.</span><span class="mob-show-text">Enter ZIP below to find plants for your zone.</span> Click charts to filter.</span>
-            <button class="tip-toast-dismiss" onclick="dismissTip()" title="Dismiss"><i class="fas fa-times"></i></button>
-        </div>
-        <script>try{if(localStorage.getItem('pltx_tip_dismissed')==='1')document.getElementById('tipToast').style.display='none';}catch(e){}</script>
 
         <!-- Quick Filter Bar (stats always, ZIP/zone on mobile only) -->
         <div class="quick-filter-bar" id="quickFilterBar">
