@@ -4,6 +4,62 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>PLANTalytics - Plant Explorer</title>
+    <meta name="description" content="Explore 7,400+ plants by hardiness zone, edibility, medicinal value &amp; more. Interactive charts powered by Apache ECharts.">
+    <meta name="author" content="PLANTalytics">
+    <meta name="theme-color" content="#2d5016">
+    <meta name="robots" content="index, follow">
+    <link rel="canonical" href="https://plantalytics.net/">
+
+    <!-- Open Graph (Facebook, LinkedIn, Discord, Slack, iMessage, etc.) -->
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="PLANTalytics – Plant Explorer">
+    <meta property="og:description" content="Explore 7,400+ plants by hardiness zone, edibility, medicinal value &amp; more. Interactive charts &amp; photo grid.">
+    <meta property="og:url" content="https://plantalytics.net/">
+    <meta property="og:image" content="https://plantalytics.net/og-image.png">
+    <meta property="og:image:type" content="image/png">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta property="og:image:alt" content="PLANTalytics dashboard showing plant type landscape, charts, and hardiness zone data">
+    <meta property="og:site_name" content="PLANTalytics">
+    <meta property="og:locale" content="en_US">
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="PLANTalytics – Plant Explorer">
+    <meta name="twitter:description" content="Explore 7,400+ plants by hardiness zone, edibility, medicinal value &amp; more.">
+    <meta name="twitter:image" content="https://plantalytics.net/og-image.png">
+    <meta name="twitter:image:alt" content="PLANTalytics dashboard showing plant type landscape, charts, and hardiness zone data">
+
+    <!-- Apple / PWA -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="PLANTalytics">
+    <link rel="apple-touch-icon" href="og-image.png">
+
+    <!-- Structured Data (JSON-LD) -->
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "WebApplication",
+        "name": "PLANTalytics",
+        "url": "https://plantalytics.net/",
+        "description": "Explore 7,400+ plants by hardiness zone, edibility, medicinal value and more. Interactive charts powered by Apache ECharts.",
+        "applicationCategory": "UtilitiesApplication",
+        "operatingSystem": "Any",
+        "image": "https://plantalytics.net/og-image.png",
+        "author": {
+            "@type": "Organization",
+            "name": "PLANTalytics",
+            "url": "https://github.com/TahriT/PLANTalytics"
+        },
+        "offers": {
+            "@type": "Offer",
+            "price": "0",
+            "priceCurrency": "USD"
+        }
+    }
+    </script>
+
     <link rel="icon" type="image/svg+xml" href="favicon.svg">
     <script>
     /* Suppress errors from browser extensions (e.g. webpage_content_reporter.js) */
@@ -1154,13 +1210,9 @@
         }
         .ban-zip-feedback.error { color: #ef9a9a; }
 
-        /* ── Hide sidebar ZIP/Zone sections on desktop ── */
+        /* ── Sidebar ZIP/Zone sections — always visible ── */
         .sidebar-zip-section,
         .sidebar-zone-section { display: block; }
-        @media (min-width: 901px) {
-            .sidebar-zip-section,
-            .sidebar-zone-section { display: none; }
-        }
 
         /* ── Header subtitle ── */
         .header-sub { font-size: 0.67rem; color: rgba(255,255,255,0.62); font-weight: 400; display: block; margin-top: 1px; letter-spacing: 0.1px; }
