@@ -5,6 +5,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>PLANTalytics - Plant Explorer</title>
     <link rel="icon" type="image/svg+xml" href="favicon.svg">
+    <script>
+    /* Suppress errors from browser extensions (e.g. webpage_content_reporter.js) */
+    window.addEventListener('error', function(e) {
+        if (e.filename && !e.filename.includes(location.origin)) { e.preventDefault(); return true; }
+        if (e.message && /webpage_content_reporter|export/.test(e.message)) { e.preventDefault(); return true; }
+    }, true);
+    </script>
     <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -272,7 +279,18 @@
             display: flex;
             align-items: center;
             gap: 0.4rem;
+            flex-wrap: wrap;
+            justify-content: space-between;
         }
+        #photoGridFooter { display: flex !important; }
+        #photoGridFooter .grid-pager {
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+            flex-wrap: wrap;
+            padding: 0;
+        }
+        #photoGridFooter .footer-hint { flex: 1; min-width: 0; }
 
         /* ── Filter panel ── */
         .filter-panel {
@@ -409,8 +427,7 @@
             .stats-row { display: none; }
 
             .charts-grid { grid-template-columns: 1fr; gap: 0.55rem; }
-            #chartCardScatter { order: 4; }
-            #chartCardCalendar { order: 3; }
+            /* Calendar now before scatter in DOM — no reorder needed */
             .chart-instance { height: 300px; }
             .chart-instance.tall { height: 350px; }
             .mob-close-filter-btn { display: flex; min-height: 44px; }
@@ -465,8 +482,11 @@
             /* Hide photo type tabs on mobile — clutters the view */
             .photo-type-tabs { display: none; }
 
-            /* Hide card footers on mobile — saves space */
+            /* Hide card footers on mobile — saves space (except photo grid) */
             .card-footer { display: none; }
+            #photoGridFooter { display: flex !important; padding: 0.35rem 0.5rem; }
+            #photoGridFooter .footer-hint { display: none; }
+            #photoGridFooter .grid-pager { width: 100%; justify-content: space-between; }
 
             /* Compact card headers on mobile */
             .card-header { padding: 0.3rem 0.55rem; }
@@ -1188,7 +1208,6 @@
         /* Hide ZIP/zone/toggle on desktop — they live in the sidebar */
         .qf-zip, .qf-sep, .qf-zone-wrap, .qf-toggle { display: none; }
         .qf-zip {
-            display: flex;
             align-items: center;
             gap: 0.3rem;
             flex-shrink: 0;
@@ -1305,6 +1324,10 @@
         @media (max-width: 900px) {
             .mob-show-text { display: inline; }
             .mob-hide-text { display: none; }
+            /* Re-apply mobile quick-filter-bar after base styles (cascade fix) */
+            .quick-filter-bar { display: flex !important; flex-direction: column; align-items: stretch; padding: 0.35rem 0.5rem; gap: 0.4rem; }
+            .qf-zip, .qf-zone-wrap, .qf-toggle { display: flex !important; }
+            .stats-row { display: none !important; }
         }
     </style>
 </head>
@@ -1579,7 +1602,10 @@
                     <div id="photoGridTypeTabs" class="photo-type-tabs"></div>
                     <div id="photoGrid" class="photo-grid"></div>
                 </div>
-                <div class="card-footer"><i class="fas fa-mouse-pointer"></i> Click a type tab to filter &middot; click a card to open its plant page &middot; sorted by utility score &middot; 48 per page</div>
+                <div class="card-footer" id="photoGridFooter">
+                    <span class="footer-hint"><i class="fas fa-mouse-pointer"></i> Click a type tab to filter &middot; click a card to open its plant page</span>
+                    <span id="photoGridPager"></span>
+                </div>
             </div>
 
             <!-- Chart 2: Top Families Donut -->
@@ -1597,21 +1623,7 @@
                 <div class="card-footer"><i class="fas fa-mouse-pointer"></i> Click a slice to filter all charts by family</div>
             </div>
 
-            <!-- Chart 3: Edibility × Medicinal Scatter -->
-            <div class="chart-card" id="chartCardScatter" style="border-top-color:#f9a825">
-                <div class="card-header">
-                    <div class="card-title"><i class="fas fa-circle"></i> Edibility × Medicinal Value</div>
-                    <div class="card-actions">
-                        <button class="icon-btn" title="Fullscreen" onclick="fullscreenCard(this)"><i class="fas fa-expand"></i></button>
-                    </div>
-                </div>
-                <div class="card-body">
-                    <div class="chart-instance" id="chartScatter"></div>
-                </div>
-                <div class="card-footer"><i class="fas fa-info-circle"></i> Bubble size = Other Uses score (fiber, timber, dye, soap &amp; more) · Top-right = best food <em>and</em> medicine plants</div>
-            </div>
-
-            <!-- Chart 4: Harvest Calendar -->
+            <!-- Chart 3: Harvest Calendar -->
             <div class="chart-card" id="chartCardCalendar" style="border-top-color:#1565c0">
                 <div class="card-header">
                     <div class="card-title"><i class="fas fa-calendar-alt"></i> Bloom &amp; Harvest Calendar</div>
@@ -1624,6 +1636,20 @@
                     <div class="chart-instance" id="chartCalendar"></div>
                 </div>
                 <div class="card-footer"><i class="fas fa-mouse-pointer"></i> Click a month to filter · Blue = flowering, Green = ripening</div>
+            </div>
+
+            <!-- Chart 4: Edibility × Medicinal Scatter -->
+            <div class="chart-card" id="chartCardScatter" style="border-top-color:#f9a825">
+                <div class="card-header">
+                    <div class="card-title"><i class="fas fa-circle"></i> Edibility × Medicinal Value</div>
+                    <div class="card-actions">
+                        <button class="icon-btn" title="Fullscreen" onclick="fullscreenCard(this)"><i class="fas fa-expand"></i></button>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="chart-instance" id="chartScatter"></div>
+                </div>
+                <div class="card-footer"><i class="fas fa-info-circle"></i> Bubble size = Other Uses score (fiber, timber, dye, soap &amp; more) · Top-right = best food <em>and</em> medicine plants</div>
             </div>
 
             <!-- Chart 5: Growth Rate × Plant Type -->
@@ -3007,8 +3033,10 @@ function renderTypeMap(data, page) {
         gridEl.appendChild(card);
     });
 
-    // Pagination controls
-    if (totalPages > 1) {
+    // Pagination controls — render into card footer
+    const footerPager = document.getElementById('photoGridPager');
+    if (footerPager) footerPager.innerHTML = '';
+    if (totalPages > 1 && footerPager) {
         const pager = document.createElement('div');
         pager.className = 'grid-pager';
 
@@ -3058,7 +3086,7 @@ function renderTypeMap(data, page) {
         btnGroup.appendChild(next);
 
         pager.appendChild(btnGroup);
-        gridEl.appendChild(pager);
+        footerPager.appendChild(pager);
     }
 }
 
