@@ -244,12 +244,63 @@ function tType(englishName) {
   return k ? t(k, englishName) : englishName;
 }
 
+// ── Translate a plant common name ──
+// Loaded from plant_names_i18n.json (keyed by "Genus Species")
+// Returns: translated name, or English name, or Latin name (italicized via flag)
+let PLANT_NAMES_I18N = {};   // populated by loadPlantNamesI18n()
+let _plantI18nLoaded = false;
+
+async function loadPlantNamesI18n() {
+  if (_plantI18nLoaded) return;
+  try {
+    const resp = await fetch('plant_names_i18n.json');
+    if (resp.ok) {
+      PLANT_NAMES_I18N = await resp.json();
+      _plantI18nLoaded = true;
+      console.log(`🌍 Plant name translations loaded: ${Object.keys(PLANT_NAMES_I18N).length} species`);
+    }
+  } catch(e) {
+    console.warn('Plant name translations not available:', e.message);
+  }
+}
+
+/**
+ * Translate a plant name.
+ * @param {object} plant - Row from CSV with Genus, Species, CommonName
+ * @param {object} opts  - { html: true } to wrap Latin fallback in <em>
+ * @returns {string} Best available name in currentLang
+ */
+function tPlant(plant, opts) {
+  const html = opts && opts.html;
+  const sciName = `${plant.Genus || ''} ${plant.Species || ''}`.trim();
+  const enName  = plant.CommonName || '';
+
+  // English or no translations loaded → return English or Latin
+  if (currentLang === 'en' || !_plantI18nLoaded) {
+    return enName || (html ? `<em>${sciName}</em>` : sciName);
+  }
+
+  // Check translations
+  const entry = PLANT_NAMES_I18N[sciName];
+  if (entry && entry[currentLang]) {
+    return entry[currentLang];
+  }
+
+  // Fallback: English common name, then Latin name (italicized to signal it's scientific)
+  if (enName) return enName;
+  return html ? `<em>${sciName}</em>` : sciName;
+}
+
 function setLang(lang) {
   if (!I18N_LANGS.find(l => l.code === lang)) lang = 'en';
   currentLang = lang;
   try { localStorage.setItem('pltx_lang', lang); } catch(e) {}
   document.documentElement.lang = lang;
   applyTranslations();
+  // Re-render charts/table with translated plant names
+  if (typeof refreshAll === 'function') {
+    try { refreshAll(); } catch(e) {}
+  }
 }
 
 function applyTranslations() {

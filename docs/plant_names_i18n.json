@@ -1,0 +1,280 @@
+{
+ "Abelmoschus esculentus": {
+  "ja": "オクラ",
+  "hi": "भिण्डी",
+  "te": "బెండకాయ",
+  "zh": "秋葵",
+  "en": "Okra",
+  "de": "Okra",
+  "es": "Abelmoschus esculentus",
+  "fr": "Gombo",
+  "pt": "Quiabo"
+ },
+ "Abies concolor": {
+  "pt": "Abies concolor",
+  "en": "Colorado Fir, White fir",
+  "es": "Abies concolor",
+  "zh": "白冷杉",
+  "de": "Kolorado-Tanne",
+  "fr": "Sapin du Colorado"
+ },
+ "Abies alba": {
+  "en": "Silver Fir, Christmas Tree Fir, European Silver Fir, Silver",
+  "zh": "銀冷杉",
+  "ja": "ヨーロッパモミ",
+  "pt": "Abies alba",
+  "de": "Weiß-Tanne",
+  "fr": "Abies alba",
+  "es": "Abies alba"
+ },
+ "Abies grandis": {
+  "en": "Grand Fir, Giant Fir, Lowland White Fir",
+  "de": "Küsten-Tanne",
+  "fr": "Abies grandis",
+  "pt": "Abies grandis",
+  "es": "Abies grandis",
+  "zh": "巨冷杉"
+ },
+ "Abies nordmanniana": {
+  "en": "Caucasian Fir, Christmas Tree Fir, Nordmann",
+  "es": "Abies nordmanniana",
+  "zh": "高加索冷杉",
+  "de": "Nordmann-Tanne",
+  "fr": "Sapin de Nordmann"
+ },
+ "Acacia concinna": {
+  "zh": "藤金合欢",
+  "hi": "शिकाकाई",
+  "te": "శీకాయ",
+  "de": "Acacia concinna",
+  "fr": "Acacia concinna",
+  "en": "Shikakai, Soap-Pod"
+ },
+ "Abies religiosa": {
+  "es": "Oyamel",
+  "en": "Sacred Fir",
+  "de": "Heilige Tanne",
+  "fr": "Abies religiosa"
+ },
+ "Abies balsamea": {
+  "en": "Balsam Fir",
+  "de": "Balsam-Tanne",
+  "es": "Abies balsamea",
+  "zh": "膠冷杉",
+  "fr": "Sapin baumier"
+ },
+ "Acacia angustissima": {
+  "en": "Prairie acacia. Timbre. Fernleaf Acacia",
+  "pt": "Acaciella angustissima",
+  "es": "Acacia angustissima",
+  "fr": "Acaciella angustissima"
+ },
+ "Abutilon theophrasti": {
+  "zh": "苘麻",
+  "en": "China Jute, Velvetleaf, Butterprint Buttonweed Jute, China Mallow, Indian Velvet Leaf",
+  "de": "Samtpappel",
+  "fr": "abutilon",
+  "pt": "Abutilon theophrasti",
+  "ja": "イチビ",
+  "es": "Abutilon theophrasti"
+ },
+ "Abelmoschus manihot": {
+  "zh": "秋葵",
+  "es": "Abelmoschus manihot",
+  "fr": "Abelmoschus manihot",
+  "en": "Aibika",
+  "de": "Maniok-Bisameibisch",
+  "pt": "Abelmoschus manihot",
+  "ja": "トロロアオイ"
+ },
+ "Abies sibirica": {
+  "zh": "杉松",
+  "en": "Siberian Fir",
+  "de": "Sibirische Tanne",
+  "es": "Abies sibirica",
+  "fr": "Sapin de Sibérie"
+ },
+ "Abies cephalonica": {
+  "en": "Grecian Fir",
+  "de": "Griechische Tanne",
+  "es": "Abies cephalonica",
+  "fr": "Sapin de Céphalonie"
+ },
+ "Abies amabilis": {
+  "en": "Red Fir,Pacific silver fir",
+  "de": "Purpur-Tanne",
+  "fr": "Sapin gracieux",
+  "pt": "Abies amabilis",
+  "es": "Abies amabilis"
+ },
+ "Abies lasiocarpa": {
+  "en": "Subalpine Fir, Alpine Fir",
+  "zh": "毛果冷杉",
+  "de": "Felsengebirgs-Tanne",
+  "fr": "Sapin subalpin",
+  "es": "Abies lasiocarpa"
+ },
+ "Abies pindrow": {
+  "de": "Pindrow-Tanne",
+  "en": "West Himalayan Fir",
+  "fr": "Abies pindrow",
+  "hi": "पिंद्रौ",
+  "es": "Abies pindrow"
+ },
+ "Abies homolepis": {
+  "de": "Nikko-Tanne",
+  "en": "Nikko Fir",
+  "ja": "ウラジロモミ",
+  "zh": "日光冷杉",
+  "es": "Abies homolepis",
+  "fr": "Abies homolepis"
+ },
+ "Acacia catechu": {
+  "zh": "儿茶",
+  "en": "Cutch tree, Catechu acacia"
+ },
+ "Abies delavayi": {
+  "de": "Delavays Tanne",
+  "en": "Abies delavayi",
+  "zh": "冷杉果",
+  "fr": "Abies delavayi",
+  "es": "Abies delavayi"
+ },
+ "Abies procera": {
+  "de": "Edeltanne",
+  "en": "Noble Fir",
+  "fr": "Sapin noble",
+  "zh": "壮丽冷杉",
+  "pt": "Abies procera",
+  "es": "Abies procera"
+ },
+ "Abies magnifica": {
+  "en": "Californian Red Fir, Shasta red fir",
+  "de": "Pracht-Tanne",
+  "fr": "Sapin rouge",
+  "zh": "红冷杉",
+  "es": "Abies magnifica"
+ },
+ "Abies fraseri": {
+  "en": "She Balsam, Fraser fir, Southern Balsam Fir",
+  "de": "Fraser-Tanne",
+  "fr": "Abies fraseri",
+  "es": "Abies fraseri"
+ },
+ "Abies sachalinensis": {
+  "de": "Sachalin-Tanne",
+  "en": "Sakhalin Fir",
+  "ja": "トドマツ",
+  "zh": "库页冷杉",
+  "pt": "Abies sachalinensis",
+  "es": "Abies sachalinensis",
+  "fr": "Sapin de Sakhaline"
+ },
+ "Abies veitchii": {
+  "en": "Veitch Fir, Christmastree",
+  "ja": "シラビソ",
+  "zh": "白叶冷杉",
+  "es": "Abies veitchii",
+  "fr": "Abies veitchii",
+  "de": "Veitchs Tanne"
+ },
+ "Abies mariesii": {
+  "en": "Abies mariesii",
+  "es": "Abies mariesii",
+  "de": "Maries-Tanne",
+  "fr": "Abies mariesii",
+  "ja": "オオシラビソ"
+ },
+ "Abies spectabilis": {
+  "en": "Himalayan Fir",
+  "zh": "藏冷杉",
+  "es": "Abies spectabilis",
+  "de": "Himalaya-Tanne",
+  "fr": "Abies spectabilis",
+  "pt": "Abies spectabilis"
+ },
+ "Abies firma": {
+  "zh": "日本冷杉",
+  "en": "Momi Fir, Japanese Fir",
+  "ja": "モミ",
+  "pt": "Abies firma",
+  "es": "Abies firma",
+  "de": "Momi-Tanne",
+  "fr": "Abies firma"
+ },
+ "Abies squamata": {
+  "zh": "杉松",
+  "en": "Flaky Fir",
+  "de": "Schuppenrindige Tanne",
+  "fr": "Abies squamata",
+  "pt": "Abies squamata",
+  "es": "Abies squamata"
+ },
+ "Acacia aneura": {
+  "en": "Mulga Acacia",
+  "zh": "无脉相思树",
+  "de": "Mulga",
+  "fr": "Acacia aneura",
+  "es": "Acacia aneura",
+  "pt": "Acacia aneura"
+ },
+ "Abies recurvata": {
+  "en": "Abies recurvata",
+  "zh": "紫果冷杉",
+  "es": "Abies recurvata",
+  "de": "Min-Tanne",
+  "fr": "Abies recurvata",
+  "pt": "Abies recurvata"
+ },
+ "Abelmoschus moschatus": {
+  "zh": "黄葵",
+  "en": "Musk Mallow,Musk Okra",
+  "hi": "मुस्कदाना",
+  "es": "Abelmoschus moschatus",
+  "ja": "リュウキュウトロロアオイ",
+  "fr": "Ambrette",
+  "pt": "Abelmosco"
+ },
+ "Acacia auriculiformis": {
+  "en": "Ear-Pod Wattle, Black Acacia, Earleaf, Black wattle",
+  "zh": "大叶相思",
+  "te": "అకేషియా అరికులిఫోర్మిస్",
+  "es": "Acacia auriculiformis",
+  "fr": "Acacia auriculiformis",
+  "pt": "Acacia auriculiformis"
+ },
+ "Abutilon pictum": {
+  "zh": "金铃花",
+  "en": "Abutilon, Parlour Maple, Flowering Maple, Spotted"
+ },
+ "Abutilon megapotamicum": {
+  "en": "Trailing Abutilon",
+  "ja": "ウキツリボク",
+  "es": "Abutilon megapotamicum",
+  "fr": "Abutilon megapotamicum",
+  "pt": "Abutilon megapotamicum"
+ },
+ "Abronia fragrans": {
+  "en": "Snowball Sand Verbena",
+  "fr": "Abronia fragrans"
+ },
+ "Abronia villosa": {
+  "en": "Desert Sand Verbena",
+  "es": "Abronia villosa",
+  "fr": "Abronia villosa",
+  "pt": "Abronia villosa"
+ },
+ "Acacia colei": {
+  "pt": "Acacia colei",
+  "en": "Cole's wattle, Candelabra Wattle, Soap wattle,"
+ },
+ "Abelia triflora": {
+  "es": "Abelia triflora",
+  "en": "Indian Abelia"
+ },
+ "Abobra tenuifolia": {
+  "en": "Cranberry Gourd",
+  "es": "Abobra tenuifolia",
+  "pt": "Abobra"
+ }
+}

@@ -1944,7 +1944,8 @@ function getFilteredData() {
             const q = filters.nameSearch.toLowerCase();
             const common = (p.CommonName || '').toLowerCase();
             const latin  = ((p.Genus || '') + ' ' + (p.Species || '')).toLowerCase().trim();
-            if (!common.includes(q) && !latin.includes(q)) return false;
+            const translated = tPlant(p).toLowerCase();
+            if (!common.includes(q) && !latin.includes(q) && !translated.includes(q)) return false;
         }
         return true;
     });
@@ -2134,7 +2135,7 @@ function renderScatter(data) {
         parseInt(p.Edibility) || 0,
         parseInt(p.Medicinal) || 0,
         (parseInt(p.OtherUses) || 0),
-        p.CommonName || `${p.Genus} ${p.Species}`,
+        tPlant(p),
         p.PFAF || ''
     ]);
 
@@ -2405,7 +2406,7 @@ function renderTopPicks(data) {
         const pct   = Math.round((score / maxScore) * 100);
         const zr    = plantZoneRange(p);
         const zoneStr = zr ? `${zr[0]}–${zr[1]}` : '—';
-        const name  = p.CommonName || `${p.Genus} ${p.Species}`;
+        const name  = tPlant(p, {html:true});
         const sp    = `${p.Genus} ${p.Species}`.trim();
         const ed    = parseInt(p.Edibility) || 0;
         const med   = parseInt(p.Medicinal) || 0;
@@ -3067,7 +3068,7 @@ function renderTypeMap(data, page) {
 
     shown.forEach(p => {
         const imgUrl  = (p['Image URL'] || '').trim();
-        const name    = p.CommonName || `${p.Genus || ''} ${p.Species || ''}`.trim();
+        const name    = tPlant(p, {html:true});
         const ed      = parseInt(p.Edibility)  || 0;
         const med     = parseInt(p.Medicinal)  || 0;
         const oth     = parseInt(p.OtherUses)  || 0;
@@ -3405,7 +3406,9 @@ async function loadData() {
             download: true, header: true, skipEmptyLines: true,
             complete: r => resolve(r),
             error: () => resolve({ data: [] })
-        }))
+        })),
+        // Load plant name translations (non-blocking — missing file is OK)
+        loadPlantNamesI18n()
     ]);
 
     allPlants = plantsResult.data;
