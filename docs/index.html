@@ -68,6 +68,7 @@
         if (e.message && /webpage_content_reporter|export/.test(e.message)) { e.preventDefault(); return true; }
     }, true);
     </script>
+    <script src="i18n.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -666,6 +667,24 @@
             font-weight: 700;
             margin-bottom: 0.4rem;
         }
+
+        /* Language picker section */
+        .filter-lang-section {
+            margin-top: 1rem;
+            padding-top: 0.75rem;
+            border-top: 1px solid #e0e0e0;
+        }
+        .filter-lang-section select {
+            width: 100%;
+            padding: 0.5rem 0.6rem;
+            border: 1.5px solid #ddd;
+            border-radius: 7px;
+            background: #fff;
+            font-size: 0.85rem;
+            color: #333;
+            cursor: pointer;
+        }
+        .filter-lang-section select:focus { border-color: var(--secondary); outline: none; }
 
         .filter-group { display: flex; flex-direction: column; gap: 0.35rem; }
 
@@ -1385,7 +1404,7 @@
 <!-- Loader -->
 <div class="loader-overlay" id="loader">
     <i class="fas fa-leaf spin"></i>
-    <p>Loading plant data…</p>
+    <p data-i18n="loader.text">Loading plant data…</p>
 </div>
 
 <!-- Mobile overlay -->
@@ -1398,21 +1417,21 @@
     </button>
     <h1>
         <i class="fas fa-leaf"></i>
-        PLANTalytics Explorer
-        <span class="badge">Apache ECharts · Live CSV</span>
-        <span class="header-sub">Explore 7,400+ plants by zone, edibility &amp; use</span>
+        <span data-i18n="header.title">PLANTalytics Explorer</span>
+        <span class="badge" data-i18n="header.badge">Apache ECharts · Live CSV</span>
+        <span class="header-sub" data-i18n="header.sub">Explore 7,400+ plants by zone, edibility &amp; use</span>
     </h1>
     <div class="header-links">
-        <a href="index.html" class="header-link"><i class="fas fa-home"></i><span class="link-text"> Home</span></a>
-        <a href="advanced-dashboard.html" class="header-link"><i class="fas fa-cube"></i><span class="link-text"> Power BI</span></a>
-        <a href="https://sproutcast.io" target="_blank" rel="noopener noreferrer" class="header-link sprout-cta" title="Track plant health with Sproutcast"><i class="fas fa-heartbeat"></i><span class="link-text"> Plant Health</span></a>
+        <a href="index.html" class="header-link"><i class="fas fa-home"></i><span class="link-text" data-i18n="header.home"> Home</span></a>
+        <a href="advanced-dashboard.html" class="header-link"><i class="fas fa-cube"></i><span class="link-text" data-i18n="header.powerbi"> Power BI</span></a>
+        <a href="https://sproutcast.io" target="_blank" rel="noopener noreferrer" class="header-link sprout-cta" title="Track plant health with Sproutcast"><i class="fas fa-heartbeat"></i><span class="link-text" data-i18n="header.planthealth"> Plant Health</span></a>
         <a href="https://github.com/TahriT/PLANTalytics" target="_blank" rel="noopener noreferrer" class="header-link" title="GitHub"><i class="fab fa-github"></i></a>
     </div>
 </header>
 
 <!-- Attribution & Links Banner -->
 <div class="pfaf-banner" id="pfafBanner">
-    <span class="ban-label"><i class="fas fa-database"></i> Data from</span>
+    <span class="ban-label"><i class="fas fa-database"></i> <span data-i18n="banner.datafrom">Data from</span></span>
     <a href="https://pfaf.org" target="_blank" rel="noopener noreferrer" class="ban-link" title="Plants For A Future">
         <i class="fas fa-leaf"></i> PFAF
     </a>
@@ -1422,23 +1441,23 @@
     </a>
     <span class="ban-sep">&bull;</span>
     <div class="ban-zip" id="bannerZipWrap">
-        <label><i class="fas fa-map-marker-alt"></i> ZIP</label>
-        <input type="text" id="bannerZipInput" placeholder="Enter ZIP" maxlength="5" onkeydown="if(event.key==='Enter') bannerLookupZip()">
+        <label><i class="fas fa-map-marker-alt"></i> <span data-i18n="banner.zip">ZIP</span></label>
+        <input type="text" id="bannerZipInput" placeholder="Enter ZIP" data-i18n-placeholder="banner.enterzip" maxlength="5" onkeydown="if(event.key==='Enter') bannerLookupZip()">
         <button class="ban-zip-btn" onclick="bannerLookupZip()" title="Find zone"><i class="fas fa-search"></i></button>
         <span class="ban-zip-feedback" id="bannerZipFeedback"></span>
     </div>
     <!-- Tip toast (inline on desktop, floating on mobile) -->
     <div id="tipToast" class="tip-toast">
-        <span><i class="fas fa-lightbulb" style="margin-right:0.25rem"></i><strong>Tip:</strong> <span class="mob-hide-text">Enter your ZIP to find plants for your zone.</span><span class="mob-show-text">Enter ZIP below to find plants for your zone.</span></span>
+        <span><i class="fas fa-lightbulb" style="margin-right:0.25rem"></i><strong data-i18n="misc.tip">Tip:</strong> <span class="mob-hide-text" data-i18n="banner.tip">Enter your ZIP to find plants for your zone.</span><span class="mob-show-text" data-i18n="banner.tipmob">Enter ZIP below to find plants for your zone.</span></span>
         <button class="tip-toast-dismiss" onclick="dismissTip()" title="Dismiss"><i class="fas fa-times"></i></button>
     </div>
     <script>try{if(localStorage.getItem('pltx_tip_dismissed')==='1')document.getElementById('tipToast').style.display='none';}catch(e){}</script>
     <div class="ban-right">
         <a href="https://pfaf.org/user/cmspage.aspx?pageid=313" target="_blank" rel="noopener noreferrer" class="ban-btn">
-            <i class="fas fa-hand-holding-heart"></i> Support PFAF
+            <i class="fas fa-hand-holding-heart"></i> <span data-i18n="banner.supportpfaf">Support PFAF</span>
         </a>
         <a href="https://sproutcast.io" target="_blank" rel="noopener noreferrer" class="ban-btn sprout" title="Track plant health with Sproutcast">
-            <i class="fas fa-heartbeat"></i> Track Plant Health &rarr; Sproutcast
+            <i class="fas fa-heartbeat"></i> <span data-i18n="banner.trackhealth">Track Plant Health &rarr; Sproutcast</span>
         </a>
         <a href="https://github.com/TahriT/PLANTalytics" target="_blank" rel="noopener noreferrer" class="ban-btn" title="View source on GitHub">
             <i class="fab fa-github"></i> GitHub
@@ -1456,31 +1475,38 @@
 
         <button class="filter-toggle" onclick="toggleFilterPanel()">
             <i class="fas fa-chevron-left toggle-icon"></i>
-            <span class="toggle-label"><i class="fas fa-sliders-h" style="margin-right:0.4rem"></i>Filters</span>
+            <span class="toggle-label"><i class="fas fa-sliders-h" style="margin-right:0.4rem"></i><span data-i18n="filter.filters">Filters</span></span>
         </button>
 
         <div class="filter-body">
 
             <!-- ZIP lookup -->
             <div class="sidebar-zip-section">
-                <div class="filter-section-heading"><i class="fas fa-map-marker-alt"></i> Location</div>
+                <div class="filter-section-heading"><i class="fas fa-map-marker-alt"></i> <span data-i18n="filter.location">Location</span></div>
                 <div class="filter-group">
-                    <label>ZIP Code → Zone</label>
+                    <label data-i18n="filter.ziptozone">ZIP Code → Zone</label>
                     <div class="zip-row">
-                        <input type="text" id="zipInput" placeholder="e.g. 90210" maxlength="5" onkeydown="if(event.key==='Enter') lookupZip()">
+                        <input type="text" id="zipInput" placeholder="e.g. 90210" data-i18n-placeholder="filter.zipplaceholder" maxlength="5" onkeydown="if(event.key==='Enter') lookupZip()">
                         <button class="zip-btn" onclick="lookupZip()"><i class="fas fa-search"></i></button>
                     </div>
                     <div class="zone-feedback" id="zoneFeedback"></div>
+                </div>
+                <div class="filter-group" style="margin-top:0.5rem">
+                    <label data-i18n="filter.country">Country</label>
+                    <select id="countryFilter" onchange="selectCountry(this.value)">
+                        <option value="" data-i18n="filter.selectcountry">Select a country…</option>
+                    </select>
+                    <div class="zone-feedback" id="countryZoneFeedback"></div>
                 </div>
             </div>
 
             <!-- Plant name search -->
             <div>
-                <div class="filter-section-heading"><i class="fas fa-search"></i> Search</div>
+                <div class="filter-section-heading"><i class="fas fa-search"></i> <span data-i18n="filter.search">Search</span></div>
                 <div class="filter-group">
-                    <label>Common or Latin name</label>
+                    <label data-i18n="filter.commonlatin">Common or Latin name</label>
                     <div class="zip-row">
-                        <input type="text" id="nameSearchInput" placeholder="e.g. Oak, Quercus…" autocomplete="off"
+                        <input type="text" id="nameSearchInput" placeholder="e.g. Oak, Quercus…" data-i18n-placeholder="filter.nameplaceholder" autocomplete="off"
                             oninput="setFilter('nameSearch', this.value.trim())">
                         <button class="zip-btn" onclick="document.getElementById('nameSearchInput').value=''; setFilter('nameSearch','');" title="Clear"><i class="fas fa-times"></i></button>
                     </div>
@@ -1489,67 +1515,67 @@
 
             <!-- Hardiness Zone visual bar -->
             <div class="sidebar-zone-section">
-                <div class="filter-section-heading"><i class="fas fa-thermometer-half"></i> Hardiness Zone</div>
+                <div class="filter-section-heading"><i class="fas fa-thermometer-half"></i> <span data-i18n="filter.hardinesszone">Hardiness Zone</span></div>
                 <div class="filter-group">
-                    <label>Click zone to filter <span class="val" id="zoneValLabel"></span></label>
+                    <label><span data-i18n="filter.clickzone">Click zone to filter</span> <span class="val" id="zoneValLabel"></span></label>
                     <div class="zone-bar" id="zoneBar"></div>
                     <div class="zone-temp-hint" id="zoneTempHint"></div>
                     <div style="display:flex;justify-content:space-between;font-size:0.68rem;color:#aaa;margin-top:0.25rem;">
-                        <span>Zone 1 (coldest)</span><span>Zone 13 (hottest)</span>
+                        <span data-i18n="filter.zone1coldest">Zone 1 (coldest)</span><span data-i18n="filter.zone13hottest">Zone 13 (hottest)</span>
                     </div>
                 </div>
             </div>
 
             <!-- Plant Type -->
             <div>
-                <div class="filter-section-heading"><i class="fas fa-leaf"></i> Plant Characteristics</div>
+                <div class="filter-section-heading"><i class="fas fa-leaf"></i> <span data-i18n="filter.plantchars">Plant Characteristics</span></div>
                 <div class="filter-group">
-                    <label>Plant Type</label>
+                    <label data-i18n="filter.planttype">Plant Type</label>
                     <select id="typeFilter" onchange="setFilter('type', this.value || null)">
-                        <option value="">All Types</option>
+                        <option value="" data-i18n="filter.alltypes">All Types</option>
                     </select>
                 </div>
 
                 <div class="filter-group" style="margin-top:0.75rem">
-                    <label>Growth Rate</label>
+                    <label data-i18n="filter.growthrate">Growth Rate</label>
                     <select id="growthFilter" onchange="setFilter('growthRate', this.value || null)">
-                        <option value="">All Rates</option>
-                        <option value="slow">Slow</option>
-                        <option value="medium">Medium</option>
-                        <option value="fast">Fast</option>
+                        <option value="" data-i18n="filter.allrates">All Rates</option>
+                        <option value="slow" data-i18n="filter.slow">Slow</option>
+                        <option value="medium" data-i18n="filter.medium">Medium</option>
+                        <option value="fast" data-i18n="filter.fast">Fast</option>
                     </select>
                 </div>
 
                 <div class="filter-group" style="margin-top:0.75rem">
-                    <label>Foliage</label>
+                    <label data-i18n="filter.foliage">Foliage</label>
                     <select id="foliageFilter" onchange="setFilter('foliage', this.value || null)">
-                        <option value="">All</option>
-                        <option value="Evergreen">Evergreen</option>
-                        <option value="Deciduous">Deciduous</option>
-                        <option value="Semi-evergreen">Semi-evergreen</option>
+                        <option value="" data-i18n="filter.all">All</option>
+                        <option value="Evergreen" data-i18n="filter.evergreen">Evergreen</option>
+                        <option value="Deciduous" data-i18n="filter.deciduous">Deciduous</option>
+                        <option value="Semi-evergreen" data-i18n="filter.semievergreen">Semi-evergreen</option>
                     </select>
                 </div>
             </div>
 
             <!-- Soil -->
             <div>
-                <div class="filter-section-heading"><i class="fas fa-seedling"></i> Growing Conditions</div>
+                <div class="filter-section-heading"><i class="fas fa-seedling"></i> <span data-i18n="filter.growing">Growing Conditions</span></div>
                 <div class="filter-group">
-                    <label>Soil Type</label>
+                    <label data-i18n="filter.soiltype">Soil Type</label>
                     <select id="soilFilter" onchange="setFilter('soil', this.value || null)">
-                        <option value="">Any Soil</option>
-                        <option value="light">Light (Sandy)</option>
-                        <option value="medium">Medium (Loam)</option>
-                        <option value="heavy">Heavy (Clay)</option>
+                        <option value="" data-i18n="filter.anysoil">Any Soil</option>
+                        <option value="light" data-i18n="filter.lightsandy">Light (Sandy)</option>
+                        <option value="medium" data-i18n="filter.mediumloam">Medium (Loam)</option>
+                        <option value="heavy" data-i18n="filter.heavycite">Heavy (Clay)</option>
                     </select>
                 </div>
             </div>
 
             <!-- Edibility / Medicinal sliders -->
             <div>
-                <div class="filter-section-heading"><i class="fas fa-star"></i> Use Ratings</div>
+                <div class="filter-section-heading"><i class="fas fa-star"></i> <span data-i18n="filter.useratings">Use Ratings</span></div>
                 <div class="filter-group">
-                    <label>Min Edibility <span class="val" id="edibilityValLabel">0+</span></label>
+                    <label><span data-i18n="filter.minedibility">Min Edibility</span> <span class="val" id="edibilityValLabel">0+</span></label>
                     <div class="slider-row">
                         <input type="range" min="0" max="5" value="0" id="edibilitySlider"
                                oninput="document.getElementById('edibilityValLabel').textContent=this.value+'+'; setFilter('minEdibility', parseInt(this.value))">
@@ -1557,7 +1583,7 @@
                     </div>
                 </div>
                 <div class="filter-group" style="margin-top:0.75rem">
-                    <label>Min Medicinal <span class="val" id="medicinalValLabel">0+</span></label>
+                    <label><span data-i18n="filter.minmedicinal">Min Medicinal</span> <span class="val" id="medicinalValLabel">0+</span></label>
                     <div class="slider-row">
                         <input type="range" min="0" max="5" value="0" id="medicinalSlider"
                                oninput="document.getElementById('medicinalValLabel').textContent=this.value+'+'; setFilter('minMedicinal', parseInt(this.value))">
@@ -1568,22 +1594,31 @@
 
             <!-- Active chips -->
             <div>
-                <div class="filter-section-heading"><i class="fas fa-filter"></i> Active Filters</div>
+                <div class="filter-section-heading"><i class="fas fa-filter"></i> <span data-i18n="filter.activefilters">Active Filters</span></div>
                 <div class="chips-area" id="chipsArea">
-                    <span style="color:#ccc;font-size:0.8rem">None</span>
+                    <span style="color:#ccc;font-size:0.8rem" data-i18n="filter.none">None</span>
                 </div>
             </div>
 
             <div class="filter-actions">
                 <button class="clear-all-btn" onclick="clearAllFilters()">
-                    <i class="fas fa-times-circle"></i> Clear All Filters
+                    <i class="fas fa-times-circle"></i> <span data-i18n="filter.clearall">Clear All Filters</span>
                 </button>
                 <button class="export-filter-btn" onclick="exportFilteredCSV()" title="Download current filtered plants as CSV">
-                    <i class="fas fa-download"></i> Export CSV
+                    <i class="fas fa-download"></i> <span data-i18n="filter.exportcsv">Export CSV</span>
                 </button>
                 <button class="mob-close-filter-btn" onclick="closeMobileFilter()">
-                    <i class="fas fa-times"></i> Close Filters
+                    <i class="fas fa-times"></i> <span data-i18n="filter.closefilters">Close Filters</span>
                 </button>
+            </div>
+
+            <!-- Language Picker -->
+            <div class="filter-lang-section">
+                <div class="filter-section-heading"><i class="fas fa-globe"></i> <span data-i18n="filter.language">Language</span></div>
+                <div class="filter-group">
+                    <select id="langSelect" onchange="setLang(this.value)">
+                    </select>
+                </div>
             </div>
 
         </div><!-- /filter-body -->
@@ -1595,41 +1630,41 @@
         <!-- Quick Filter Bar (stats always, ZIP/zone on mobile only) -->
         <div class="quick-filter-bar" id="quickFilterBar">
             <div class="qf-zip">
-                <label><i class="fas fa-map-marker-alt"></i> ZIP</label>
-                <input type="text" id="qfZipInput" placeholder="e.g. 90210" maxlength="5" onkeydown="if(event.key==='Enter') qfLookupZip()">
+                <label><i class="fas fa-map-marker-alt"></i> <span data-i18n="banner.zip">ZIP</span></label>
+                <input type="text" id="qfZipInput" placeholder="e.g. 90210" data-i18n-placeholder="filter.zipplaceholder" maxlength="5" onkeydown="if(event.key==='Enter') qfLookupZip()">
                 <button class="qf-zip-btn" onclick="qfLookupZip()" title="Find zone"><i class="fas fa-search"></i></button>
                 <span class="qf-zone-feedback" id="qfZoneFeedback"></span>
             </div>
             <div class="qf-sep"></div>
             <div class="qf-zone-wrap">
-                <span class="qf-zone-label">Hardiness Zone <span id="qfZoneValLabel"></span></span>
+                <span class="qf-zone-label"><span data-i18n="qf.hardinesszone">Hardiness Zone</span> <span id="qfZoneValLabel"></span></span>
                 <div class="qf-zone-bar" id="qfZoneBar"></div>
             </div>
             <div class="stats-row">
                 <div class="stat-seg" title="Total plants matching current filters out of the full dataset">
                     <div class="seg-icon green"><i class="fas fa-seedling"></i></div>
                     <span class="seg-val" id="statTotal">—</span>
-                    <span class="seg-lbl">Plants<span id="statTotalOf" style="opacity:0.6;font-weight:400"></span></span>
+                    <span class="seg-lbl" data-i18n="stat.plants">Plants</span><span id="statTotalOf" style="opacity:0.6;font-weight:400"></span>
                 </div>
                 <div class="stat-seg" title="PFAF edibility scale 1–5: score 3 = good food plant, 4 = important food source, 5 = staple crop. Showing plants rated 3 or above.">
                     <div class="seg-icon orange"><i class="fas fa-apple-alt"></i></div>
                     <span class="seg-val" id="statEdible">—</span>
-                    <span class="seg-lbl">Edible ≥3</span>
+                    <span class="seg-lbl" data-i18n="stat.edible">Edible ≥3</span>
                 </div>
                 <div class="stat-seg" title="PFAF medicinal scale 1–5: score 3 = used in herbalism, 5 = major medicinal plant. Showing plants rated 3 or above.">
                     <div class="seg-icon purple"><i class="fas fa-mortar-pestle"></i></div>
                     <span class="seg-val" id="statMedicinal">—</span>
-                    <span class="seg-lbl">Medicinal ≥3</span>
+                    <span class="seg-lbl" data-i18n="stat.medicinal">Medicinal ≥3</span>
                 </div>
                 <div class="stat-seg" title="Plants that support at least one listed pollinator species (bees, butterflies, moths, etc.)">
                     <div class="seg-icon blue"><i class="fas fa-bug"></i></div>
                     <span class="seg-val" id="statPollinators">—</span>
-                    <span class="seg-lbl">Pollinators</span>
+                    <span class="seg-lbl" data-i18n="stat.pollinators">Pollinators</span>
                 </div>
             </div>
             <div class="qf-toggle">
                 <button class="qf-toggle-btn" id="advFilterToggle" onclick="toggleAdvancedFilters()" title="Show all filters">
-                    <i class="fas fa-sliders-h"></i> <span class="mob-hide-text">Advanced</span> Filters
+                    <i class="fas fa-sliders-h"></i> <span class="mob-hide-text" data-i18n="qf.advanced">Advanced</span> <span data-i18n="qf.advfilters">Filters</span>
                 </button>
             </div>
         </div>
@@ -1640,7 +1675,7 @@
             <!-- Chart 1: Plant Type Treemap — full width -->
             <div class="chart-card full-width" style="border-top-color:#2d5016">
                 <div class="card-header">
-                    <div class="card-title"><i class="fas fa-th-large"></i> Plant Type Landscape</div>
+                    <div class="card-title"><i class="fas fa-th-large"></i> <span data-i18n="chart.typelandscape">Plant Type Landscape</span></div>
                     <div class="card-actions">
                         <button class="icon-btn" title="Clear type filter" onclick="clearFilter('type')"><i class="fas fa-times"></i></button>
                         <button class="icon-btn" title="Fullscreen" onclick="fullscreenCard(this)"><i class="fas fa-expand"></i></button>
@@ -1651,7 +1686,7 @@
                     <div id="photoGrid" class="photo-grid"></div>
                 </div>
                 <div class="card-footer" id="photoGridFooter">
-                    <span class="footer-hint"><i class="fas fa-mouse-pointer"></i> Click a type tab to filter &middot; click a card to open its plant page</span>
+                    <span class="footer-hint"><i class="fas fa-mouse-pointer"></i> <span data-i18n="foot.typehint">Click a type tab to filter &middot; click a card to open its plant page</span></span>
                     <span id="photoGridPager"></span>
                 </div>
             </div>
@@ -1659,7 +1694,7 @@
             <!-- Chart 2: Top Families Donut -->
             <div class="chart-card" style="border-top-color:#00897b">
                 <div class="card-header">
-                    <div class="card-title"><i class="fas fa-chart-pie"></i> Top Plant Families</div>
+                    <div class="card-title"><i class="fas fa-chart-pie"></i> <span data-i18n="chart.topfamilies">Top Plant Families</span></div>
                     <div class="card-actions">
                         <button class="icon-btn" title="Clear family filter" onclick="clearFilter('family')"><i class="fas fa-times"></i></button>
                         <button class="icon-btn" title="Fullscreen" onclick="fullscreenCard(this)"><i class="fas fa-expand"></i></button>
@@ -1668,13 +1703,13 @@
                 <div class="card-body">
                     <div class="chart-instance" id="chartFamilies"></div>
                 </div>
-                <div class="card-footer"><i class="fas fa-mouse-pointer"></i> Click a slice to filter all charts by family</div>
+                <div class="card-footer"><i class="fas fa-mouse-pointer"></i> <span data-i18n="foot.familyhint">Click a slice to filter all charts by family</span></div>
             </div>
 
             <!-- Chart 3: Harvest Calendar -->
             <div class="chart-card" id="chartCardCalendar" style="border-top-color:#1565c0">
                 <div class="card-header">
-                    <div class="card-title"><i class="fas fa-calendar-alt"></i> Bloom &amp; Harvest Calendar</div>
+                    <div class="card-title"><i class="fas fa-calendar-alt"></i> <span data-i18n="chart.calendar">Bloom &amp; Harvest Calendar</span></div>
                     <div class="card-actions">
                         <button class="icon-btn" title="Clear month filter" onclick="clearFilter('month')"><i class="fas fa-times"></i></button>
                         <button class="icon-btn" title="Fullscreen" onclick="fullscreenCard(this)"><i class="fas fa-expand"></i></button>
@@ -1683,13 +1718,13 @@
                 <div class="card-body">
                     <div class="chart-instance" id="chartCalendar"></div>
                 </div>
-                <div class="card-footer"><i class="fas fa-mouse-pointer"></i> Click a month to filter · Blue = flowering, Green = ripening</div>
+                <div class="card-footer"><i class="fas fa-mouse-pointer"></i> <span data-i18n="foot.calendarhint">Click a month to filter · Blue = flowering, Green = ripening</span></div>
             </div>
 
             <!-- Chart 4: Edibility × Medicinal Scatter -->
             <div class="chart-card" id="chartCardScatter" style="border-top-color:#f9a825">
                 <div class="card-header">
-                    <div class="card-title"><i class="fas fa-circle"></i> Edibility × Medicinal Value</div>
+                    <div class="card-title"><i class="fas fa-circle"></i> <span data-i18n="chart.scatter">Edibility × Medicinal Value</span></div>
                     <div class="card-actions">
                         <button class="icon-btn" title="Fullscreen" onclick="fullscreenCard(this)"><i class="fas fa-expand"></i></button>
                     </div>
@@ -1697,13 +1732,13 @@
                 <div class="card-body">
                     <div class="chart-instance" id="chartScatter"></div>
                 </div>
-                <div class="card-footer"><i class="fas fa-info-circle"></i> Bubble size = Other Uses score (fiber, timber, dye, soap &amp; more) · Top-right = best food <em>and</em> medicine plants</div>
+                <div class="card-footer"><i class="fas fa-info-circle"></i> <span data-i18n="foot.scatterhint">Bubble size = Other Uses score (fiber, timber, dye, soap &amp; more) · Top-right = best food <em>and</em> medicine plants</span></div>
             </div>
 
             <!-- Chart 5: Growth Rate × Plant Type -->
             <div class="chart-card" style="border-top-color:#6a1b9a">
                 <div class="card-header">
-                    <div class="card-title"><i class="fas fa-chart-bar"></i> Plant Type &amp; Growth Rate</div>
+                    <div class="card-title"><i class="fas fa-chart-bar"></i> <span data-i18n="chart.growthrate">Plant Type &amp; Growth Rate</span></div>
                     <div class="card-actions">
                         <button class="icon-btn" title="Clear type/growth filter" onclick="clearFilter('type'); clearFilter('growthRate')"><i class="fas fa-times"></i></button>
                         <button class="icon-btn" title="Fullscreen" onclick="fullscreenCard(this)"><i class="fas fa-expand"></i></button>
@@ -1712,13 +1747,13 @@
                 <div class="card-body">
                     <div class="chart-instance" id="chartGrowth"></div>
                 </div>
-                <div class="card-footer"><i class="fas fa-mouse-pointer"></i> Click a bar segment to filter by plant type</div>
+                <div class="card-footer"><i class="fas fa-mouse-pointer"></i> <span data-i18n="foot.growthhint">Click a bar segment to filter by plant type</span></div>
             </div>
 
             <!-- Chart 6: Pollinator Support — full width so grid has no orphan gap -->
             <div class="chart-card full-width">
                 <div class="card-header">
-                    <div class="card-title"><i class="fas fa-bug"></i> Pollinator Support</div>
+                    <div class="card-title"><i class="fas fa-bug"></i> <span data-i18n="chart.pollinators">Pollinator Support</span></div>
                     <div class="card-actions">
                         <button class="icon-btn" title="Clear pollinator filter" onclick="clearFilter('pollinator')"><i class="fas fa-times"></i></button>
                         <button class="icon-btn" title="Fullscreen" onclick="fullscreenCard(this)"><i class="fas fa-expand"></i></button>
@@ -1727,13 +1762,13 @@
                 <div class="card-body">
                     <div class="chart-instance" id="chartPollinators" style="height:280px"></div>
                 </div>
-                <div class="card-footer"><i class="fas fa-mouse-pointer"></i> Click a bar to filter by pollinator type</div>
+                <div class="card-footer"><i class="fas fa-mouse-pointer"></i> <span data-i18n="foot.pollinatorhint">Click a bar to filter by pollinator type</span></div>
             </div>
 
             <!-- Chart 7: Top Picks Table — full width -->
             <div class="chart-card full-width">
                 <div class="card-header">
-                    <div class="card-title"><i class="fas fa-star"></i> Top Picks for Your Selection</div>
+                    <div class="card-title"><i class="fas fa-star"></i> <span data-i18n="chart.toppicks">Top Picks for Your Selection</span></div>
                     <div class="card-actions">
                         <button class="icon-btn" title="Fullscreen" onclick="fullscreenCard(this)"><i class="fas fa-expand"></i></button>
                     </div>
@@ -1743,23 +1778,23 @@
                         <table class="picks-table">
                             <thead>
                                 <tr>
-                                    <th>#</th>
-                                    <th>Common Name</th>
-                                    <th>Family / Species</th>
-                                    <th>Type</th>
-                                    <th title="USDA Hardiness Zone range this plant can survive in">Zone</th>
-                                    <th title="PFAF edibility rating 1–5: 1=mildly edible, 3=good food plant, 5=staple crop">Edibility</th>
-                                    <th title="PFAF medicinal rating 1–5: 1=minor uses, 3=used in herbalism, 5=major medicinal plant">Medicinal</th>
-                                    <th title="Other practical uses: fiber, timber, dye, soap, biofuel, fencing, paper and more — rated 1–5">Other Uses</th>
-                                    <th title="Sum of Edibility + Medicinal + Other Uses (max 15). Higher = more versatile plant.">Utility Score</th>
-                                    <th>Link</th>
+                                    <th data-i18n="table.rank">#</th>
+                                    <th data-i18n="table.commonname">Common Name</th>
+                                    <th data-i18n="table.familyspecies">Family / Species</th>
+                                    <th data-i18n="table.type">Type</th>
+                                    <th data-i18n="table.zone" title="USDA Hardiness Zone range this plant can survive in">Zone</th>
+                                    <th data-i18n="table.edibility" title="PFAF edibility rating 1–5: 1=mildly edible, 3=good food plant, 5=staple crop">Edibility</th>
+                                    <th data-i18n="table.medicinal" title="PFAF medicinal rating 1–5: 1=minor uses, 3=used in herbalism, 5=major medicinal plant">Medicinal</th>
+                                    <th data-i18n="table.otheruses" title="Other practical uses: fiber, timber, dye, soap, biofuel, fencing, paper and more — rated 1–5">Other Uses</th>
+                                    <th data-i18n="table.utilityscore" title="Sum of Edibility + Medicinal + Other Uses (max 15). Higher = more versatile plant.">Utility Score</th>
+                                    <th data-i18n="table.link">Link</th>
                                 </tr>
                             </thead>
                             <tbody id="topPicksBody"></tbody>
                         </table>
                     </div>
                 </div>
-                <div class="card-footer"><i class="fas fa-info-circle"></i> Sorted by Utility Score (Edibility + Medicinal + OtherUses). Showing top 50 from filtered set.</div>
+                <div class="card-footer"><i class="fas fa-info-circle"></i> <span data-i18n="foot.toppickshint">Sorted by Utility Score (Edibility + Medicinal + OtherUses). Showing top 50 from filtered set.</span></div>
             </div>
 
         </div><!-- /charts-grid -->
@@ -1768,6 +1803,11 @@
 
 
 </div><!-- /page-body -->
+
+<!-- Privacy footer -->
+<footer style="text-align:center;padding:1rem 0.75rem;font-size:0.72rem;color:#999;border-top:1px solid #e8e8e8;background:#fafafa;">
+    <i class="fas fa-lock" style="margin-right:0.25rem"></i> This site uses functional cookies and local storage to remember your language and UI preferences. No tracking or advertising cookies are used.
+</footer>
 
 <script>
 // ─────────────────────────────────────────────
@@ -3600,6 +3640,49 @@ if (window.innerWidth <= 900) {
 }
 
 // Start
+(function initI18n() {
+    // Populate language selector
+    const langSel = document.getElementById('langSelect');
+    if (langSel) {
+        I18N_LANGS.forEach(l => {
+            const opt = document.createElement('option');
+            opt.value = l.code;
+            opt.textContent = `${l.flag} ${l.label}`;
+            langSel.appendChild(opt);
+        });
+        langSel.value = currentLang;
+    }
+
+    // Populate country selector
+    const countrySel = document.getElementById('countryFilter');
+    if (countrySel) {
+        COUNTRY_ZONES.forEach(c => {
+            const opt = document.createElement('option');
+            opt.value = c.code;
+            opt.textContent = `${c.name} (Zone ${c.zones})`;
+            countrySel.appendChild(opt);
+        });
+    }
+
+    // Apply initial translations
+    applyTranslations();
+})();
+
+// Country selection handler
+function selectCountry(code) {
+    const fb = document.getElementById('countryZoneFeedback');
+    if (!code) { if (fb) fb.textContent = ''; return; }
+    const country = COUNTRY_ZONES.find(c => c.code === code);
+    if (!country) return;
+    filters.zone = country.defaultZone;
+    if (fb) {
+        fb.textContent = `\u2713 ${country.name} \u2192 Zone ${country.defaultZone} (typical range: ${country.zones})`;
+        fb.className = 'zone-feedback';
+    }
+    syncZoneUI(country.defaultZone);
+    refreshAll();
+}
+
 loadData().catch(e => {
     console.error('loadData failed:', e);
     document.getElementById('loader').style.display = 'none';
