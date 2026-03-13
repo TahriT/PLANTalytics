@@ -1,0 +1,939 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PLANTalytics — Species Explorer</title>
+    <link rel="icon" type="image/svg+xml" href="favicon.svg">
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=IBM+Plex+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg:       #0c110a;
+            --bg-card:  #161e12;
+            --bg-hover: #1e2a18;
+            --border:   #2a3a22;
+            --green-1:  #3d6b1e;
+            --green-2:  #5fa030;
+            --green-3:  #8fd45e;
+            --green-4:  #c5f0a0;
+            --amber:    #e8b830;
+            --coral:    #e06050;
+            --sky:      #50a8d0;
+            --text:     #d8e4d0;
+            --text-dim: #7a9070;
+            --text-muted:#4a6040;
+            --radius:   10px;
+        }
+
+        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'IBM Plex Sans', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        /* ── HEADER ────────────────────────────────── */
+        header {
+            background: linear-gradient(135deg, #1a2e10 0%, #2a4a1a 100%);
+            border-bottom: 1px solid var(--border);
+            padding: 10px 24px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-shrink: 0;
+        }
+
+        .hd-left {
+            display: flex; align-items: center; gap: 14px;
+        }
+
+        .hd-left h1 {
+            font-family: 'DM Serif Display', serif;
+            font-size: 1.25rem;
+            color: var(--green-3);
+            letter-spacing: 0.5px;
+        }
+
+        .hd-left .badge {
+            font-size: 0.65rem;
+            color: var(--text-dim);
+            background: rgba(255,255,255,.06);
+            padding: 3px 10px;
+            border-radius: 20px;
+            border: 1px solid var(--border);
+        }
+
+        .breadcrumb {
+            display: flex; align-items: center; gap: 6px;
+            font-size: 0.82rem; color: var(--text-dim);
+        }
+        .breadcrumb span { cursor: pointer; transition: color .2s; }
+        .breadcrumb span:hover { color: var(--green-3); }
+        .breadcrumb .sep { opacity: .3; cursor: default; }
+        .breadcrumb .active { color: var(--green-4); font-weight: 600; }
+
+        .hd-right {
+            display: flex; align-items: center; gap: 8px;
+        }
+        .hd-btn {
+            background: rgba(255,255,255,.06);
+            border: 1px solid var(--border);
+            color: var(--text-dim);
+            font-size: 0.78rem;
+            padding: 5px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            display: flex; align-items: center; gap: 5px;
+            text-decoration: none;
+            transition: all .2s;
+            font-family: inherit;
+        }
+        .hd-btn:hover { background: rgba(255,255,255,.10); color: var(--text); }
+
+        /* ── STATS BAR ─────────────────────────────── */
+        .stats-bar {
+            display: flex;
+            gap: 1px;
+            background: var(--border);
+            border-bottom: 1px solid var(--border);
+            flex-shrink: 0;
+        }
+        .stat-cell {
+            flex: 1;
+            background: var(--bg-card);
+            padding: 10px 16px;
+            display: flex;
+            flex-direction: column;
+        }
+        .stat-cell .num {
+            font-family: 'DM Serif Display', serif;
+            font-size: 1.5rem;
+            color: var(--green-3);
+            line-height: 1;
+        }
+        .stat-cell .lbl {
+            font-size: 0.68rem;
+            color: var(--text-dim);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-top: 2px;
+        }
+
+        /* ── MAIN LAYOUT ──────────────────────────── */
+        .main {
+            display: flex;
+            flex: 1;
+            overflow: hidden;
+        }
+
+        /* ── SIDEBAR FILTERS ──────────────────────── */
+        .sidebar {
+            width: 280px;
+            background: var(--bg-card);
+            border-right: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            flex-shrink: 0;
+            overflow-y: auto;
+        }
+
+        .sb-section {
+            padding: 16px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .sb-title {
+            font-size: 0.68rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 1.2px;
+            margin-bottom: 10px;
+            font-weight: 600;
+        }
+
+        .search-box {
+            width: 100%;
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            padding: 8px 12px;
+            color: var(--text);
+            font-size: 0.85rem;
+            font-family: inherit;
+            outline: none;
+            transition: border-color .2s;
+        }
+        .search-box:focus { border-color: var(--green-2); }
+        .search-box::placeholder { color: var(--text-muted); }
+
+        .filter-chips {
+            display: flex; flex-wrap: wrap; gap: 4px;
+        }
+        .chip {
+            font-size: 0.72rem;
+            padding: 4px 10px;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all .2s;
+            border: 1px solid var(--border);
+            background: var(--bg);
+            color: var(--text-dim);
+            white-space: nowrap;
+        }
+        .chip:hover { border-color: var(--green-2); color: var(--text); }
+        .chip.active {
+            background: var(--green-1);
+            border-color: var(--green-2);
+            color: var(--green-4);
+        }
+        .chip .ct { opacity: .5; margin-left: 3px; }
+
+        .source-legend { display: flex; flex-direction: column; gap: 6px; }
+        .source-row {
+            display: flex; align-items: center; gap: 8px;
+            font-size: 0.78rem; color: var(--text-dim);
+            cursor: pointer; transition: color .2s;
+        }
+        .source-row:hover { color: var(--text); }
+        .source-dot {
+            width: 10px; height: 10px; border-radius: 50%;
+            flex-shrink: 0;
+        }
+
+        /* ── GRID CONTENT ─────────────────────────── */
+        .content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .content-header {
+            padding: 14px 20px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-shrink: 0;
+        }
+        .content-header h2 {
+            font-family: 'DM Serif Display', serif;
+            font-size: 1.2rem;
+            color: var(--green-3);
+        }
+        .content-header .count {
+            font-size: 0.78rem;
+            color: var(--text-dim);
+        }
+
+        .grid {
+            flex: 1;
+            overflow-y: auto;
+            padding: 16px 20px;
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+            gap: 10px;
+            align-content: start;
+        }
+
+        /* ── CARDS ─────────────────────────────────── */
+        .card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 14px 16px;
+            cursor: pointer;
+            transition: all .2s;
+            position: relative;
+            overflow: hidden;
+        }
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0;
+            width: 3px; height: 100%;
+            background: var(--green-2);
+            opacity: 0;
+            transition: opacity .2s;
+        }
+        .card:hover {
+            background: var(--bg-hover);
+            border-color: var(--green-1);
+            transform: translateY(-1px);
+        }
+        .card:hover::before { opacity: 1; }
+
+        .card-name {
+            font-weight: 600;
+            font-size: 0.92rem;
+            color: var(--green-4);
+            margin-bottom: 2px;
+        }
+        .card-sci {
+            font-style: italic;
+            font-size: 0.78rem;
+            color: var(--text-dim);
+            margin-bottom: 8px;
+        }
+        .card-meta {
+            display: flex; flex-wrap: wrap; gap: 4px;
+        }
+        .tag {
+            font-size: 0.65rem;
+            padding: 2px 7px;
+            border-radius: 4px;
+            font-weight: 500;
+        }
+        .tag-climate {
+            background: rgba(80,168,208,.12);
+            color: var(--sky);
+            border: 1px solid rgba(80,168,208,.2);
+        }
+        .tag-lifeform {
+            background: rgba(95,160,48,.12);
+            color: var(--green-3);
+            border: 1px solid rgba(95,160,48,.2);
+        }
+        .tag-source {
+            background: rgba(232,184,48,.08);
+            color: var(--amber);
+            border: 1px solid rgba(232,184,48,.15);
+        }
+        .tag-toxic {
+            background: rgba(224,96,80,.10);
+            color: var(--coral);
+            border: 1px solid rgba(224,96,80,.2);
+        }
+
+        .card-count {
+            position: absolute;
+            top: 12px; right: 14px;
+            font-family: 'DM Serif Display', serif;
+            font-size: 1.4rem;
+            color: var(--text-muted);
+        }
+
+        /* ── DETAIL PANEL ──────────────────────────── */
+        .detail {
+            width: 380px;
+            background: var(--bg-card);
+            border-left: 1px solid var(--border);
+            flex-shrink: 0;
+            overflow-y: auto;
+            display: none;
+            flex-direction: column;
+        }
+        .detail.open { display: flex; }
+
+        .detail-header {
+            padding: 20px;
+            border-bottom: 1px solid var(--border);
+            position: relative;
+        }
+        .detail-close {
+            position: absolute;
+            top: 14px; right: 14px;
+            background: none; border: none;
+            color: var(--text-dim);
+            cursor: pointer;
+            font-size: 1.1rem;
+        }
+        .detail-close:hover { color: var(--text); }
+
+        .detail-header h3 {
+            font-family: 'DM Serif Display', serif;
+            font-size: 1.3rem;
+            color: var(--green-3);
+            margin-bottom: 2px;
+        }
+        .detail-header .sci {
+            font-style: italic;
+            color: var(--text-dim);
+            font-size: 0.88rem;
+        }
+        .detail-tags { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 10px; }
+
+        .detail-section {
+            padding: 16px 20px;
+            border-bottom: 1px solid var(--border);
+        }
+        .detail-section:last-child { border-bottom: none; }
+
+        .ds-title {
+            font-size: 0.68rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 1.2px;
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+
+        .ds-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 4px 0;
+            font-size: 0.82rem;
+        }
+        .ds-row .label { color: var(--text-dim); }
+        .ds-row .value { color: var(--text); text-align: right; max-width: 60%; }
+
+        .range-list {
+            display: flex; flex-wrap: wrap; gap: 4px;
+        }
+        .range-tag {
+            font-size: 0.65rem;
+            background: rgba(255,255,255,.04);
+            border: 1px solid var(--border);
+            padding: 2px 7px;
+            border-radius: 4px;
+            color: var(--text-dim);
+        }
+        .range-tag.intro {
+            border-color: rgba(232,184,48,.2);
+            color: var(--amber);
+        }
+
+        .powo-link {
+            display: inline-flex; align-items: center; gap: 6px;
+            color: var(--sky);
+            font-size: 0.82rem;
+            text-decoration: none;
+            transition: color .2s;
+        }
+        .powo-link:hover { color: var(--green-3); }
+
+        /* ── LOADING ───────────────────────────────── */
+        .loading {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            gap: 12px;
+            color: var(--text-dim);
+        }
+        .spinner {
+            width: 32px; height: 32px;
+            border: 3px solid var(--border);
+            border-top-color: var(--green-2);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* ── SCROLLBAR ─────────────────────────────── */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: var(--green-1); }
+
+        /* ── RESPONSIVE ────────────────────────────── */
+        @media (max-width: 900px) {
+            .sidebar { display: none; }
+            .detail { width: 100%; position: absolute; top: 0; left: 0; z-index: 20; height: 100%; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header>
+    <div class="hd-left">
+        <h1><i class="fas fa-seedling" style="margin-right:4px"></i> PLANTalytics</h1>
+        <span class="badge">Species Explorer</span>
+        <div class="breadcrumb" id="breadcrumb">
+            <span class="active" data-level="family">All Families</span>
+        </div>
+    </div>
+    <div class="hd-right">
+        <a class="hd-btn" href="dashboard.html"><i class="fas fa-chart-bar"></i> Dashboard</a>
+        <a class="hd-btn" href="index.html"><i class="fas fa-home"></i> Home</a>
+    </div>
+</header>
+
+<!-- STATS BAR -->
+<div class="stats-bar" id="statsBar">
+    <div class="stat-cell"><span class="num" id="statFamilies">—</span><span class="lbl">Families</span></div>
+    <div class="stat-cell"><span class="num" id="statGenera">—</span><span class="lbl">Genera</span></div>
+    <div class="stat-cell"><span class="num" id="statSpecies">—</span><span class="lbl">Species</span></div>
+    <div class="stat-cell"><span class="num" id="statSources">—</span><span class="lbl">Sources</span></div>
+    <div class="stat-cell"><span class="num" id="statClimates">—</span><span class="lbl">Climates</span></div>
+    <div class="stat-cell"><span class="num" id="statLifeforms">—</span><span class="lbl">Lifeforms</span></div>
+</div>
+
+<!-- MAIN -->
+<div class="main">
+    <!-- SIDEBAR -->
+    <div class="sidebar" id="sidebar">
+        <div class="sb-section">
+            <div class="sb-title">Search</div>
+            <input type="text" class="search-box" id="searchBox" placeholder="Family, genus, or species…">
+        </div>
+        <div class="sb-section">
+            <div class="sb-title">Climate</div>
+            <div class="filter-chips" id="climateChips"></div>
+        </div>
+        <div class="sb-section">
+            <div class="sb-title">Lifeform</div>
+            <div class="filter-chips" id="lifeformChips"></div>
+        </div>
+        <div class="sb-section">
+            <div class="sb-title">Data Sources</div>
+            <div class="source-legend" id="sourceLegend"></div>
+        </div>
+    </div>
+
+    <!-- CONTENT -->
+    <div class="content" id="content">
+        <div class="content-header">
+            <h2 id="contentTitle">Plant Families</h2>
+            <span class="count" id="contentCount"></span>
+        </div>
+        <div class="grid" id="grid">
+            <div class="loading"><div class="spinner"></div>Loading plant data…</div>
+        </div>
+    </div>
+
+    <!-- DETAIL PANEL -->
+    <div class="detail" id="detail">
+        <div class="detail-header">
+            <button class="detail-close" id="detailClose"><i class="fas fa-times"></i></button>
+            <h3 id="detailName"></h3>
+            <div class="sci" id="detailSci"></div>
+            <div class="detail-tags" id="detailTags"></div>
+        </div>
+        <div id="detailBody"></div>
+    </div>
+</div>
+
+<script>
+/* ═══════════════════════════════════════════════════════════════════
+   PLANTalytics Species Explorer — drill-down from Family → Genus → Species
+   ═══════════════════════════════════════════════════════════════════ */
+
+let DATA = [];
+let LEVEL = 'family';          // 'family' | 'genus' | 'species'
+let CURRENT_FAMILY = null;
+let CURRENT_GENUS  = null;
+let FILTERS = { climate: null, lifeform: null, search: '' };
+
+const SOURCE_COLORS = {
+    pfaf:       '#5fa030',
+    permapeople:'#e8b830',
+    zenodo:     '#50a8d0',
+    kew:        '#d070d0',
+};
+
+// ── Load CSV ──────────────────────────────────────────────────────
+Papa.parse('plant_data.csv', {
+    download: true,
+    header: true,
+    skipEmptyLines: true,
+    complete(results) {
+        DATA = results.data.filter(r => r.Genus && r.Genus.trim());
+        initApp();
+    }
+});
+
+function initApp() {
+    buildFilters();
+    updateStats();
+    renderLevel();
+
+    document.getElementById('searchBox').addEventListener('input', e => {
+        FILTERS.search = e.target.value.trim().toLowerCase();
+        renderLevel();
+    });
+
+    document.getElementById('detailClose').addEventListener('click', () => {
+        document.getElementById('detail').classList.remove('open');
+    });
+}
+
+// ── FILTERS ───────────────────────────────────────────────────────
+function buildFilters() {
+    // Climate chips
+    const climates = {};
+    DATA.forEach(r => {
+        const c = (r.kew_climate_description || '').trim();
+        if (c) climates[c] = (climates[c] || 0) + 1;
+    });
+    const climateEl = document.getElementById('climateChips');
+    climateEl.innerHTML = '';
+    Object.entries(climates)
+        .sort((a,b) => b[1] - a[1])
+        .forEach(([name, ct]) => {
+            const chip = document.createElement('div');
+            chip.className = 'chip';
+            chip.innerHTML = `${name}<span class="ct">${ct}</span>`;
+            chip.addEventListener('click', () => {
+                FILTERS.climate = FILTERS.climate === name ? null : name;
+                climateEl.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+                if (FILTERS.climate) chip.classList.add('active');
+                renderLevel();
+            });
+            climateEl.appendChild(chip);
+        });
+
+    // Lifeform chips
+    const lifeforms = {};
+    DATA.forEach(r => {
+        const l = (r.kew_lifeform_description || '').trim();
+        if (l) lifeforms[l] = (lifeforms[l] || 0) + 1;
+    });
+    const lifeformEl = document.getElementById('lifeformChips');
+    lifeformEl.innerHTML = '';
+    Object.entries(lifeforms)
+        .sort((a,b) => b[1] - a[1])
+        .slice(0, 20)
+        .forEach(([name, ct]) => {
+            const chip = document.createElement('div');
+            chip.className = 'chip';
+            chip.innerHTML = `${name}<span class="ct">${ct}</span>`;
+            chip.addEventListener('click', () => {
+                FILTERS.lifeform = FILTERS.lifeform === name ? null : name;
+                lifeformEl.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+                if (FILTERS.lifeform) chip.classList.add('active');
+                renderLevel();
+            });
+            lifeformEl.appendChild(chip);
+        });
+
+    // Source legend
+    const srcEl = document.getElementById('sourceLegend');
+    srcEl.innerHTML = '';
+    const srcCounts = {};
+    DATA.forEach(r => {
+        (r.sources || '').split('+').forEach(s => {
+            s = s.trim();
+            if (s) srcCounts[s] = (srcCounts[s] || 0) + 1;
+        });
+    });
+    Object.entries(srcCounts)
+        .sort((a,b) => b[1] - a[1])
+        .forEach(([name, ct]) => {
+            const row = document.createElement('div');
+            row.className = 'source-row';
+            const color = SOURCE_COLORS[name] || '#888';
+            row.innerHTML = `<span class="source-dot" style="background:${color}"></span>${name} <span style="opacity:.4;margin-left:auto">${ct.toLocaleString()}</span>`;
+            srcEl.appendChild(row);
+        });
+}
+
+function updateStats() {
+    const families = new Set(), genera = new Set(), sources = new Set();
+    const climates = new Set(), lifeforms = new Set();
+    DATA.forEach(r => {
+        if (r.Family) families.add(r.Family);
+        if (r.Genus) genera.add(r.Genus);
+        (r.sources || '').split('+').forEach(s => { if (s.trim()) sources.add(s.trim()); });
+        const c = (r.kew_climate_description || '').trim();
+        if (c) climates.add(c);
+        const l = (r.kew_lifeform_description || '').trim();
+        if (l) lifeforms.add(l);
+    });
+    document.getElementById('statFamilies').textContent = families.size.toLocaleString();
+    document.getElementById('statGenera').textContent = genera.size.toLocaleString();
+    document.getElementById('statSpecies').textContent = DATA.length.toLocaleString();
+    document.getElementById('statSources').textContent = sources.size;
+    document.getElementById('statClimates').textContent = climates.size;
+    document.getElementById('statLifeforms').textContent = lifeforms.size;
+}
+
+// ── FILTERED DATA ─────────────────────────────────────────────────
+function filtered() {
+    return DATA.filter(r => {
+        if (FILTERS.climate && (r.kew_climate_description || '').trim() !== FILTERS.climate) return false;
+        if (FILTERS.lifeform && (r.kew_lifeform_description || '').trim() !== FILTERS.lifeform) return false;
+        if (FILTERS.search) {
+            const q = FILTERS.search;
+            const hay = `${r.Family} ${r.Genus} ${r.Species} ${r.CommonName}`.toLowerCase();
+            if (!hay.includes(q)) return false;
+        }
+        return true;
+    });
+}
+
+// ── RENDER ────────────────────────────────────────────────────────
+function renderLevel() {
+    if (LEVEL === 'family') renderFamilies();
+    else if (LEVEL === 'genus') renderGenera();
+    else renderSpecies();
+    updateBreadcrumb();
+}
+
+function updateBreadcrumb() {
+    const bc = document.getElementById('breadcrumb');
+    let html = `<span data-level="family" class="${LEVEL === 'family' ? 'active' : ''}">All Families</span>`;
+    if (CURRENT_FAMILY) {
+        html += `<span class="sep">›</span>`;
+        html += `<span data-level="genus" class="${LEVEL === 'genus' ? 'active' : ''}">${CURRENT_FAMILY}</span>`;
+    }
+    if (CURRENT_GENUS) {
+        html += `<span class="sep">›</span>`;
+        html += `<span data-level="species" class="active">${CURRENT_GENUS}</span>`;
+    }
+    bc.innerHTML = html;
+    bc.querySelectorAll('span[data-level]').forEach(el => {
+        el.addEventListener('click', () => navigateTo(el.dataset.level));
+    });
+}
+
+function navigateTo(level) {
+    if (level === 'family') { LEVEL = 'family'; CURRENT_FAMILY = null; CURRENT_GENUS = null; }
+    else if (level === 'genus') { LEVEL = 'genus'; CURRENT_GENUS = null; }
+    document.getElementById('detail').classList.remove('open');
+    renderLevel();
+}
+
+// ── FAMILIES ──────────────────────────────────────────────────────
+function renderFamilies() {
+    const data = filtered();
+    const groups = {};
+    data.forEach(r => {
+        const fam = (r.Family || 'Unknown').trim();
+        if (!groups[fam]) groups[fam] = { count: 0, genera: new Set(), climates: new Set(), lifeforms: new Set() };
+        groups[fam].count++;
+        if (r.Genus) groups[fam].genera.add(r.Genus);
+        const c = (r.kew_climate_description || '').trim();
+        if (c) groups[fam].climates.add(c);
+        const l = (r.kew_lifeform_description || '').trim();
+        if (l) groups[fam].lifeforms.add(l);
+    });
+
+    const sorted = Object.entries(groups).sort((a,b) => b[1].count - a[1].count);
+    document.getElementById('contentTitle').textContent = 'Plant Families';
+    document.getElementById('contentCount').textContent = `${sorted.length} families · ${data.length.toLocaleString()} species`;
+
+    const grid = document.getElementById('grid');
+    grid.innerHTML = '';
+    sorted.forEach(([name, info]) => {
+        const card = document.createElement('div');
+        card.className = 'card';
+        const topClimate = [...info.climates][0] || '';
+        const topLifeform = [...info.lifeforms][0] || '';
+        card.innerHTML = `
+            <div class="card-name">${escHtml(name)}</div>
+            <div class="card-sci">${info.genera.size} genera</div>
+            <div class="card-meta">
+                ${topClimate ? `<span class="tag tag-climate">${escHtml(topClimate)}</span>` : ''}
+                ${topLifeform ? `<span class="tag tag-lifeform">${escHtml(topLifeform)}</span>` : ''}
+            </div>
+            <div class="card-count">${info.count}</div>
+        `;
+        card.addEventListener('click', () => {
+            CURRENT_FAMILY = name;
+            LEVEL = 'genus';
+            renderLevel();
+        });
+        grid.appendChild(card);
+    });
+}
+
+// ── GENERA ────────────────────────────────────────────────────────
+function renderGenera() {
+    const data = filtered().filter(r => (r.Family || '').trim() === CURRENT_FAMILY);
+    const groups = {};
+    data.forEach(r => {
+        const gen = (r.Genus || 'Unknown').trim();
+        if (!groups[gen]) groups[gen] = { count: 0, species: [], climates: new Set(), lifeforms: new Set() };
+        groups[gen].count++;
+        groups[gen].species.push(r);
+        const c = (r.kew_climate_description || '').trim();
+        if (c) groups[gen].climates.add(c);
+        const l = (r.kew_lifeform_description || '').trim();
+        if (l) groups[gen].lifeforms.add(l);
+    });
+
+    const sorted = Object.entries(groups).sort((a,b) => b[1].count - a[1].count);
+    document.getElementById('contentTitle').textContent = CURRENT_FAMILY;
+    document.getElementById('contentCount').textContent = `${sorted.length} genera · ${data.length.toLocaleString()} species`;
+
+    const grid = document.getElementById('grid');
+    grid.innerHTML = '';
+    sorted.forEach(([name, info]) => {
+        const card = document.createElement('div');
+        card.className = 'card';
+        const sampleCommon = info.species.find(s => s.CommonName)?.CommonName || '';
+        const topClimate = [...info.climates][0] || '';
+        const topLifeform = [...info.lifeforms][0] || '';
+        card.innerHTML = `
+            <div class="card-name">${escHtml(name)}</div>
+            <div class="card-sci">${sampleCommon ? escHtml(sampleCommon) : info.count + ' species'}</div>
+            <div class="card-meta">
+                ${topClimate ? `<span class="tag tag-climate">${escHtml(topClimate)}</span>` : ''}
+                ${topLifeform ? `<span class="tag tag-lifeform">${escHtml(topLifeform)}</span>` : ''}
+            </div>
+            <div class="card-count">${info.count}</div>
+        `;
+        card.addEventListener('click', () => {
+            CURRENT_GENUS = name;
+            LEVEL = 'species';
+            renderLevel();
+        });
+        grid.appendChild(card);
+    });
+}
+
+// ── SPECIES ───────────────────────────────────────────────────────
+function renderSpecies() {
+    const data = filtered().filter(r =>
+        (r.Family || '').trim() === CURRENT_FAMILY &&
+        (r.Genus || '').trim() === CURRENT_GENUS
+    );
+
+    document.getElementById('contentTitle').textContent = `${CURRENT_GENUS} (${CURRENT_FAMILY})`;
+    document.getElementById('contentCount').textContent = `${data.length} species`;
+
+    const grid = document.getElementById('grid');
+    grid.innerHTML = '';
+    data.sort((a,b) => (a.Species || '').localeCompare(b.Species || ''))
+        .forEach(r => {
+            const card = document.createElement('div');
+            card.className = 'card';
+            const climate = (r.kew_climate_description || '').trim();
+            const lifeform = (r.kew_lifeform_description || '').trim();
+            const toxic = (r.zn_Toxicity || '').trim();
+            const hasToxic = toxic && toxic !== 'No Incriminating Information Has Been Discovered';
+            const srcs = (r.sources || '').split('+').filter(Boolean);
+
+            card.innerHTML = `
+                <div class="card-name">${escHtml(r.CommonName || r.Species || '—')}</div>
+                <div class="card-sci">${escHtml(r.Genus)} ${escHtml(r.Species)}</div>
+                <div class="card-meta">
+                    ${climate ? `<span class="tag tag-climate">${escHtml(climate)}</span>` : ''}
+                    ${lifeform ? `<span class="tag tag-lifeform">${escHtml(lifeform)}</span>` : ''}
+                    ${hasToxic ? `<span class="tag tag-toxic"><i class="fas fa-exclamation-triangle"></i> Toxic</span>` : ''}
+                    ${srcs.map(s => `<span class="tag tag-source">${s}</span>`).join('')}
+                </div>
+            `;
+            card.addEventListener('click', () => showDetail(r));
+            grid.appendChild(card);
+        });
+}
+
+// ── DETAIL PANEL ──────────────────────────────────────────────────
+function showDetail(r) {
+    const panel = document.getElementById('detail');
+    panel.classList.add('open');
+
+    document.getElementById('detailName').textContent = r.CommonName || r.Species || '—';
+    document.getElementById('detailSci').textContent = `${r.Genus} ${r.Species}`;
+
+    const climate = (r.kew_climate_description || '').trim();
+    const lifeform = (r.kew_lifeform_description || '').trim();
+    const toxic = (r.zn_Toxicity || '').trim();
+    const hasToxic = toxic && toxic !== 'No Incriminating Information Has Been Discovered';
+    const tags = document.getElementById('detailTags');
+    tags.innerHTML = '';
+    if (climate) tags.innerHTML += `<span class="tag tag-climate">${escHtml(climate)}</span>`;
+    if (lifeform) tags.innerHTML += `<span class="tag tag-lifeform">${escHtml(lifeform)}</span>`;
+    if (hasToxic) tags.innerHTML += `<span class="tag tag-toxic"><i class="fas fa-exclamation-triangle"></i> ${escHtml(toxic)}</span>`;
+
+    let body = '';
+
+    // Core info
+    body += `<div class="detail-section">
+        <div class="ds-title">Taxonomy</div>
+        ${dsRow('Family', r.Family)}
+        ${dsRow('Genus', r.Genus)}
+        ${dsRow('Species', r.Species)}
+        ${dsRow('Authors', r.kew_taxon_authors)}
+        ${dsRow('First Published', r.kew_first_published)}
+        ${dsRow('Type', r.Type)}
+        ${dsRow('Foliage', r.Foliage)}
+    </div>`;
+
+    // Growing info
+    const zone = r.HardinessZones || '';
+    const height = r.Height ? r.Height + 'm' : '';
+    const edibility = r.Edibility || '';
+    const medicinal = r.Medicinal || '';
+    body += `<div class="detail-section">
+        <div class="ds-title">Growing</div>
+        ${dsRow('Hardiness Zones', zone)}
+        ${dsRow('Height', height)}
+        ${dsRow('Growth Rate', r.GrowthRate)}
+        ${dsRow('Soils', r.Soils)}
+        ${dsRow('pH', r.pH)}
+        ${dsRow('Edibility', edibility)}
+        ${dsRow('Medicinal', medicinal)}
+    </div>`;
+
+    // Zenodo care data
+    if (r.zn_brightness || r.zn_temperature || r.zn_watering) {
+        body += `<div class="detail-section">
+            <div class="ds-title">Indoor Care (Zenodo)</div>
+            ${dsRow('Brightness', r.zn_brightness)}
+            ${dsRow('Temperature', r.zn_temperature)}
+            ${dsRow('Humidity', r.zn_solHumidity)}
+            ${dsRow('Watering', r.zn_watering)}
+            ${dsRow('Soil Mix', r.zn_suggestedSoilMix)}
+        </div>`;
+    }
+
+    // Native range
+    const native = (r.kew_native_range || '').trim();
+    const intro = (r.kew_introduced_range || '').trim();
+    if (native || intro) {
+        body += `<div class="detail-section">
+            <div class="ds-title">Distribution (Kew)</div>
+            ${dsRow('Origin', r.kew_geographic_area)}
+            ${native ? `<div style="margin-top:8px"><div style="font-size:.72rem;color:var(--text-muted);margin-bottom:4px">Native to</div>
+                <div class="range-list">${native.split('; ').map(a => `<span class="range-tag">${escHtml(a)}</span>`).join('')}</div></div>` : ''}
+            ${intro ? `<div style="margin-top:8px"><div style="font-size:.72rem;color:var(--text-muted);margin-bottom:4px">Introduced to</div>
+                <div class="range-list">${intro.split('; ').map(a => `<span class="range-tag intro">${escHtml(a)}</span>`).join('')}</div></div>` : ''}
+        </div>`;
+    }
+
+    // POWO link
+    const powoId = (r.kew_powo_id || '').trim();
+    if (powoId) {
+        body += `<div class="detail-section">
+            <div class="ds-title">External Links</div>
+            <a class="powo-link" href="https://powo.science.kew.org/taxon/urn:lsid:ipni.org:names:${encodeURIComponent(powoId)}" target="_blank" rel="noopener">
+                <i class="fas fa-external-link-alt"></i> View on Plants of the World Online
+            </a>
+        </div>`;
+    }
+
+    // Sources
+    const srcs = (r.sources || '').split('+').filter(Boolean);
+    if (srcs.length) {
+        body += `<div class="detail-section">
+            <div class="ds-title">Data Sources</div>
+            <div style="display:flex;gap:6px;flex-wrap:wrap">
+                ${srcs.map(s => {
+                    const color = SOURCE_COLORS[s] || '#888';
+                    return `<span style="display:inline-flex;align-items:center;gap:4px;font-size:.78rem;color:var(--text-dim)">
+                        <span style="width:8px;height:8px;border-radius:50%;background:${color};flex-shrink:0"></span>${s}</span>`;
+                }).join('')}
+            </div>
+        </div>`;
+    }
+
+    document.getElementById('detailBody').innerHTML = body;
+}
+
+function dsRow(label, value) {
+    if (!value) return '';
+    return `<div class="ds-row"><span class="label">${escHtml(label)}</span><span class="value">${escHtml(String(value))}</span></div>`;
+}
+
+function escHtml(str) {
+    const d = document.createElement('div');
+    d.textContent = str || '';
+    return d.innerHTML;
+}
+</script>
+</body>
+</html>
