@@ -11,297 +11,223 @@
     <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=IBM+Plex+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
-            --bg:       #0c110a;
-            --bg-card:  #161e12;
-            --bg-hover: #1e2a18;
-            --border:   #2a3a22;
-            --green-1:  #3d6b1e;
-            --green-2:  #5fa030;
-            --green-3:  #8fd45e;
-            --green-4:  #c5f0a0;
-            --amber:    #e8b830;
-            --coral:    #e06050;
-            --sky:      #50a8d0;
-            --purple:   #b07ae0;
-            --text:     #d8e4d0;
-            --text-dim: #7a9070;
-            --text-muted:#4a6040;
-            --radius:   10px;
+            --primary: #2d5016;
+            --secondary: #6b9e3e;
+            --accent: #9ec472;
+            --light: #f5f5f5;
+            --white: #ffffff;
+            --header-h: 38px;
+            --amber:  #e8b830;
+            --coral:  #e06050;
+            --sky:    #50a8d0;
+            --purple: #b07ae0;
         }
 
         *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
 
         body {
-            font-family: 'IBM Plex Sans', sans-serif;
-            background: var(--bg);
-            color: var(--text);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #eef2e6;
+            color: #333;
             min-height: 100vh;
         }
 
+        /* ── Header (matches index.html) ── */
         header {
-            background: linear-gradient(135deg, #1a2e10 0%, #2a4a1a 100%);
-            border-bottom: 1px solid var(--border);
-            padding: 10px 24px;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            color: white;
+            height: var(--header-h);
             display: flex;
             align-items: center;
-            justify-content: space-between;
+            padding: 0 0.75rem;
+            gap: 0.5rem;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.25);
+            flex-shrink: 0;
+            z-index: 100;
         }
-        .hd-left { display: flex; align-items: center; gap: 14px; }
-        .hd-left h1 {
-            font-family: 'DM Serif Display', serif;
-            font-size: 1.25rem;
-            color: var(--green-3);
+        header h1 {
+            font-size: 0.95rem;
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+            flex: 1;
+            white-space: nowrap;
         }
-        .badge {
-            font-size: 0.65rem;
-            color: var(--text-dim);
-            background: rgba(255,255,255,.06);
-            padding: 3px 10px;
+        header h1 .badge {
+            font-size: 0.6rem;
+            background: rgba(255,255,255,0.2);
+            padding: 0.1rem 0.4rem;
             border-radius: 20px;
-            border: 1px solid var(--border);
+            font-weight: 400;
         }
-        .hd-right { display: flex; align-items: center; gap: 8px; }
-        .hd-btn {
-            background: rgba(255,255,255,.06);
-            border: 1px solid var(--border);
-            color: var(--text-dim);
-            font-size: 0.78rem;
-            padding: 5px 12px;
-            border-radius: 6px;
-            cursor: pointer;
-            display: flex; align-items: center; gap: 5px;
+        .header-links {
+            display: flex;
+            gap: 0.35rem;
+            align-items: center;
+        }
+        .header-link {
+            color: white;
             text-decoration: none;
-            transition: all .2s;
-            font-family: inherit;
+            padding: 0.2rem 0.55rem;
+            background: rgba(255,255,255,0.12);
+            border-radius: 4px;
+            font-size: 0.72rem;
+            transition: background 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 0.3rem;
+            white-space: nowrap;
         }
-        .hd-btn:hover { background: rgba(255,255,255,.10); color: var(--text); }
+        .header-link:hover { background: rgba(255,255,255,0.28); }
 
-        /* ── PAGE LAYOUT ──────────────────────────── */
-        .page {
-            max-width: 1400px;
-            margin: 0 auto;
-            padding: 20px;
-        }
-
-        .page-title {
-            font-family: 'DM Serif Display', serif;
-            font-size: 1.6rem;
-            color: var(--green-3);
-            margin-bottom: 4px;
-        }
-        .page-sub {
-            font-size: 0.85rem;
-            color: var(--text-dim);
-            margin-bottom: 24px;
-        }
+        /* ── Page layout ── */
+        .page { max-width: 1400px; margin: 0 auto; padding: 0.6rem; }
+        .page-title { font-size: 1rem; font-weight: 700; color: var(--primary); margin: 0.5rem 0 0.15rem; }
+        .page-sub { font-size: 0.8rem; color: #888; margin-bottom: 0.6rem; }
 
         /* stats row */
         .geo-stats {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-            gap: 10px;
-            margin-bottom: 24px;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 0.45rem;
+            margin-bottom: 0.6rem;
         }
         .gs-cell {
-            background: var(--bg-card);
-            border: 1px solid var(--border);
-            border-radius: var(--radius);
-            padding: 14px 18px;
+            background: white;
+            border-radius: 6px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+            padding: 0.6rem 0.8rem;
+            border-top: 2px solid var(--secondary);
         }
-        .gs-cell .num {
-            font-family: 'DM Serif Display', serif;
-            font-size: 1.8rem;
-            line-height: 1;
-        }
-        .gs-cell .lbl {
-            font-size: 0.68rem;
-            color: var(--text-dim);
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            margin-top: 2px;
-        }
-        .c-native .num { color: var(--green-3); }
-        .c-intro  .num { color: var(--amber); }
+        .gs-cell .num { font-size: 1.4rem; font-weight: 700; line-height: 1; }
+        .gs-cell .lbl { font-size: 0.62rem; color: #aaa; text-transform: uppercase; letter-spacing: 0.8px; margin-top: 2px; }
+        .c-native  .num { color: var(--secondary); }
+        .c-intro   .num { color: var(--amber); }
         .c-regions .num { color: var(--sky); }
         .c-species .num { color: var(--purple); }
 
-        /* two-column layout */
-        .row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px; }
+        /* grid */
+        .row { display: grid; grid-template-columns: 1fr 1fr; gap: 0.45rem; margin-bottom: 0.45rem; }
         .row.full { grid-template-columns: 1fr; }
-
         @media (max-width: 900px) { .row { grid-template-columns: 1fr; } }
 
+        /* panels (chart cards) */
         .panel {
-            background: var(--bg-card);
-            border: 1px solid var(--border);
-            border-radius: var(--radius);
+            background: white;
+            border-radius: 6px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.08);
             overflow: hidden;
+            border-top: 2px solid var(--secondary);
         }
         .panel-title {
-            padding: 14px 18px;
-            border-bottom: 1px solid var(--border);
-            font-size: 0.68rem;
-            text-transform: uppercase;
-            letter-spacing: 1.2px;
-            color: var(--text-muted);
+            background: linear-gradient(135deg, var(--secondary), var(--accent));
+            color: white;
+            padding: 0.35rem 0.7rem;
             font-weight: 600;
+            font-size: 0.8rem;
         }
-        .panel-body { padding: 16px 18px; }
+        .panel-body { padding: 0.6rem 0.7rem; }
         .panel-body svg { display: block; width: 100%; overflow: visible; }
 
         /* treemap */
-        .tm-cell {
-            cursor: pointer;
-            transition: opacity .15s;
-        }
+        .tm-cell { cursor: pointer; transition: opacity .15s; }
         .tm-cell:hover { opacity: .85; }
-        .tm-label {
-            font-family: 'IBM Plex Sans', sans-serif;
-            fill: #fff;
-            pointer-events: none;
-        }
+        .tm-label { font-family: 'Segoe UI', sans-serif; fill: #fff; pointer-events: none; }
         .tm-label-name { font-weight: 600; }
         .tm-label-count { opacity: .7; }
 
         /* bar chart */
-        .bar-native { fill: var(--green-2); }
+        .bar-native { fill: var(--secondary); }
         .bar-intro  { fill: var(--amber); opacity: .8; }
-        .bar-label  { fill: var(--text-dim); font-size: 11px; }
-        .bar-value  { fill: var(--text); font-size: 11px; font-weight: 600; }
-        .axis-line  { stroke: var(--border); }
-        .tick text  { fill: var(--text-dim); font-size: 10px; }
+        .bar-label  { fill: #888; font-size: 11px; }
+        .bar-value  { fill: var(--primary); font-size: 11px; font-weight: 600; }
 
-        /* region list in info panel */
-        .region-list {
-            max-height: 500px;
-            overflow-y: auto;
-        }
+        /* region list */
+        .region-list { max-height: 500px; overflow-y: auto; }
         .region-row {
             display: flex;
             align-items: center;
-            padding: 8px 0;
-            border-bottom: 1px solid var(--border);
+            padding: 6px 0;
+            border-bottom: 1px solid #f0f0f0;
             cursor: pointer;
             transition: background .15s;
         }
-        .region-row:hover { background: var(--bg-hover); margin: 0 -18px; padding: 8px 18px; }
+        .region-row:hover { background: var(--light); margin: 0 -0.7rem; padding: 6px 0.7rem; }
         .region-row:last-child { border-bottom: none; }
-        .region-rank {
-            width: 28px;
-            font-family: 'DM Serif Display', serif;
-            color: var(--text-muted);
-            font-size: .85rem;
-            flex-shrink: 0;
-        }
-        .region-name {
-            flex: 1;
-            font-size: 0.85rem;
-            color: var(--text);
-        }
-        .region-bars {
-            display: flex; align-items: center; gap: 4px;
-            width: 180px;
-            flex-shrink: 0;
-        }
-        .rb-track {
-            flex: 1;
-            height: 6px;
-            border-radius: 3px;
-            background: rgba(255,255,255,.04);
-            overflow: hidden;
-            position: relative;
-        }
-        .rb-fill {
-            height: 100%;
-            border-radius: 3px;
-            transition: width .4s;
-        }
-        .rb-native .rb-fill { background: var(--green-2); }
+        .region-rank { width: 28px; font-weight: 700; color: #ccc; font-size: .82rem; flex-shrink: 0; }
+        .region-name { flex: 1; font-size: 0.82rem; color: #333; }
+        .region-bars { display: flex; align-items: center; gap: 4px; width: 180px; flex-shrink: 0; }
+        .rb-track { flex: 1; height: 6px; border-radius: 3px; background: #eee; overflow: hidden; }
+        .rb-fill { height: 100%; border-radius: 3px; transition: width .4s; }
+        .rb-native .rb-fill { background: var(--secondary); }
         .rb-intro  .rb-fill { background: var(--amber); }
-        .region-ct {
-            font-size: .78rem;
-            font-weight: 600;
-            width: 40px;
-            text-align: right;
-            color: var(--text-dim);
-        }
+        .region-ct { font-size: .78rem; font-weight: 600; width: 40px; text-align: right; color: #888; }
 
-        /* species popup for region click */
-        .region-detail {
-            display: none;
-            background: var(--bg);
-            border: 1px solid var(--border);
-            border-radius: var(--radius);
-            padding: 16px 18px;
-            margin-top: 12px;
-        }
+        /* region detail popup */
+        .region-detail { display: none; background: var(--light); border: 1px solid #ddd; border-radius: 6px; padding: 0.7rem 0.8rem; margin-top: 0.6rem; }
         .region-detail.open { display: block; }
-        .rd-title {
-            font-family: 'DM Serif Display', serif;
-            font-size: 1.1rem;
-            color: var(--green-3);
-            margin-bottom: 6px;
-        }
-        .rd-counts { font-size: .78rem; color: var(--text-dim); margin-bottom: 12px; }
+        .rd-title { font-size: 1rem; font-weight: 700; color: var(--primary); margin-bottom: 4px; }
+        .rd-counts { font-size: .78rem; color: #888; margin-bottom: 10px; }
         .rd-counts span { font-weight: 600; }
-        .sp-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-            gap: 6px;
-            max-height: 300px;
-            overflow-y: auto;
+        .sp-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 6px; max-height: 300px; overflow-y: auto; }
+        .sp-item { font-size: .78rem; padding: 5px 10px; background: white; border: 1px solid #e8e8e8; border-radius: 6px; }
+        .sp-item .sci { font-style: italic; color: #888; }
+
+        /* search box */
+        .search-box {
+            width: 100%;
+            background: var(--light);
+            border: 1.5px solid #ddd;
+            border-radius: 7px;
+            padding: 0.5rem 0.7rem;
+            color: #333;
+            font-size: .85rem;
+            font-family: inherit;
+            outline: none;
+            margin-bottom: 10px;
+            transition: border-color .2s;
         }
-        .sp-item {
-            font-size: .78rem;
-            padding: 5px 10px;
-            background: var(--bg-card);
-            border: 1px solid var(--border);
-            border-radius: 6px;
-        }
-        .sp-item .sci { font-style: italic; color: var(--text-dim); }
+        .search-box:focus { border-color: var(--secondary); }
+        .search-box::placeholder { color: #bbb; }
 
         /* legend */
-        .legend { display: flex; gap: 16px; align-items: center; padding: 10px 0; }
-        .legend-item { display: flex; align-items: center; gap: 6px; font-size: .78rem; color: var(--text-dim); }
+        .legend { display: flex; gap: 16px; align-items: center; padding: 6px 0; }
+        .legend-item { display: flex; align-items: center; gap: 6px; font-size: .78rem; color: #888; }
         .legend-dot { width: 10px; height: 10px; border-radius: 3px; flex-shrink: 0; }
 
-        /* ── LOADING ───────────────────────────────── */
-        .loading {
-            display: flex; align-items: center; justify-content: center;
-            flex-direction: column; gap: 12px; color: var(--text-dim);
-            padding: 60px 0;
-        }
-        .spinner {
-            width: 32px; height: 32px;
-            border: 3px solid var(--border);
-            border-top-color: var(--green-2);
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-        }
+        /* loading */
+        .loading { display: flex; align-items: center; justify-content: center; flex-direction: column; gap: 12px; color: #888; padding: 60px 0; }
+        .spinner { width: 32px; height: 32px; border: 3px solid #ddd; border-top-color: var(--secondary); border-radius: 50%; animation: spin 1s linear infinite; }
         @keyframes spin { to { transform: rotate(360deg); } }
 
         ::-webkit-scrollbar { width: 6px; }
         ::-webkit-scrollbar-track { background: transparent; }
-        ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
-        ::-webkit-scrollbar-thumb:hover { background: var(--green-1); }
+        ::-webkit-scrollbar-thumb { background: var(--accent); border-radius: 3px; }
+
+        @media (max-width: 900px) {
+            .header-link span.link-text { display: none; }
+            .header-link { padding: 0.25rem 0.45rem; min-width: 34px; min-height: 34px; justify-content: center; }
+        }
     </style>
 </head>
 <body>
 
 <header>
-    <div class="hd-left">
-        <h1><i class="fas fa-seedling" style="margin-right:4px"></i> PLANTalytics</h1>
+    <h1>
+        <i class="fas fa-globe"></i>
+        <span>PLANTalytics</span>
         <span class="badge">Geographic Distributions</span>
-    </div>
-    <div class="hd-right">
-        <a class="hd-btn" href="explorer.html"><i class="fas fa-leaf"></i> Explorer</a>
-        <a class="hd-btn" href="dashboard.html"><i class="fas fa-chart-bar"></i> Dashboard</a>
-        <a class="hd-btn" href="index.html"><i class="fas fa-home"></i> Home</a>
+    </h1>
+    <div class="header-links">
+        <a href="index.html" class="header-link"><i class="fas fa-home"></i><span class="link-text"> Home</span></a>
+        <a href="explorer.html" class="header-link"><i class="fas fa-leaf"></i><span class="link-text"> Species</span></a>
+        <a href="insights.html" class="header-link"><i class="fas fa-chart-pie"></i><span class="link-text"> Insights</span></a>
+        <a href="dashboard.html" class="header-link"><i class="fas fa-chart-bar"></i><span class="link-text"> Dashboard</span></a>
     </div>
 </header>
 
 <div class="page" id="app">
-    <h2 class="page-title">Where Plants Grow</h2>
+    <div class="page-title">Where Plants Grow</div>
     <p class="page-sub">Geographic range data from Kew World Checklist of Vascular Plants — native and introduced distributions for <span id="enrichedCount">…</span> species.</p>
 
     <div class="geo-stats" id="geoStats">
@@ -312,7 +238,7 @@
     </div>
 
     <div class="legend">
-        <div class="legend-item"><div class="legend-dot" style="background:var(--green-2)"></div>Native range</div>
+        <div class="legend-item"><div class="legend-dot" style="background:var(--secondary)"></div>Native range</div>
         <div class="legend-item"><div class="legend-dot" style="background:var(--amber)"></div>Introduced range</div>
     </div>
 
@@ -335,8 +261,7 @@
         <div class="panel">
             <div class="panel-title">All Regions — click to see species</div>
             <div class="panel-body">
-                <input type="text" class="search-box" id="regionSearch" placeholder="Search regions…"
-                       style="width:100%;background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:8px 12px;color:var(--text);font-size:.85rem;font-family:inherit;outline:none;margin-bottom:12px;">
+                <input type="text" class="search-box" id="regionSearch" placeholder="Search regions…">
                 <div class="region-list" id="regionList"></div>
                 <div class="region-detail" id="regionDetail">
                     <div class="rd-title" id="rdTitle"></div>
@@ -449,7 +374,7 @@ function drawTreemap(regions, nativeMap) {
 
     const color = d3.scaleSequential()
         .domain([0, d3.max(topRegions, r => r.native)])
-        .interpolator(t => d3.interpolateRgb('#1a3a10', '#8fd45e')(t));
+        .interpolator(t => d3.interpolateRgb('#c8e6c9', '#2d5016')(t));
 
     const svg = d3.select(container).append('svg')
         .attr('viewBox', `0 0 ${W} ${H}`)
@@ -493,15 +418,16 @@ function drawTreemap(regions, nativeMap) {
     // tooltip
     const tip = d3.select(container).append('div')
         .style('position', 'absolute')
-        .style('background', 'var(--bg)')
-        .style('border', '1px solid var(--border)')
+        .style('background', 'white')
+        .style('border', '1px solid #ddd')
         .style('padding', '8px 12px')
         .style('border-radius', '6px')
         .style('font-size', '.78rem')
-        .style('color', 'var(--text)')
+        .style('color', '#333')
         .style('pointer-events', 'none')
         .style('display', 'none')
-        .style('z-index', '10');
+        .style('z-index', '10')
+        .style('box-shadow', '0 2px 6px rgba(0,0,0,0.1)');
 
     container.style.position = 'relative';
 
@@ -621,7 +547,7 @@ function showRegionDetail(region, nativeMap, introMap) {
 
     document.getElementById('rdTitle').textContent = region;
     document.getElementById('rdCounts').innerHTML =
-        `<span style="color:var(--green-3)">${natSpecies.length}</span> native · <span style="color:var(--amber)">${intSpecies.length}</span> introduced`;
+        `<span style="color:var(--secondary)">${natSpecies.length}</span> native · <span style="color:var(--amber)">${intSpecies.length}</span> introduced`;
 
     const grid = document.getElementById('rdGrid');
     grid.innerHTML = '';
@@ -639,14 +565,14 @@ function showRegionDetail(region, nativeMap, introMap) {
         div.className = 'sp-item';
         div.innerHTML = `<span class="sci">${escHtml(r.Genus)} ${escHtml(r.Species)}</span>` +
             (r.CommonName ? `<br>${escHtml(r.CommonName)}` : '') +
-            `<br><span style="font-size:.65rem;color:${nat ? 'var(--green-3)' : 'var(--amber)'}">${nat ? 'native' : 'introduced'}</span>`;
+            `<br><span style="font-size:.65rem;color:${nat ? 'var(--secondary)' : 'var(--amber)'}">${nat ? 'native' : 'introduced'}</span>`;
         grid.appendChild(div);
     });
 
     if (all.length > 100) {
         const more = document.createElement('div');
         more.className = 'sp-item';
-        more.style.color = 'var(--text-muted)';
+        more.style.color = '#888';
         more.textContent = `+ ${all.length - 100} more…`;
         grid.appendChild(more);
     }

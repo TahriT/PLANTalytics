@@ -8,33 +8,23 @@
     <script src="https://d3js.org/d3.v7.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=IBM+Plex+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
-            --bg:       #0c110a;
-            --bg-card:  #161e12;
-            --bg-hover: #1e2a18;
-            --border:   #2a3a22;
-            --green-1:  #3d6b1e;
-            --green-2:  #5fa030;
-            --green-3:  #8fd45e;
-            --green-4:  #c5f0a0;
-            --amber:    #e8b830;
-            --coral:    #e06050;
-            --sky:      #50a8d0;
-            --text:     #d8e4d0;
-            --text-dim: #7a9070;
-            --text-muted:#4a6040;
-            --radius:   10px;
+            --primary:   #2d5016;
+            --secondary: #6b9e3e;
+            --accent:    #9ec472;
+            --amber:     #e8b830;
+            --coral:     #e06050;
+            --sky:       #2e86c1;
+            --radius:    8px;
         }
 
         *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
 
         body {
-            font-family: 'IBM Plex Sans', sans-serif;
-            background: var(--bg);
-            color: var(--text);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #eef2e6;
+            color: #333;
             height: 100vh;
             display: flex;
             flex-direction: column;
@@ -43,86 +33,77 @@
 
         /* ── HEADER ────────────────────────────────── */
         header {
-            background: linear-gradient(135deg, #1a2e10 0%, #2a4a1a 100%);
-            border-bottom: 1px solid var(--border);
-            padding: 10px 24px;
+            background: linear-gradient(135deg, var(--secondary), var(--accent));
+            padding: 8px 24px;
             display: flex;
             align-items: center;
             justify-content: space-between;
             flex-shrink: 0;
         }
-
-        .hd-left {
-            display: flex; align-items: center; gap: 14px;
+        header h1 {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: #fff;
+            font-size: 1.15rem;
+            font-weight: 700;
         }
-
-        .hd-left h1 {
-            font-family: 'DM Serif Display', serif;
-            font-size: 1.25rem;
-            color: var(--green-3);
-            letter-spacing: 0.5px;
-        }
-
-        .hd-left .badge {
-            font-size: 0.65rem;
-            color: var(--text-dim);
-            background: rgba(255,255,255,.06);
-            padding: 3px 10px;
+        header h1 i { font-size: 1rem; }
+        .badge {
+            font-size: 0.6rem;
+            color: rgba(255,255,255,.85);
+            background: rgba(255,255,255,.15);
+            padding: 2px 10px;
             border-radius: 20px;
-            border: 1px solid var(--border);
+            font-weight: 500;
         }
+        .header-links { display: flex; gap: 6px; }
+        .header-link {
+            background: rgba(255,255,255,.12);
+            color: rgba(255,255,255,.9);
+            font-size: 0.72rem;
+            padding: 4px 12px;
+            border-radius: 6px;
+            text-decoration: none;
+            display: flex; align-items: center; gap: 5px;
+            transition: background .2s;
+        }
+        .header-link:hover { background: rgba(255,255,255,.22); }
 
         .breadcrumb {
             display: flex; align-items: center; gap: 6px;
-            font-size: 0.82rem; color: var(--text-dim);
+            font-size: 0.82rem; color: #888;
+            margin: 0 0 0 20px;
         }
         .breadcrumb span { cursor: pointer; transition: color .2s; }
-        .breadcrumb span:hover { color: var(--green-3); }
+        .breadcrumb span:hover { color: var(--secondary); }
         .breadcrumb .sep { opacity: .3; cursor: default; }
-        .breadcrumb .active { color: var(--green-4); font-weight: 600; }
-
-        .hd-right {
-            display: flex; align-items: center; gap: 8px;
-        }
-        .hd-btn {
-            background: rgba(255,255,255,.06);
-            border: 1px solid var(--border);
-            color: var(--text-dim);
-            font-size: 0.78rem;
-            padding: 5px 12px;
-            border-radius: 6px;
-            cursor: pointer;
-            display: flex; align-items: center; gap: 5px;
-            text-decoration: none;
-            transition: all .2s;
-            font-family: inherit;
-        }
-        .hd-btn:hover { background: rgba(255,255,255,.10); color: var(--text); }
+        .breadcrumb .active { color: var(--primary); font-weight: 600; }
 
         /* ── STATS BAR ─────────────────────────────── */
         .stats-bar {
             display: flex;
             gap: 1px;
-            background: var(--border);
-            border-bottom: 1px solid var(--border);
+            background: #ddd;
+            border-bottom: 1px solid #ddd;
             flex-shrink: 0;
         }
         .stat-cell {
             flex: 1;
-            background: var(--bg-card);
+            background: #fff;
             padding: 10px 16px;
             display: flex;
             flex-direction: column;
         }
         .stat-cell .num {
-            font-family: 'DM Serif Display', serif;
             font-size: 1.5rem;
-            color: var(--green-3);
+            font-weight: 700;
+            color: var(--secondary);
             line-height: 1;
         }
         .stat-cell .lbl {
             font-size: 0.68rem;
-            color: var(--text-dim);
+            color: #888;
             text-transform: uppercase;
             letter-spacing: 1px;
             margin-top: 2px;
@@ -138,8 +119,8 @@
         /* ── SIDEBAR FILTERS ──────────────────────── */
         .sidebar {
             width: 280px;
-            background: var(--bg-card);
-            border-right: 1px solid var(--border);
+            background: #fff;
+            border-right: 1px solid #ddd;
             display: flex;
             flex-direction: column;
             flex-shrink: 0;
@@ -148,12 +129,12 @@
 
         .sb-section {
             padding: 16px;
-            border-bottom: 1px solid var(--border);
+            border-bottom: 1px solid #eee;
         }
 
         .sb-title {
             font-size: 0.68rem;
-            color: var(--text-muted);
+            color: #aaa;
             text-transform: uppercase;
             letter-spacing: 1.2px;
             margin-bottom: 10px;
@@ -162,18 +143,18 @@
 
         .search-box {
             width: 100%;
-            background: var(--bg);
-            border: 1px solid var(--border);
+            background: #f8faf5;
+            border: 1px solid #ddd;
             border-radius: 6px;
             padding: 8px 12px;
-            color: var(--text);
+            color: #333;
             font-size: 0.85rem;
             font-family: inherit;
             outline: none;
             transition: border-color .2s;
         }
-        .search-box:focus { border-color: var(--green-2); }
-        .search-box::placeholder { color: var(--text-muted); }
+        .search-box:focus { border-color: var(--secondary); }
+        .search-box::placeholder { color: #bbb; }
 
         .filter-chips {
             display: flex; flex-wrap: wrap; gap: 4px;
@@ -184,26 +165,26 @@
             border-radius: 20px;
             cursor: pointer;
             transition: all .2s;
-            border: 1px solid var(--border);
-            background: var(--bg);
-            color: var(--text-dim);
+            border: 1px solid #ddd;
+            background: #f8faf5;
+            color: #666;
             white-space: nowrap;
         }
-        .chip:hover { border-color: var(--green-2); color: var(--text); }
+        .chip:hover { border-color: var(--secondary); color: #333; }
         .chip.active {
-            background: var(--green-1);
-            border-color: var(--green-2);
-            color: var(--green-4);
+            background: rgba(107,158,62,.12);
+            border-color: var(--secondary);
+            color: var(--primary);
         }
         .chip .ct { opacity: .5; margin-left: 3px; }
 
         .source-legend { display: flex; flex-direction: column; gap: 6px; }
         .source-row {
             display: flex; align-items: center; gap: 8px;
-            font-size: 0.78rem; color: var(--text-dim);
+            font-size: 0.78rem; color: #666;
             cursor: pointer; transition: color .2s;
         }
-        .source-row:hover { color: var(--text); }
+        .source-row:hover { color: #333; }
         .source-dot {
             width: 10px; height: 10px; border-radius: 50%;
             flex-shrink: 0;
@@ -215,24 +196,26 @@
             display: flex;
             flex-direction: column;
             overflow: hidden;
+            background: #eef2e6;
         }
 
         .content-header {
             padding: 14px 20px;
-            border-bottom: 1px solid var(--border);
+            background: #fff;
+            border-bottom: 1px solid #ddd;
             display: flex;
             align-items: center;
             justify-content: space-between;
             flex-shrink: 0;
         }
         .content-header h2 {
-            font-family: 'DM Serif Display', serif;
             font-size: 1.2rem;
-            color: var(--green-3);
+            font-weight: 700;
+            color: var(--primary);
         }
         .content-header .count {
             font-size: 0.78rem;
-            color: var(--text-dim);
+            color: #888;
         }
 
         .grid {
@@ -247,41 +230,42 @@
 
         /* ── CARDS ─────────────────────────────────── */
         .card {
-            background: var(--bg-card);
-            border: 1px solid var(--border);
+            background: #fff;
+            border: 1px solid #ddd;
             border-radius: var(--radius);
             padding: 14px 16px;
             cursor: pointer;
             transition: all .2s;
             position: relative;
             overflow: hidden;
+            box-shadow: 0 1px 3px rgba(0,0,0,.06);
         }
         .card::before {
             content: '';
             position: absolute;
             top: 0; left: 0;
             width: 3px; height: 100%;
-            background: var(--green-2);
+            background: var(--secondary);
             opacity: 0;
             transition: opacity .2s;
         }
         .card:hover {
-            background: var(--bg-hover);
-            border-color: var(--green-1);
+            border-color: var(--secondary);
             transform: translateY(-1px);
+            box-shadow: 0 3px 8px rgba(0,0,0,.1);
         }
         .card:hover::before { opacity: 1; }
 
         .card-name {
             font-weight: 600;
             font-size: 0.92rem;
-            color: var(--green-4);
+            color: var(--primary);
             margin-bottom: 2px;
         }
         .card-sci {
             font-style: italic;
             font-size: 0.78rem;
-            color: var(--text-dim);
+            color: #888;
             margin-bottom: 8px;
         }
         .card-meta {
@@ -294,39 +278,39 @@
             font-weight: 500;
         }
         .tag-climate {
-            background: rgba(80,168,208,.12);
+            background: rgba(46,134,193,.08);
             color: var(--sky);
-            border: 1px solid rgba(80,168,208,.2);
+            border: 1px solid rgba(46,134,193,.18);
         }
         .tag-lifeform {
-            background: rgba(95,160,48,.12);
-            color: var(--green-3);
-            border: 1px solid rgba(95,160,48,.2);
+            background: rgba(107,158,62,.08);
+            color: var(--secondary);
+            border: 1px solid rgba(107,158,62,.18);
         }
         .tag-source {
             background: rgba(232,184,48,.08);
-            color: var(--amber);
-            border: 1px solid rgba(232,184,48,.15);
+            color: #b8860b;
+            border: 1px solid rgba(232,184,48,.18);
         }
         .tag-toxic {
-            background: rgba(224,96,80,.10);
+            background: rgba(224,96,80,.06);
             color: var(--coral);
-            border: 1px solid rgba(224,96,80,.2);
+            border: 1px solid rgba(224,96,80,.15);
         }
 
         .card-count {
             position: absolute;
             top: 12px; right: 14px;
-            font-family: 'DM Serif Display', serif;
             font-size: 1.4rem;
-            color: var(--text-muted);
+            font-weight: 700;
+            color: #ccc;
         }
 
         /* ── DETAIL PANEL ──────────────────────────── */
         .detail {
             width: 380px;
-            background: var(--bg-card);
-            border-left: 1px solid var(--border);
+            background: #fff;
+            border-left: 1px solid #ddd;
             flex-shrink: 0;
             overflow-y: auto;
             display: none;
@@ -336,41 +320,41 @@
 
         .detail-header {
             padding: 20px;
-            border-bottom: 1px solid var(--border);
+            border-bottom: 1px solid #eee;
             position: relative;
         }
         .detail-close {
             position: absolute;
             top: 14px; right: 14px;
             background: none; border: none;
-            color: var(--text-dim);
+            color: #888;
             cursor: pointer;
             font-size: 1.1rem;
         }
-        .detail-close:hover { color: var(--text); }
+        .detail-close:hover { color: #333; }
 
         .detail-header h3 {
-            font-family: 'DM Serif Display', serif;
             font-size: 1.3rem;
-            color: var(--green-3);
+            font-weight: 700;
+            color: var(--primary);
             margin-bottom: 2px;
         }
         .detail-header .sci {
             font-style: italic;
-            color: var(--text-dim);
+            color: #888;
             font-size: 0.88rem;
         }
         .detail-tags { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 10px; }
 
         .detail-section {
             padding: 16px 20px;
-            border-bottom: 1px solid var(--border);
+            border-bottom: 1px solid #eee;
         }
         .detail-section:last-child { border-bottom: none; }
 
         .ds-title {
             font-size: 0.68rem;
-            color: var(--text-muted);
+            color: #aaa;
             text-transform: uppercase;
             letter-spacing: 1.2px;
             margin-bottom: 8px;
@@ -383,23 +367,23 @@
             padding: 4px 0;
             font-size: 0.82rem;
         }
-        .ds-row .label { color: var(--text-dim); }
-        .ds-row .value { color: var(--text); text-align: right; max-width: 60%; }
+        .ds-row .label { color: #888; }
+        .ds-row .value { color: #333; text-align: right; max-width: 60%; }
 
         .range-list {
             display: flex; flex-wrap: wrap; gap: 4px;
         }
         .range-tag {
             font-size: 0.65rem;
-            background: rgba(255,255,255,.04);
-            border: 1px solid var(--border);
+            background: #f4f7f0;
+            border: 1px solid #ddd;
             padding: 2px 7px;
             border-radius: 4px;
-            color: var(--text-dim);
+            color: #666;
         }
         .range-tag.intro {
-            border-color: rgba(232,184,48,.2);
-            color: var(--amber);
+            border-color: rgba(232,184,48,.3);
+            color: #b8860b;
         }
 
         .powo-link {
@@ -409,7 +393,7 @@
             text-decoration: none;
             transition: color .2s;
         }
-        .powo-link:hover { color: var(--green-3); }
+        .powo-link:hover { color: var(--secondary); }
 
         /* ── LOADING ───────────────────────────────── */
         .loading {
@@ -419,12 +403,12 @@
             justify-content: center;
             flex-direction: column;
             gap: 12px;
-            color: var(--text-dim);
+            color: #888;
         }
         .spinner {
             width: 32px; height: 32px;
-            border: 3px solid var(--border);
-            border-top-color: var(--green-2);
+            border: 3px solid #ddd;
+            border-top-color: var(--secondary);
             border-radius: 50%;
             animation: spin 1s linear infinite;
         }
@@ -433,8 +417,8 @@
         /* ── SCROLLBAR ─────────────────────────────── */
         ::-webkit-scrollbar { width: 6px; }
         ::-webkit-scrollbar-track { background: transparent; }
-        ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
-        ::-webkit-scrollbar-thumb:hover { background: var(--green-1); }
+        ::-webkit-scrollbar-thumb { background: #ccc; border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: var(--secondary); }
 
         /* ── RESPONSIVE ────────────────────────────── */
         @media (max-width: 900px) {
@@ -447,16 +431,19 @@
 
 <!-- HEADER -->
 <header>
-    <div class="hd-left">
-        <h1><i class="fas fa-seedling" style="margin-right:4px"></i> PLANTalytics</h1>
+    <h1>
+        <i class="fas fa-leaf"></i>
+        <span>PLANTalytics</span>
         <span class="badge">Species Explorer</span>
-        <div class="breadcrumb" id="breadcrumb">
-            <span class="active" data-level="family">All Families</span>
-        </div>
+    </h1>
+    <div class="breadcrumb" id="breadcrumb">
+        <span class="active" data-level="family">All Families</span>
     </div>
-    <div class="hd-right">
-        <a class="hd-btn" href="dashboard.html"><i class="fas fa-chart-bar"></i> Dashboard</a>
-        <a class="hd-btn" href="index.html"><i class="fas fa-home"></i> Home</a>
+    <div class="header-links">
+        <a href="index.html" class="header-link"><i class="fas fa-home"></i><span class="link-text"> Home</span></a>
+        <a href="distributions.html" class="header-link"><i class="fas fa-globe"></i><span class="link-text"> Geo</span></a>
+        <a href="insights.html" class="header-link"><i class="fas fa-chart-pie"></i><span class="link-text"> Insights</span></a>
+        <a href="dashboard.html" class="header-link"><i class="fas fa-chart-bar"></i><span class="link-text"> Dashboard</span></a>
     </div>
 </header>
 
@@ -888,9 +875,9 @@ function showDetail(r) {
         body += `<div class="detail-section">
             <div class="ds-title">Distribution (Kew)</div>
             ${dsRow('Origin', r.kew_geographic_area)}
-            ${native ? `<div style="margin-top:8px"><div style="font-size:.72rem;color:var(--text-muted);margin-bottom:4px">Native to</div>
+            ${native ? `<div style="margin-top:8px"><div style="font-size:.72rem;color:#aaa;margin-bottom:4px">Native to</div>
                 <div class="range-list">${native.split('; ').map(a => `<span class="range-tag">${escHtml(a)}</span>`).join('')}</div></div>` : ''}
-            ${intro ? `<div style="margin-top:8px"><div style="font-size:.72rem;color:var(--text-muted);margin-bottom:4px">Introduced to</div>
+            ${intro ? `<div style="margin-top:8px"><div style="font-size:.72rem;color:#aaa;margin-bottom:4px">Introduced to</div>
                 <div class="range-list">${intro.split('; ').map(a => `<span class="range-tag intro">${escHtml(a)}</span>`).join('')}</div></div>` : ''}
         </div>`;
     }
@@ -914,7 +901,7 @@ function showDetail(r) {
             <div style="display:flex;gap:6px;flex-wrap:wrap">
                 ${srcs.map(s => {
                     const color = SOURCE_COLORS[s] || '#888';
-                    return `<span style="display:inline-flex;align-items:center;gap:4px;font-size:.78rem;color:var(--text-dim)">
+                    return `<span style="display:inline-flex;align-items:center;gap:4px;font-size:.78rem;color:#666">
                         <span style="width:8px;height:8px;border-radius:50%;background:${color};flex-shrink:0"></span>${s}</span>`;
                 }).join('')}
             </div>
