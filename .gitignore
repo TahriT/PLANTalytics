@@ -169,3 +169,4 @@ generate_og_image.py
 
 # Claude config
 .claude/
+.vscode/settings.json
