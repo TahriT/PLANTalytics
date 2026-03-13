@@ -1,0 +1,721 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PLANTalytics — Geographic Distributions</title>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=IBM+Plex+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg:       #0c110a;
+            --bg-card:  #161e12;
+            --bg-hover: #1e2a18;
+            --border:   #2a3a22;
+            --green-1:  #3d6b1e;
+            --green-2:  #5fa030;
+            --green-3:  #8fd45e;
+            --green-4:  #c5f0a0;
+            --amber:    #e8b830;
+            --coral:    #e06050;
+            --sky:      #50a8d0;
+            --purple:   #b07ae0;
+            --text:     #d8e4d0;
+            --text-dim: #7a9070;
+            --text-muted:#4a6040;
+            --radius:   10px;
+        }
+
+        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'IBM Plex Sans', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+        }
+
+        header {
+            background: linear-gradient(135deg, #1a2e10 0%, #2a4a1a 100%);
+            border-bottom: 1px solid var(--border);
+            padding: 10px 24px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .hd-left { display: flex; align-items: center; gap: 14px; }
+        .hd-left h1 {
+            font-family: 'DM Serif Display', serif;
+            font-size: 1.25rem;
+            color: var(--green-3);
+        }
+        .badge {
+            font-size: 0.65rem;
+            color: var(--text-dim);
+            background: rgba(255,255,255,.06);
+            padding: 3px 10px;
+            border-radius: 20px;
+            border: 1px solid var(--border);
+        }
+        .hd-right { display: flex; align-items: center; gap: 8px; }
+        .hd-btn {
+            background: rgba(255,255,255,.06);
+            border: 1px solid var(--border);
+            color: var(--text-dim);
+            font-size: 0.78rem;
+            padding: 5px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            display: flex; align-items: center; gap: 5px;
+            text-decoration: none;
+            transition: all .2s;
+            font-family: inherit;
+        }
+        .hd-btn:hover { background: rgba(255,255,255,.10); color: var(--text); }
+
+        /* ── PAGE LAYOUT ──────────────────────────── */
+        .page {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .page-title {
+            font-family: 'DM Serif Display', serif;
+            font-size: 1.6rem;
+            color: var(--green-3);
+            margin-bottom: 4px;
+        }
+        .page-sub {
+            font-size: 0.85rem;
+            color: var(--text-dim);
+            margin-bottom: 24px;
+        }
+
+        /* stats row */
+        .geo-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+            gap: 10px;
+            margin-bottom: 24px;
+        }
+        .gs-cell {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 14px 18px;
+        }
+        .gs-cell .num {
+            font-family: 'DM Serif Display', serif;
+            font-size: 1.8rem;
+            line-height: 1;
+        }
+        .gs-cell .lbl {
+            font-size: 0.68rem;
+            color: var(--text-dim);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-top: 2px;
+        }
+        .c-native .num { color: var(--green-3); }
+        .c-intro  .num { color: var(--amber); }
+        .c-regions .num { color: var(--sky); }
+        .c-species .num { color: var(--purple); }
+
+        /* two-column layout */
+        .row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px; }
+        .row.full { grid-template-columns: 1fr; }
+
+        @media (max-width: 900px) { .row { grid-template-columns: 1fr; } }
+
+        .panel {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            overflow: hidden;
+        }
+        .panel-title {
+            padding: 14px 18px;
+            border-bottom: 1px solid var(--border);
+            font-size: 0.68rem;
+            text-transform: uppercase;
+            letter-spacing: 1.2px;
+            color: var(--text-muted);
+            font-weight: 600;
+        }
+        .panel-body { padding: 16px 18px; }
+        .panel-body svg { display: block; width: 100%; overflow: visible; }
+
+        /* treemap */
+        .tm-cell {
+            cursor: pointer;
+            transition: opacity .15s;
+        }
+        .tm-cell:hover { opacity: .85; }
+        .tm-label {
+            font-family: 'IBM Plex Sans', sans-serif;
+            fill: #fff;
+            pointer-events: none;
+        }
+        .tm-label-name { font-weight: 600; }
+        .tm-label-count { opacity: .7; }
+
+        /* bar chart */
+        .bar-native { fill: var(--green-2); }
+        .bar-intro  { fill: var(--amber); opacity: .8; }
+        .bar-label  { fill: var(--text-dim); font-size: 11px; }
+        .bar-value  { fill: var(--text); font-size: 11px; font-weight: 600; }
+        .axis-line  { stroke: var(--border); }
+        .tick text  { fill: var(--text-dim); font-size: 10px; }
+
+        /* region list in info panel */
+        .region-list {
+            max-height: 500px;
+            overflow-y: auto;
+        }
+        .region-row {
+            display: flex;
+            align-items: center;
+            padding: 8px 0;
+            border-bottom: 1px solid var(--border);
+            cursor: pointer;
+            transition: background .15s;
+        }
+        .region-row:hover { background: var(--bg-hover); margin: 0 -18px; padding: 8px 18px; }
+        .region-row:last-child { border-bottom: none; }
+        .region-rank {
+            width: 28px;
+            font-family: 'DM Serif Display', serif;
+            color: var(--text-muted);
+            font-size: .85rem;
+            flex-shrink: 0;
+        }
+        .region-name {
+            flex: 1;
+            font-size: 0.85rem;
+            color: var(--text);
+        }
+        .region-bars {
+            display: flex; align-items: center; gap: 4px;
+            width: 180px;
+            flex-shrink: 0;
+        }
+        .rb-track {
+            flex: 1;
+            height: 6px;
+            border-radius: 3px;
+            background: rgba(255,255,255,.04);
+            overflow: hidden;
+            position: relative;
+        }
+        .rb-fill {
+            height: 100%;
+            border-radius: 3px;
+            transition: width .4s;
+        }
+        .rb-native .rb-fill { background: var(--green-2); }
+        .rb-intro  .rb-fill { background: var(--amber); }
+        .region-ct {
+            font-size: .78rem;
+            font-weight: 600;
+            width: 40px;
+            text-align: right;
+            color: var(--text-dim);
+        }
+
+        /* species popup for region click */
+        .region-detail {
+            display: none;
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 16px 18px;
+            margin-top: 12px;
+        }
+        .region-detail.open { display: block; }
+        .rd-title {
+            font-family: 'DM Serif Display', serif;
+            font-size: 1.1rem;
+            color: var(--green-3);
+            margin-bottom: 6px;
+        }
+        .rd-counts { font-size: .78rem; color: var(--text-dim); margin-bottom: 12px; }
+        .rd-counts span { font-weight: 600; }
+        .sp-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 6px;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        .sp-item {
+            font-size: .78rem;
+            padding: 5px 10px;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+        }
+        .sp-item .sci { font-style: italic; color: var(--text-dim); }
+
+        /* legend */
+        .legend { display: flex; gap: 16px; align-items: center; padding: 10px 0; }
+        .legend-item { display: flex; align-items: center; gap: 6px; font-size: .78rem; color: var(--text-dim); }
+        .legend-dot { width: 10px; height: 10px; border-radius: 3px; flex-shrink: 0; }
+
+        /* ── LOADING ───────────────────────────────── */
+        .loading {
+            display: flex; align-items: center; justify-content: center;
+            flex-direction: column; gap: 12px; color: var(--text-dim);
+            padding: 60px 0;
+        }
+        .spinner {
+            width: 32px; height: 32px;
+            border: 3px solid var(--border);
+            border-top-color: var(--green-2);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: var(--green-1); }
+    </style>
+</head>
+<body>
+
+<header>
+    <div class="hd-left">
+        <h1><i class="fas fa-seedling" style="margin-right:4px"></i> PLANTalytics</h1>
+        <span class="badge">Geographic Distributions</span>
+    </div>
+    <div class="hd-right">
+        <a class="hd-btn" href="explorer.html"><i class="fas fa-leaf"></i> Explorer</a>
+        <a class="hd-btn" href="dashboard.html"><i class="fas fa-chart-bar"></i> Dashboard</a>
+        <a class="hd-btn" href="index.html"><i class="fas fa-home"></i> Home</a>
+    </div>
+</header>
+
+<div class="page" id="app">
+    <h2 class="page-title">Where Plants Grow</h2>
+    <p class="page-sub">Geographic range data from Kew World Checklist of Vascular Plants — native and introduced distributions for <span id="enrichedCount">…</span> species.</p>
+
+    <div class="geo-stats" id="geoStats">
+        <div class="gs-cell c-species"><span class="num" id="sN">—</span><span class="lbl">Species w/ range data</span></div>
+        <div class="gs-cell c-regions"><span class="num" id="sR">—</span><span class="lbl">Unique regions</span></div>
+        <div class="gs-cell c-native"><span class="num" id="sNat">—</span><span class="lbl">Native occurrences</span></div>
+        <div class="gs-cell c-intro"><span class="num" id="sInt">—</span><span class="lbl">Introduced occurrences</span></div>
+    </div>
+
+    <div class="legend">
+        <div class="legend-item"><div class="legend-dot" style="background:var(--green-2)"></div>Native range</div>
+        <div class="legend-item"><div class="legend-dot" style="background:var(--amber)"></div>Introduced range</div>
+    </div>
+
+    <!-- TREEMAP -->
+    <div class="row full">
+        <div class="panel">
+            <div class="panel-title">Native Range Treemap — regions sized by number of native species</div>
+            <div class="panel-body" id="treemapContainer">
+                <div class="loading"><div class="spinner"></div>Loading…</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- TOP REGIONS BAR + FULL LIST -->
+    <div class="row">
+        <div class="panel">
+            <div class="panel-title">Top 25 Regions — species counts</div>
+            <div class="panel-body" id="barContainer"></div>
+        </div>
+        <div class="panel">
+            <div class="panel-title">All Regions — click to see species</div>
+            <div class="panel-body">
+                <input type="text" class="search-box" id="regionSearch" placeholder="Search regions…"
+                       style="width:100%;background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:8px 12px;color:var(--text);font-size:.85rem;font-family:inherit;outline:none;margin-bottom:12px;">
+                <div class="region-list" id="regionList"></div>
+                <div class="region-detail" id="regionDetail">
+                    <div class="rd-title" id="rdTitle"></div>
+                    <div class="rd-counts" id="rdCounts"></div>
+                    <div class="sp-grid" id="rdGrid"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- INTRODUCTION FLOWS -->
+    <div class="row full">
+        <div class="panel">
+            <div class="panel-title">Most Widely Distributed Species — native + introduced region count</div>
+            <div class="panel-body" id="wideContainer"></div>
+        </div>
+    </div>
+</div>
+
+<script>
+/* ═══════════════════════════════════════════════════════════════════
+   PLANTalytics — Geographic Distributions
+   ═══════════════════════════════════════════════════════════════════ */
+
+let DATA = [];
+
+Papa.parse('plant_data.csv', {
+    download: true, header: true, skipEmptyLines: true,
+    complete(results) {
+        DATA = results.data.filter(r => r.Genus && r.Genus.trim());
+        init();
+    }
+});
+
+/* ── helpers ─────────────────────────────────────────────────────── */
+function parseRange(str) {
+    if (!str || !str.trim()) return [];
+    return str.split(';').map(s => s.trim()).filter(Boolean);
+}
+
+function escHtml(s) {
+    const d = document.createElement('div');
+    d.textContent = s || '';
+    return d.innerHTML;
+}
+
+/* ── init ────────────────────────────────────────────────────────── */
+function init() {
+    // build region index
+    const nativeMap  = {};   // region → [species rows]
+    const introMap   = {};
+    let totalNat = 0, totalInt = 0;
+
+    const speciesWithRange = DATA.filter(r => (r.kew_native_range || '').trim() || (r.kew_introduced_range || '').trim());
+
+    speciesWithRange.forEach(r => {
+        parseRange(r.kew_native_range).forEach(reg => {
+            if (!nativeMap[reg]) nativeMap[reg] = [];
+            nativeMap[reg].push(r);
+            totalNat++;
+        });
+        parseRange(r.kew_introduced_range).forEach(reg => {
+            if (!introMap[reg]) introMap[reg] = [];
+            introMap[reg].push(r);
+            totalInt++;
+        });
+    });
+
+    const allRegions = new Set([...Object.keys(nativeMap), ...Object.keys(introMap)]);
+
+    // stats
+    document.getElementById('enrichedCount').textContent = speciesWithRange.length.toLocaleString();
+    document.getElementById('sN').textContent = speciesWithRange.length.toLocaleString();
+    document.getElementById('sR').textContent = allRegions.size.toLocaleString();
+    document.getElementById('sNat').textContent = totalNat.toLocaleString();
+    document.getElementById('sInt').textContent = totalInt.toLocaleString();
+
+    // build combined region data
+    const regions = [...allRegions].map(name => ({
+        name,
+        native: (nativeMap[name] || []).length,
+        introduced: (introMap[name] || []).length,
+        total: (nativeMap[name] || []).length + (introMap[name] || []).length,
+    })).sort((a, b) => b.native - a.native);
+
+    drawTreemap(regions, nativeMap);
+    drawBars(regions.slice(0, 25));
+    drawRegionList(regions, nativeMap, introMap);
+    drawWidestSpecies(speciesWithRange);
+}
+
+/* ── TREEMAP ─────────────────────────────────────────────────────── */
+function drawTreemap(regions, nativeMap) {
+    const container = document.getElementById('treemapContainer');
+    container.innerHTML = '';
+
+    const W = container.clientWidth;
+    const H = Math.max(400, Math.min(600, W * 0.5));
+
+    const topRegions = regions.filter(r => r.native > 0).slice(0, 60);
+
+    const root = d3.hierarchy({
+        children: topRegions.map(r => ({ name: r.name, value: r.native }))
+    }).sum(d => d.value);
+
+    d3.treemap()
+        .size([W, H])
+        .padding(2)
+        .round(true)(root);
+
+    const color = d3.scaleSequential()
+        .domain([0, d3.max(topRegions, r => r.native)])
+        .interpolator(t => d3.interpolateRgb('#1a3a10', '#8fd45e')(t));
+
+    const svg = d3.select(container).append('svg')
+        .attr('viewBox', `0 0 ${W} ${H}`)
+        .attr('width', W)
+        .attr('height', H);
+
+    const cell = svg.selectAll('.tm-cell')
+        .data(root.leaves())
+        .join('g')
+        .attr('class', 'tm-cell')
+        .attr('transform', d => `translate(${d.x0},${d.y0})`);
+
+    cell.append('rect')
+        .attr('width', d => d.x1 - d.x0)
+        .attr('height', d => d.y1 - d.y0)
+        .attr('rx', 3)
+        .attr('fill', d => color(d.data.value));
+
+    // label only if enough space
+    cell.each(function(d) {
+        const w = d.x1 - d.x0;
+        const h = d.y1 - d.y0;
+        const g = d3.select(this);
+
+        if (w > 50 && h > 28) {
+            g.append('text')
+                .attr('class', 'tm-label tm-label-name')
+                .attr('x', 6).attr('y', 16)
+                .attr('font-size', Math.min(12, w / 8))
+                .text(d.data.name.length > w / 7 ? d.data.name.slice(0, Math.floor(w/7)) + '…' : d.data.name);
+            if (h > 38) {
+                g.append('text')
+                    .attr('class', 'tm-label tm-label-count')
+                    .attr('x', 6).attr('y', 30)
+                    .attr('font-size', 10)
+                    .text(d.data.value + ' spp.');
+            }
+        }
+    });
+
+    // tooltip
+    const tip = d3.select(container).append('div')
+        .style('position', 'absolute')
+        .style('background', 'var(--bg)')
+        .style('border', '1px solid var(--border)')
+        .style('padding', '8px 12px')
+        .style('border-radius', '6px')
+        .style('font-size', '.78rem')
+        .style('color', 'var(--text)')
+        .style('pointer-events', 'none')
+        .style('display', 'none')
+        .style('z-index', '10');
+
+    container.style.position = 'relative';
+
+    cell.on('mouseenter', function(event, d) {
+        tip.style('display', 'block')
+            .html(`<strong>${escHtml(d.data.name)}</strong><br>${d.data.value.toLocaleString()} native species`);
+    })
+    .on('mousemove', function(event) {
+        const rect = container.getBoundingClientRect();
+        tip.style('left', (event.clientX - rect.left + 12) + 'px')
+           .style('top',  (event.clientY - rect.top  - 10) + 'px');
+    })
+    .on('mouseleave', () => tip.style('display', 'none'));
+}
+
+/* ── BAR CHART ───────────────────────────────────────────────────── */
+function drawBars(top25) {
+    const container = document.getElementById('barContainer');
+    const W = container.clientWidth;
+    const barH = 22, gap = 4;
+    const margin = { top: 10, right: 60, bottom: 10, left: 140 };
+    const H = margin.top + margin.bottom + top25.length * (barH + gap);
+
+    const svg = d3.select(container).append('svg')
+        .attr('viewBox', `0 0 ${W} ${H}`)
+        .attr('width', W)
+        .attr('height', H);
+
+    const maxVal = d3.max(top25, d => d.native + d.introduced);
+    const x = d3.scaleLinear().domain([0, maxVal]).range([margin.left, W - margin.right]);
+
+    top25.forEach((d, i) => {
+        const y = margin.top + i * (barH + gap);
+
+        // region name
+        svg.append('text')
+            .attr('class', 'bar-label')
+            .attr('x', margin.left - 8)
+            .attr('y', y + barH / 2 + 4)
+            .attr('text-anchor', 'end')
+            .text(d.name.length > 18 ? d.name.slice(0, 18) + '…' : d.name);
+
+        // native bar
+        svg.append('rect')
+            .attr('class', 'bar-native')
+            .attr('x', x(0))
+            .attr('y', y)
+            .attr('height', barH)
+            .attr('rx', 3)
+            .attr('width', 0)
+            .transition().duration(600).delay(i * 20)
+            .attr('width', x(d.native) - x(0));
+
+        // introduced bar (stacked)
+        if (d.introduced > 0) {
+            svg.append('rect')
+                .attr('class', 'bar-intro')
+                .attr('x', x(d.native))
+                .attr('y', y)
+                .attr('height', barH)
+                .attr('rx', 3)
+                .attr('width', 0)
+                .transition().duration(600).delay(i * 20 + 100)
+                .attr('width', x(d.native + d.introduced) - x(d.native));
+        }
+
+        // total value
+        svg.append('text')
+            .attr('class', 'bar-value')
+            .attr('x', x(d.native + d.introduced) + 6)
+            .attr('y', y + barH / 2 + 4)
+            .text(d.native + (d.introduced ? ` + ${d.introduced}` : ''));
+    });
+}
+
+/* ── REGION LIST ─────────────────────────────────────────────────── */
+function drawRegionList(regions, nativeMap, introMap) {
+    const list = document.getElementById('regionList');
+    const maxNative = d3.max(regions, r => r.native) || 1;
+    const maxIntro = d3.max(regions, r => r.introduced) || 1;
+
+    function render(filter) {
+        list.innerHTML = '';
+        const shown = filter
+            ? regions.filter(r => r.name.toLowerCase().includes(filter))
+            : regions;
+
+        shown.forEach((r, i) => {
+            const row = document.createElement('div');
+            row.className = 'region-row';
+            row.innerHTML = `
+                <span class="region-rank">${i + 1}</span>
+                <span class="region-name">${escHtml(r.name)}</span>
+                <div class="region-bars">
+                    <div class="rb-track rb-native"><div class="rb-fill" style="width:${(r.native / maxNative * 100).toFixed(1)}%"></div></div>
+                    <div class="rb-track rb-intro"><div class="rb-fill" style="width:${(r.introduced / maxIntro * 100).toFixed(1)}%"></div></div>
+                </div>
+                <span class="region-ct">${r.total}</span>
+            `;
+            row.addEventListener('click', () => showRegionDetail(r.name, nativeMap, introMap));
+            list.appendChild(row);
+        });
+    }
+
+    render('');
+    document.getElementById('regionSearch').addEventListener('input', e => {
+        render(e.target.value.trim().toLowerCase());
+    });
+}
+
+function showRegionDetail(region, nativeMap, introMap) {
+    const panel = document.getElementById('regionDetail');
+    panel.classList.add('open');
+
+    const natSpecies = nativeMap[region] || [];
+    const intSpecies = introMap[region] || [];
+
+    document.getElementById('rdTitle').textContent = region;
+    document.getElementById('rdCounts').innerHTML =
+        `<span style="color:var(--green-3)">${natSpecies.length}</span> native · <span style="color:var(--amber)">${intSpecies.length}</span> introduced`;
+
+    const grid = document.getElementById('rdGrid');
+    grid.innerHTML = '';
+
+    // combine, deduplicate, sort
+    const seen = new Set();
+    const all = [];
+    natSpecies.forEach(r => { const k = r.Genus + ' ' + r.Species; if (!seen.has(k)) { seen.add(k); all.push({ r, nat: true }); } });
+    intSpecies.forEach(r => { const k = r.Genus + ' ' + r.Species; if (!seen.has(k)) { seen.add(k); all.push({ r, nat: false }); } });
+
+    all.sort((a, b) => (a.r.Genus + a.r.Species).localeCompare(b.r.Genus + b.r.Species));
+
+    all.slice(0, 100).forEach(({ r, nat }) => {
+        const div = document.createElement('div');
+        div.className = 'sp-item';
+        div.innerHTML = `<span class="sci">${escHtml(r.Genus)} ${escHtml(r.Species)}</span>` +
+            (r.CommonName ? `<br>${escHtml(r.CommonName)}` : '') +
+            `<br><span style="font-size:.65rem;color:${nat ? 'var(--green-3)' : 'var(--amber)'}">${nat ? 'native' : 'introduced'}</span>`;
+        grid.appendChild(div);
+    });
+
+    if (all.length > 100) {
+        const more = document.createElement('div');
+        more.className = 'sp-item';
+        more.style.color = 'var(--text-muted)';
+        more.textContent = `+ ${all.length - 100} more…`;
+        grid.appendChild(more);
+    }
+}
+
+/* ── WIDEST SPECIES ──────────────────────────────────────────────── */
+function drawWidestSpecies(speciesWithRange) {
+    const ranked = speciesWithRange.map(r => ({
+        r,
+        nativeCount: parseRange(r.kew_native_range).length,
+        introCount: parseRange(r.kew_introduced_range).length,
+    }));
+    ranked.forEach(d => d.totalRegions = d.nativeCount + d.introCount);
+    ranked.sort((a, b) => b.totalRegions - a.totalRegions);
+
+    const top30 = ranked.slice(0, 30);
+
+    const container = document.getElementById('wideContainer');
+    const W = container.clientWidth;
+    const barH = 22, gap = 4;
+    const margin = { top: 10, right: 60, bottom: 10, left: 180 };
+    const H = margin.top + margin.bottom + top30.length * (barH + gap);
+
+    const svg = d3.select(container).append('svg')
+        .attr('viewBox', `0 0 ${W} ${H}`)
+        .attr('width', W)
+        .attr('height', H);
+
+    const maxVal = d3.max(top30, d => d.totalRegions);
+    const x = d3.scaleLinear().domain([0, maxVal]).range([margin.left, W - margin.right]);
+
+    top30.forEach((d, i) => {
+        const y = margin.top + i * (barH + gap);
+        const label = d.r.CommonName
+            ? `${d.r.CommonName} (${d.r.Genus})`
+            : `${d.r.Genus} ${d.r.Species}`;
+
+        svg.append('text')
+            .attr('class', 'bar-label')
+            .attr('x', margin.left - 8)
+            .attr('y', y + barH / 2 + 4)
+            .attr('text-anchor', 'end')
+            .text(label.length > 24 ? label.slice(0, 24) + '…' : label);
+
+        svg.append('rect')
+            .attr('class', 'bar-native')
+            .attr('x', x(0)).attr('y', y)
+            .attr('height', barH).attr('rx', 3)
+            .attr('width', 0)
+            .transition().duration(600).delay(i * 20)
+            .attr('width', x(d.nativeCount) - x(0));
+
+        if (d.introCount > 0) {
+            svg.append('rect')
+                .attr('class', 'bar-intro')
+                .attr('x', x(d.nativeCount)).attr('y', y)
+                .attr('height', barH).attr('rx', 3)
+                .attr('width', 0)
+                .transition().duration(600).delay(i * 20 + 100)
+                .attr('width', x(d.nativeCount + d.introCount) - x(d.nativeCount));
+        }
+
+        svg.append('text')
+            .attr('class', 'bar-value')
+            .attr('x', x(d.totalRegions) + 6)
+            .attr('y', y + barH / 2 + 4)
+            .text(`${d.nativeCount} + ${d.introCount}`);
+    });
+}
+</script>
+</body>
+</html>

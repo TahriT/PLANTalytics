@@ -1,0 +1,487 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PLANTalytics — Data Insights</title>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=IBM+Plex+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg:       #0c110a;
+            --bg-card:  #161e12;
+            --bg-hover: #1e2a18;
+            --border:   #2a3a22;
+            --green-1:  #3d6b1e;
+            --green-2:  #5fa030;
+            --green-3:  #8fd45e;
+            --green-4:  #c5f0a0;
+            --amber:    #e8b830;
+            --coral:    #e06050;
+            --sky:      #50a8d0;
+            --purple:   #b07ae0;
+            --text:     #d8e4d0;
+            --text-dim: #7a9070;
+            --text-muted:#4a6040;
+            --radius:   10px;
+        }
+
+        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'IBM Plex Sans', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+        }
+
+        header {
+            background: linear-gradient(135deg, #1a2e10 0%, #2a4a1a 100%);
+            border-bottom: 1px solid var(--border);
+            padding: 10px 24px;
+            display: flex; align-items: center; justify-content: space-between;
+        }
+        .hd-left { display: flex; align-items: center; gap: 14px; }
+        .hd-left h1 { font-family: 'DM Serif Display', serif; font-size: 1.25rem; color: var(--green-3); }
+        .badge { font-size: .65rem; color: var(--text-dim); background: rgba(255,255,255,.06); padding: 3px 10px; border-radius: 20px; border: 1px solid var(--border); }
+        .hd-right { display: flex; align-items: center; gap: 8px; }
+        .hd-btn { background: rgba(255,255,255,.06); border: 1px solid var(--border); color: var(--text-dim); font-size: .78rem; padding: 5px 12px; border-radius: 6px; cursor: pointer; display: flex; align-items: center; gap: 5px; text-decoration: none; transition: all .2s; font-family: inherit; }
+        .hd-btn:hover { background: rgba(255,255,255,.10); color: var(--text); }
+
+        .page { max-width: 1400px; margin: 0 auto; padding: 20px; }
+        .page-title { font-family: 'DM Serif Display', serif; font-size: 1.6rem; color: var(--green-3); margin-bottom: 4px; }
+        .page-sub { font-size: .85rem; color: var(--text-dim); margin-bottom: 24px; }
+
+        /* Grid */
+        .row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px; }
+        .row.tri { grid-template-columns: 1fr 1fr 1fr; }
+        .row.full { grid-template-columns: 1fr; }
+        @media (max-width: 900px) { .row, .row.tri { grid-template-columns: 1fr; } }
+
+        .panel { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; }
+        .panel-title { padding: 14px 18px; border-bottom: 1px solid var(--border); font-size: .68rem; text-transform: uppercase; letter-spacing: 1.2px; color: var(--text-muted); font-weight: 600; }
+        .panel-body { padding: 16px 18px; }
+
+        /* ── SOURCE PETAL DIAGRAM ─────────────────── */
+        .petal-center { text-anchor: middle; font-family: 'DM Serif Display', serif; fill: var(--green-3); }
+        .petal-arc { cursor: pointer; transition: opacity .15s; }
+        .petal-arc:hover { opacity: .8; }
+        .petal-label { fill: var(--text); font-size: 11px; font-weight: 600; pointer-events: none; }
+        .petal-sub   { fill: var(--text-dim); font-size: 9px; pointer-events: none; }
+
+        /* ── COMPLETENESS BARS ────────────────────── */
+        .comp-row { display: flex; align-items: center; gap: 10px; padding: 5px 0; }
+        .comp-name { width: 170px; font-size: .78rem; color: var(--text-dim); text-align: right; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex-shrink: 0; }
+        .comp-track { flex: 1; height: 8px; background: rgba(255,255,255,.04); border-radius: 4px; overflow: hidden; }
+        .comp-fill { height: 100%; border-radius: 4px; transition: width .6s; }
+        .comp-pct { width: 46px; font-size: .75rem; font-weight: 600; text-align: right; flex-shrink: 0; }
+
+        /* ── SOURCE COMBO TABLE ───────────────────── */
+        .combo-table { width: 100%; border-collapse: collapse; }
+        .combo-table th { text-align: left; font-size: .68rem; text-transform: uppercase; letter-spacing: 1px; color: var(--text-muted); padding: 6px 8px; border-bottom: 1px solid var(--border); font-weight: 600; }
+        .combo-table td { padding: 6px 8px; font-size: .82rem; border-bottom: 1px solid rgba(255,255,255,.03); }
+        .combo-table tr:hover td { background: var(--bg-hover); }
+        .combo-tags { display: flex; gap: 3px; flex-wrap: wrap; }
+        .combo-tag { font-size: .65rem; padding: 1px 6px; border-radius: 3px; }
+        .combo-bar-track { width: 100%; height: 6px; background: rgba(255,255,255,.04); border-radius: 3px; }
+        .combo-bar-fill { height: 100%; border-radius: 3px; background: var(--green-2); }
+
+        /* ── FAMILY BARS ──────────────────────────── */
+        .fam-bar { fill: var(--green-2); }
+        .fam-label { fill: var(--text-dim); font-size: 11px; }
+        .fam-value { fill: var(--text); font-size: 11px; font-weight: 600; }
+
+        /* ── DONUT ────────────────────────────────── */
+        .donut-label { text-anchor: middle; font-family: 'DM Serif Display', serif; fill: var(--green-3); }
+        .donut-sub   { text-anchor: middle; fill: var(--text-dim); font-size: 10px; }
+        .donut-arc   { cursor: pointer; transition: opacity .15s; }
+        .donut-arc:hover { opacity: .8; }
+        .donut-legend { margin-top: 10px; display: flex; flex-wrap: wrap; gap: 8px; }
+        .dl-item { display: flex; align-items: center; gap: 5px; font-size: .75rem; color: var(--text-dim); }
+        .dl-dot { width: 8px; height: 8px; border-radius: 2px; flex-shrink: 0; }
+
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+    </style>
+</head>
+<body>
+
+<header>
+    <div class="hd-left">
+        <h1><i class="fas fa-seedling" style="margin-right:4px"></i> PLANTalytics</h1>
+        <span class="badge">Data Insights</span>
+    </div>
+    <div class="hd-right">
+        <a class="hd-btn" href="distributions.html"><i class="fas fa-globe"></i> Distributions</a>
+        <a class="hd-btn" href="explorer.html"><i class="fas fa-leaf"></i> Explorer</a>
+        <a class="hd-btn" href="dashboard.html"><i class="fas fa-chart-bar"></i> Dashboard</a>
+        <a class="hd-btn" href="index.html"><i class="fas fa-home"></i> Home</a>
+    </div>
+</header>
+
+<div class="page">
+    <h2 class="page-title">Data Quality & Coverage</h2>
+    <p class="page-sub">Analyzing <span id="totalRows">…</span> species across <span id="totalCols">…</span> columns from 4 data sources.</p>
+
+    <!-- ROW 1: Source donut + combo table -->
+    <div class="row">
+        <div class="panel">
+            <div class="panel-title">Data Sources — species per source</div>
+            <div class="panel-body" id="sourceDonut"></div>
+        </div>
+        <div class="panel">
+            <div class="panel-title">Source Combinations — overlap analysis</div>
+            <div class="panel-body" style="max-height:400px;overflow-y:auto" id="comboContainer"></div>
+        </div>
+    </div>
+
+    <!-- ROW 2: Column completeness -->
+    <div class="row full">
+        <div class="panel">
+            <div class="panel-title">Column Completeness — % of rows with data</div>
+            <div class="panel-body" id="completeness"></div>
+        </div>
+    </div>
+
+    <!-- ROW 3: Top families + Edibility donut + Growth types -->
+    <div class="row tri">
+        <div class="panel">
+            <div class="panel-title">Top 20 Families</div>
+            <div class="panel-body" id="familyBars"></div>
+        </div>
+        <div class="panel">
+            <div class="panel-title">Edibility Rating Distribution</div>
+            <div class="panel-body" id="edibilityDonut"></div>
+        </div>
+        <div class="panel">
+            <div class="panel-title">Growth Rate Distribution</div>
+            <div class="panel-body" id="growthDonut"></div>
+        </div>
+    </div>
+
+    <!-- ROW 4: Hardiness zones heatmap -->
+    <div class="row full">
+        <div class="panel">
+            <div class="panel-title">Hardiness Zone Coverage</div>
+            <div class="panel-body" id="zoneChart"></div>
+        </div>
+    </div>
+</div>
+
+<script>
+/* ═══════════════════════════════════════════════════════════════════
+   PLANTalytics — Data Insights
+   ═══════════════════════════════════════════════════════════════════ */
+
+const SRC_COLORS = {
+    pfaf:        '#5fa030',
+    permapeople: '#e8b830',
+    zenodo:      '#50a8d0',
+    kew:         '#b07ae0',
+};
+
+let DATA = [], COLS = [];
+
+Papa.parse('plant_data.csv', {
+    download: true, header: true, skipEmptyLines: true,
+    complete(results) {
+        DATA = results.data.filter(r => r.Genus && r.Genus.trim());
+        COLS = results.meta.fields || [];
+        document.getElementById('totalRows').textContent = DATA.length.toLocaleString();
+        document.getElementById('totalCols').textContent = COLS.length;
+        init();
+    }
+});
+
+function escHtml(s) { const d = document.createElement('div'); d.textContent = s || ''; return d.innerHTML; }
+
+function init() {
+    drawSourceDonut();
+    drawComboTable();
+    drawCompleteness();
+    drawFamilyBars();
+    drawEdibilityDonut();
+    drawGrowthDonut();
+    drawZoneChart();
+}
+
+/* ── SOURCE DONUT ────────────────────────────────────────────────── */
+function drawSourceDonut() {
+    const counts = {};
+    DATA.forEach(r => {
+        (r.sources || '').split('+').forEach(s => {
+            s = s.trim();
+            if (s) counts[s] = (counts[s] || 0) + 1;
+        });
+    });
+
+    const entries = Object.entries(counts).sort((a, b) => b[1] - a[1]);
+    drawDonut('sourceDonut', entries, SRC_COLORS, DATA.length.toLocaleString(), 'species total');
+}
+
+/* ── COMBO TABLE ─────────────────────────────────────────────────── */
+function drawComboTable() {
+    const combos = {};
+    DATA.forEach(r => {
+        const key = (r.sources || 'unknown').trim();
+        combos[key] = (combos[key] || 0) + 1;
+    });
+
+    const sorted = Object.entries(combos).sort((a, b) => b[1] - a[1]);
+    const maxCount = sorted[0]?.[1] || 1;
+
+    let html = '<table class="combo-table"><thead><tr><th>Source Combination</th><th>Count</th><th style="width:40%">Share</th></tr></thead><tbody>';
+    sorted.forEach(([combo, ct]) => {
+        const tags = combo.split('+').map(s => {
+            const c = SRC_COLORS[s.trim()] || '#888';
+            return `<span class="combo-tag" style="background:${c}22;color:${c};border:1px solid ${c}44">${escHtml(s.trim())}</span>`;
+        }).join('');
+        const pct = (ct / DATA.length * 100).toFixed(1);
+        html += `<tr>
+            <td><div class="combo-tags">${tags}</div></td>
+            <td style="font-weight:600">${ct.toLocaleString()}</td>
+            <td><div class="combo-bar-track"><div class="combo-bar-fill" style="width:${(ct / maxCount * 100).toFixed(1)}%"></div></div>
+                <span style="font-size:.7rem;color:var(--text-muted)">${pct}%</span></td>
+        </tr>`;
+    });
+    html += '</tbody></table>';
+    document.getElementById('comboContainer').innerHTML = html;
+}
+
+/* ── COLUMN COMPLETENESS ─────────────────────────────────────────── */
+function drawCompleteness() {
+    const total = DATA.length;
+    const stats = COLS.map(col => {
+        let filled = 0;
+        DATA.forEach(r => { if (r[col] && r[col].trim()) filled++; });
+        return { col, filled, pct: filled / total * 100 };
+    }).sort((a, b) => b.pct - a.pct);
+
+    // group by prefix
+    const groups = [
+        { label: 'Core Fields', filter: c => !c.col.startsWith('pp_') && !c.col.startsWith('zn_') && !c.col.startsWith('kew_') },
+        { label: 'PermaPlants (pp_)', filter: c => c.col.startsWith('pp_') },
+        { label: 'Zenodo (zn_)', filter: c => c.col.startsWith('zn_') },
+        { label: 'Kew (kew_)', filter: c => c.col.startsWith('kew_') },
+    ];
+
+    const container = document.getElementById('completeness');
+    container.innerHTML = '';
+
+    groups.forEach(g => {
+        const items = stats.filter(g.filter);
+        if (!items.length) return;
+
+        const section = document.createElement('div');
+        section.style.marginBottom = '20px';
+
+        const title = document.createElement('div');
+        title.style.cssText = 'font-size:.72rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;font-weight:600';
+        title.textContent = g.label;
+        section.appendChild(title);
+
+        items.forEach(s => {
+            const color = s.pct > 70 ? 'var(--green-2)' : s.pct > 30 ? 'var(--amber)' : 'var(--coral)';
+            const row = document.createElement('div');
+            row.className = 'comp-row';
+            row.innerHTML = `
+                <span class="comp-name" title="${escHtml(s.col)}">${escHtml(s.col)}</span>
+                <div class="comp-track"><div class="comp-fill" style="width:${s.pct.toFixed(1)}%;background:${color}"></div></div>
+                <span class="comp-pct" style="color:${color}">${s.pct.toFixed(1)}%</span>
+            `;
+            section.appendChild(row);
+        });
+
+        container.appendChild(section);
+    });
+}
+
+/* ── TOP FAMILIES ────────────────────────────────────────────────── */
+function drawFamilyBars() {
+    const fams = {};
+    DATA.forEach(r => {
+        const f = (r.Family || '').trim();
+        if (f) fams[f] = (fams[f] || 0) + 1;
+    });
+
+    const top = Object.entries(fams).sort((a, b) => b[1] - a[1]).slice(0, 20);
+    const container = document.getElementById('familyBars');
+    const W = container.clientWidth || 400;
+    const barH = 20, gap = 4;
+    const margin = { top: 4, right: 50, bottom: 4, left: 120 };
+    const H = margin.top + margin.bottom + top.length * (barH + gap);
+
+    const svg = d3.select(container).append('svg')
+        .attr('viewBox', `0 0 ${W} ${H}`).attr('width', W).attr('height', H);
+
+    const maxVal = top[0][1];
+    const x = d3.scaleLinear().domain([0, maxVal]).range([margin.left, W - margin.right]);
+
+    top.forEach(([name, ct], i) => {
+        const y = margin.top + i * (barH + gap);
+        svg.append('text').attr('class', 'fam-label')
+            .attr('x', margin.left - 6).attr('y', y + barH / 2 + 4)
+            .attr('text-anchor', 'end')
+            .text(name.length > 16 ? name.slice(0, 16) + '…' : name);
+        svg.append('rect').attr('class', 'fam-bar')
+            .attr('x', x(0)).attr('y', y).attr('height', barH).attr('rx', 3)
+            .attr('width', 0)
+            .transition().duration(500).delay(i * 20)
+            .attr('width', x(ct) - x(0));
+        svg.append('text').attr('class', 'fam-value')
+            .attr('x', x(ct) + 6).attr('y', y + barH / 2 + 4)
+            .text(ct);
+    });
+}
+
+/* ── EDIBILITY DONUT ─────────────────────────────────────────────── */
+function drawEdibilityDonut() {
+    const buckets = {};
+    DATA.forEach(r => {
+        const e = (r.Edibility || '').trim();
+        const label = e === '' ? 'Unknown' : e;
+        buckets[label] = (buckets[label] || 0) + 1;
+    });
+
+    const sorted = Object.entries(buckets).sort((a, b) => b[1] - a[1]);
+    const palette = { '5': '#2ecc71', '4': '#5fa030', '3': '#8fd45e', '2': '#c5f0a0', '1': '#e8b830', '0': '#e06050', 'Unknown': '#4a6040' };
+    drawDonut('edibilityDonut', sorted, palette, sorted.find(s => s[0] !== 'Unknown')?.[0] || '—', 'top rating');
+}
+
+/* ── GROWTH RATE DONUT ───────────────────────────────────────────── */
+function drawGrowthDonut() {
+    const buckets = {};
+    DATA.forEach(r => {
+        const g = (r.GrowthRate || '').trim() || 'Unknown';
+        buckets[g] = (buckets[g] || 0) + 1;
+    });
+
+    const sorted = Object.entries(buckets).sort((a, b) => b[1] - a[1]);
+    const palette = { 'Fast': '#2ecc71', 'Medium': '#e8b830', 'Slow': '#e06050', 'Unknown': '#4a6040' };
+    drawDonut('growthDonut', sorted, palette, '', '');
+}
+
+/* ── ZONE CHART ──────────────────────────────────────────────────── */
+function drawZoneChart() {
+    const zoneCounts = {};
+    DATA.forEach(r => {
+        const hz = (r.HardinessZones || '').trim();
+        if (!hz) return;
+        // parse "3-8" or "5" etc
+        const m = hz.match(/(\d+)/g);
+        if (!m) return;
+        const lo = parseInt(m[0]), hi = parseInt(m[m.length - 1]);
+        for (let z = lo; z <= hi && z <= 13; z++) {
+            zoneCounts[z] = (zoneCounts[z] || 0) + 1;
+        }
+    });
+
+    const container = document.getElementById('zoneChart');
+    const W = container.clientWidth || 800;
+    const H = 100;
+    const margin = { top: 10, right: 20, bottom: 30, left: 20 };
+    const innerW = W - margin.left - margin.right;
+
+    const zones = [];
+    for (let z = 1; z <= 13; z++) zones.push({ zone: z, count: zoneCounts[z] || 0 });
+    const maxC = d3.max(zones, d => d.count) || 1;
+
+    const svg = d3.select(container).append('svg')
+        .attr('viewBox', `0 0 ${W} ${H}`).attr('width', W).attr('height', H);
+
+    const g = svg.append('g').attr('transform', `translate(${margin.left},${margin.top})`);
+    const barW = innerW / 13;
+    const iH = H - margin.top - margin.bottom;
+
+    const colorScale = d3.scaleSequential()
+        .domain([1, 13])
+        .interpolator(d3.interpolateTurbo);
+
+    zones.forEach((d, i) => {
+        const h = (d.count / maxC) * iH;
+        g.append('rect')
+            .attr('x', i * barW + 2)
+            .attr('y', iH - h)
+            .attr('width', barW - 4)
+            .attr('height', h)
+            .attr('rx', 3)
+            .attr('fill', colorScale(d.zone))
+            .attr('opacity', .85);
+
+        // zone label
+        g.append('text')
+            .attr('x', i * barW + barW / 2)
+            .attr('y', iH + 14)
+            .attr('text-anchor', 'middle')
+            .attr('font-size', 10)
+            .attr('fill', 'var(--text-dim)')
+            .text(d.zone);
+
+        // count label
+        if (d.count > 0) {
+            g.append('text')
+                .attr('x', i * barW + barW / 2)
+                .attr('y', iH - h - 4)
+                .attr('text-anchor', 'middle')
+                .attr('font-size', 9)
+                .attr('fill', 'var(--text)')
+                .text(d.count.toLocaleString());
+        }
+    });
+}
+
+/* ── SHARED DONUT ────────────────────────────────────────────────── */
+function drawDonut(containerId, entries, palette, centerText, centerSub) {
+    const container = document.getElementById(containerId);
+    const size = 220;
+    const outerR = size / 2 - 10;
+    const innerR = outerR * 0.58;
+
+    const svg = d3.select(container).append('svg')
+        .attr('viewBox', `0 0 ${size} ${size}`)
+        .attr('width', size).attr('height', size)
+        .style('display', 'block').style('margin', '0 auto');
+
+    const g = svg.append('g')
+        .attr('transform', `translate(${size / 2},${size / 2})`);
+
+    const pie = d3.pie().value(d => d[1]).sort(null);
+    const arc = d3.arc().innerRadius(innerR).outerRadius(outerR).padAngle(0.02).cornerRadius(3);
+
+    const defaultColors = d3.schemeTableau10;
+
+    g.selectAll('.donut-arc')
+        .data(pie(entries))
+        .join('path')
+        .attr('class', 'donut-arc')
+        .attr('d', arc)
+        .attr('fill', (d, i) => palette[d.data[0]] || defaultColors[i % 10]);
+
+    if (centerText) {
+        g.append('text').attr('class', 'donut-label').attr('dy', centerSub ? '-0.15em' : '.35em')
+            .attr('font-size', centerText.length > 5 ? 16 : 22)
+            .text(centerText);
+        if (centerSub) {
+            g.append('text').attr('class', 'donut-sub').attr('dy', '1.1em').text(centerSub);
+        }
+    }
+
+    // legend below
+    const legend = document.createElement('div');
+    legend.className = 'donut-legend';
+    entries.slice(0, 8).forEach(([name, ct], i) => {
+        const color = palette[name] || defaultColors[i % 10];
+        const item = document.createElement('div');
+        item.className = 'dl-item';
+        item.innerHTML = `<span class="dl-dot" style="background:${color}"></span>${escHtml(name)} <span style="opacity:.5">${ct.toLocaleString()}</span>`;
+        legend.appendChild(item);
+    });
+    container.appendChild(legend);
+}
+</script>
+</body>
+</html>
