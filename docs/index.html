@@ -1664,6 +1664,22 @@
                 </div>
             </div>
 
+            <!-- Hazard / Toxicity -->
+            <div>
+                <div class="filter-section-heading"><i class="fas fa-exclamation-triangle"></i> Hazards &amp; Toxicity</div>
+                <div class="filter-group">
+                    <label>Hazard Warning</label>
+                    <select id="hazardFilter" onchange="setFilter('hazard', this.value || null)">
+                        <option value="">Any</option>
+                        <option value="none">No Warnings</option>
+                        <option value="toxic">Toxic / Poisonous</option>
+                        <option value="weed">Weed Potential</option>
+                        <option value="invasive">Invasive</option>
+                        <option value="any_warning">Any Warning</option>
+                    </select>
+                </div>
+            </div>
+
             <!-- Plant Layer & Life Cycle -->
             <div>
                 <div class="filter-section-heading"><i class="fas fa-layer-group"></i> Plant Structure</div>
@@ -1863,7 +1879,22 @@
                 <div class="card-footer"><i class="fas fa-mouse-pointer"></i> <span data-i18n="foot.growthhint">Click a bar segment to filter by plant type</span></div>
             </div>
 
-            <!-- Chart 6: Pollinator Support — full width so grid has no orphan gap -->
+            <!-- Chart 6: Hazard & Toxicity Warnings -->
+            <div class="chart-card" style="border-top-color:#c0392b">
+                <div class="card-header">
+                    <div class="card-title"><i class="fas fa-skull-crossbones"></i> <span data-i18n="chart.hazard">Hazard &amp; Toxicity Warnings</span></div>
+                    <div class="card-actions">
+                        <button class="icon-btn" title="Clear hazard filter" onclick="clearFilter('hazard')"><i class="fas fa-times"></i></button>
+                        <button class="icon-btn" title="Fullscreen" onclick="fullscreenCard(this)"><i class="fas fa-expand"></i></button>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="chart-instance" id="chartHazard"></div>
+                </div>
+                <div class="card-footer"><i class="fas fa-mouse-pointer"></i> <span data-i18n="foot.hazardhint">Click a segment to filter by hazard type</span></div>
+            </div>
+
+            <!-- Chart 7: Pollinator Support — full width so grid has no orphan gap -->
             <div class="chart-card full-width">
                 <div class="card-header">
                     <div class="card-title"><i class="fas fa-bug"></i> <span data-i18n="chart.pollinators">Pollinator Support</span></div>
@@ -2011,12 +2042,13 @@ const filters = {
     light:       null,   // pp_light_requirement
     water:       null,   // pp_water_requirement
     tolerance:   null,   // Tolerances
+    hazard:      null,   // pp_warning: Toxic, Weed potential, Invasive, etc.
 };
 
 // ─────────────────────────────────────────────
 // ECHARTS INSTANCES
 // ─────────────────────────────────────────────
-let ecFamilies, ecScatter, ecCalendar, ecGrowth, ecPollinators;
+let ecFamilies, ecScatter, ecCalendar, ecGrowth, ecPollinators, ecHazard;
 
 const ZONE_COLORS = [
     '#8ecae6','#219ebc','#023047','#6a994e','#386641','#a7c957',
@@ -2148,6 +2180,20 @@ function getFilteredData() {
         if (filters.tolerance) {
             if (!(p.Tolerances || '').toLowerCase().includes(filters.tolerance.toLowerCase())) return false;
         }
+        if (filters.hazard) {
+            const warn = ((p.pp_warning || '') + ' ' + (p.zn_Toxicity || '')).toLowerCase();
+            if (filters.hazard === 'none') {
+                if (warn.trim()) return false;
+            } else if (filters.hazard === 'toxic') {
+                if (!warn.includes('toxic') && !warn.includes('poison')) return false;
+            } else if (filters.hazard === 'weed') {
+                if (!warn.includes('weed')) return false;
+            } else if (filters.hazard === 'invasive') {
+                if (!warn.includes('invasive')) return false;
+            } else if (filters.hazard === 'any_warning') {
+                if (!warn.trim()) return false;
+            }
+        }
         return true;
     });
 }
@@ -2182,6 +2228,7 @@ function clearFilter(key) {
     else if (key === 'light') { filters.light = null; document.getElementById('lightFilter').value = ''; }
     else if (key === 'water') { filters.water = null; document.getElementById('waterFilter').value = ''; }
     else if (key === 'tolerance') { filters.tolerance = null; document.getElementById('toleranceFilter').value = ''; }
+    else if (key === 'hazard') { filters.hazard = null; document.getElementById('hazardFilter').value = ''; }
     else if (key === 'zone') {
         filters.zone = null;
         syncZoneUI(null);
@@ -2205,6 +2252,7 @@ function clearAllFilters() {
     document.getElementById('lightFilter').value = '';
     document.getElementById('waterFilter').value = '';
     document.getElementById('toleranceFilter').value = '';
+    document.getElementById('hazardFilter').value = '';
     document.getElementById('layerFilter').value = '';
     document.getElementById('lifeCycleFilter').value = '';
     document.getElementById('edibilitySlider').value = 0;
@@ -2249,6 +2297,7 @@ function updateChips() {
         { key: 'light',       label: () => `Light: ${filters.light}` },
         { key: 'water',       label: () => `Water: ${filters.water}` },
         { key: 'tolerance',   label: () => `Tol: ${filters.tolerance}` },
+        { key: 'hazard',      label: () => `Hazard: ${filters.hazard}` },
     ];
 
     const active = chipDefs.filter(d => {
@@ -2601,6 +2650,60 @@ function renderPollinators(data) {
 }
 
 // ─────────────────────────────────────────────
+// CHART: Hazard & Toxicity Warnings (donut)
+// ─────────────────────────────────────────────
+function renderHazard(data) {
+    if (!ecHazard) { ecHazard = echarts.init(document.getElementById('chartHazard'), null, {renderer:'svg'}); }
+
+    const cats = { 'Toxic / Poisonous': 0, 'Weed Potential': 0, 'Invasive': 0, 'Other Warning': 0, 'No Warning': 0 };
+    data.forEach(p => {
+        const combined = ((p.pp_warning || '') + ' ' + (p.zn_Toxicity || '')).toLowerCase();
+        if (/toxic|poison/i.test(combined))      cats['Toxic / Poisonous']++;
+        else if (/weed/i.test(combined))          cats['Weed Potential']++;
+        else if (/invasive/i.test(combined))      cats['Invasive']++;
+        else if ((p.pp_warning || '').trim() || (p.zn_Toxicity || '').trim()) cats['Other Warning']++;
+        else                                       cats['No Warning']++;
+    });
+
+    const palette = { 'Toxic / Poisonous': '#c0392b', 'Weed Potential': '#e67e22', 'Invasive': '#8e44ad', 'Other Warning': '#7f8c8d', 'No Warning': '#27ae60' };
+    const seriesData = Object.entries(cats).filter(([,v]) => v > 0).map(([name, value]) => ({
+        name, value,
+        itemStyle: {
+            color: palette[name],
+            opacity: filters.hazard && !name.toLowerCase().includes(filters.hazard.toLowerCase().split('/')[0].split(' ')[0]) ? 0.3 : 1
+        }
+    }));
+
+    ecHazard.off('click');
+    ecHazard.setOption({
+        tooltip: { trigger: 'item', formatter: '{b}: {c} ({d}%)' },
+        series: [{
+            type: 'pie',
+            radius: ['42%', '70%'],
+            center: ['50%', '52%'],
+            avoidLabelOverlap: true,
+            label: { show: true, fontSize: 11, formatter: '{b}\n{d}%' },
+            emphasis: { label: { fontSize: 13, fontWeight: 'bold' } },
+            data: seriesData
+        }]
+    }, true);
+
+    ecHazard.on('click', params => {
+        const map = {
+            'Toxic / Poisonous': 'Toxic / Poisonous',
+            'Weed Potential': 'Weed Potential',
+            'Invasive': 'Invasive',
+            'Other Warning': 'Any Warning',
+            'No Warning': 'No Warnings'
+        };
+        const val = map[params.name];
+        filters.hazard = filters.hazard === val ? null : val;
+        document.getElementById('hazardFilter').value = filters.hazard || '';
+        refreshAll();
+    });
+}
+
+// ─────────────────────────────────────────────
 // TABLE: Top Picks
 // ─────────────────────────────────────────────
 function renderTopPicks(data) {
@@ -2699,6 +2802,7 @@ function refreshAll() {
     renderCalendar(data);
     renderGrowth(data);
     renderPollinators(data);
+    renderHazard(data);
     renderTopPicks(data);
     updateZoneBar(filters.zone);
     updateQfZoneBar(filters.zone);
@@ -3274,6 +3378,7 @@ function renderTypeMap(data, page) {
     if (filters.light)           activeFilters.push(filters.light);
     if (filters.water)           activeFilters.push(filters.water);
     if (filters.tolerance)       activeFilters.push(filters.tolerance);
+    if (filters.hazard)           activeFilters.push('Hazard: ' + filters.hazard);
 
     if (activeFilters.length > 0) {
         const banner = document.createElement('div');
@@ -3614,7 +3719,7 @@ function fullscreenCard(btn) {
         if (req) req.call(card).then(() => {
             // Resize all charts after entering fullscreen
             setTimeout(() => {
-                [ecFamilies, ecScatter, ecCalendar, ecGrowth, ecPollinators].forEach(ec => {
+                [ecFamilies, ecScatter, ecCalendar, ecGrowth, ecPollinators, ecHazard].forEach(ec => {
                     if (ec) ec.resize();
                 });
             }, 150);
@@ -3625,7 +3730,7 @@ function fullscreenCard(btn) {
 // Resize charts when exiting fullscreen too
 document.addEventListener('fullscreenchange', () => {
     setTimeout(() => {
-        [ecFamilies, ecScatter, ecCalendar, ecGrowth, ecPollinators].forEach(ec => {
+        [ecFamilies, ecScatter, ecCalendar, ecGrowth, ecPollinators, ecHazard].forEach(ec => {
             if (ec) ec.resize();
         });
     }, 150);
@@ -3654,7 +3759,7 @@ function toggleFilterPanel() {
     } else {
         panel.classList.toggle('collapsed');
         setTimeout(() => {
-            [ecFamilies, ecScatter, ecCalendar, ecGrowth, ecPollinators].forEach(ec => {
+            [ecFamilies, ecScatter, ecCalendar, ecGrowth, ecPollinators, ecHazard].forEach(ec => {
                 if (ec) ec.resize();
             });
         }, 300);
@@ -3670,7 +3775,7 @@ function closeMobileFilter() {
 // ECHARTS RESIZE on window change
 // ─────────────────────────────────────────────
 window.addEventListener('resize', () => {
-    [ecFamilies, ecScatter, ecCalendar, ecGrowth, ecPollinators].forEach(ec => {
+    [ecFamilies, ecScatter, ecCalendar, ecGrowth, ecPollinators, ecHazard].forEach(ec => {
         if (ec) ec.resize();
     });
 });
@@ -3893,7 +3998,7 @@ function toggleAdvancedFilters() {
     panel.classList.toggle('collapsed');
     btn.classList.toggle('active', !panel.classList.contains('collapsed'));
     setTimeout(() => {
-        [ecFamilies, ecScatter, ecCalendar, ecGrowth, ecPollinators].forEach(ec => {
+        [ecFamilies, ecScatter, ecCalendar, ecGrowth, ecPollinators, ecHazard].forEach(ec => {
             if (ec) ec.resize();
         });
     }, 300);

@@ -871,6 +871,7 @@ function renderSpecies() {
             const lifeform = (r.kew_lifeform_description || '').trim();
             const toxic = (r.zn_Toxicity || '').trim();
             const hasToxic = toxic && toxic !== 'No Incriminating Information Has Been Discovered';
+            const warning = (r.pp_warning || '').trim();
             const srcs = (r.sources || '').split('+').filter(Boolean);
 
             card.innerHTML = `
@@ -880,6 +881,7 @@ function renderSpecies() {
                     ${climate ? `<span class="tag tag-climate">${escHtml(climate)}</span>` : ''}
                     ${lifeform ? `<span class="tag tag-lifeform">${escHtml(lifeform)}</span>` : ''}
                     ${hasToxic ? `<span class="tag tag-toxic"><i class="fas fa-exclamation-triangle"></i> Toxic</span>` : ''}
+                    ${warning ? `<span class="tag tag-toxic"><i class="fas fa-exclamation-triangle"></i> ${escHtml(warning)}</span>` : ''}
                     ${srcs.map(s => `<span class="tag tag-source">${s}</span>`).join('')}
                 </div>
             `;
@@ -900,11 +902,13 @@ function showDetail(r) {
     const lifeform = (r.kew_lifeform_description || '').trim();
     const toxic = (r.zn_Toxicity || '').trim();
     const hasToxic = toxic && toxic !== 'No Incriminating Information Has Been Discovered';
+    const warning = (r.pp_warning || '').trim();
     const tags = document.getElementById('detailTags');
     tags.innerHTML = '';
     if (climate) tags.innerHTML += `<span class="tag tag-climate">${escHtml(climate)}</span>`;
     if (lifeform) tags.innerHTML += `<span class="tag tag-lifeform">${escHtml(lifeform)}</span>`;
     if (hasToxic) tags.innerHTML += `<span class="tag tag-toxic"><i class="fas fa-exclamation-triangle"></i> ${escHtml(toxic)}</span>`;
+    if (warning) tags.innerHTML += `<span class="tag tag-toxic"><i class="fas fa-exclamation-triangle"></i> ${escHtml(warning)}</span>`;
 
     let body = '';
 
@@ -940,6 +944,17 @@ function showDetail(r) {
         ${dsRow('Medicinal', medicinal)}
         ${dsRow('Tolerances', r.Tolerances)}
     </div>`;
+
+    // Warnings & Toxicity
+    const ppWarn = (r.pp_warning || '').trim();
+    const znTox = (r.zn_Toxicity || '').trim();
+    if (ppWarn || (znTox && znTox !== 'No Incriminating Information Has Been Discovered')) {
+        body += `<div class="detail-section">
+            <div class="ds-title">Warnings &amp; Toxicity</div>
+            ${ppWarn ? dsRow('Warning (PermaPeople)', ppWarn) : ''}
+            ${znTox ? dsRow('Toxicity (Zenodo)', znTox) : ''}
+        </div>`;
+    }
 
     // Zenodo care data
     if (r.zn_brightness || r.zn_temperature || r.zn_watering) {

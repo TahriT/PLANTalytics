@@ -237,6 +237,10 @@
             <div class="panel-title">Plant Layers</div>
             <div class="panel-body" id="layerDonut"></div>
         </div>
+        <div class="panel">
+            <div class="panel-title">Hazard &amp; Toxicity Warnings</div>
+            <div class="panel-body" id="hazardDonut"></div>
+        </div>
     </div>
 
     <!-- ROW 5: Hardiness zones heatmap -->
@@ -286,6 +290,7 @@ function init() {
     drawClimateDonut();
     drawLightBars();
     drawLayerDonut();
+    drawHazardDonut();
 }
 
 /* ── SOURCE DONUT ────────────────────────────────────────────────── */
@@ -630,6 +635,26 @@ function drawLayerDonut() {
     };
     const total = sorted.reduce((s, e) => s + e[1], 0);
     drawDonut('layerDonut', sorted, palette, total.toLocaleString(), 'species w/ layer');
+}
+
+/* ── HAZARD & TOXICITY DONUT ────────────────────────────────────── */
+function drawHazardDonut() {
+    const cats = { 'Toxic / Poisonous': 0, 'Weed Potential': 0, 'Invasive': 0, 'Other Warning': 0, 'No Warning': 0 };
+    DATA.forEach(r => {
+        const combined = ((r.pp_warning || '') + ' ' + (r.zn_Toxicity || '')).toLowerCase();
+        if (/toxic|poison/.test(combined))          cats['Toxic / Poisonous']++;
+        else if (/weed/.test(combined))              cats['Weed Potential']++;
+        else if (/invasive/.test(combined))          cats['Invasive']++;
+        else if ((r.pp_warning || '').trim() || (r.zn_Toxicity || '').trim()) cats['Other Warning']++;
+        else                                          cats['No Warning']++;
+    });
+    const sorted = Object.entries(cats).filter(([,v]) => v > 0).sort((a,b) => b[1] - a[1]);
+    const palette = {
+        'No Warning': '#27ae60', 'Weed Potential': '#e67e22',
+        'Toxic / Poisonous': '#c0392b', 'Invasive': '#8e44ad', 'Other Warning': '#7f8c8d'
+    };
+    const warned = sorted.filter(([k]) => k !== 'No Warning').reduce((s, e) => s + e[1], 0);
+    drawDonut('hazardDonut', sorted, palette, warned.toLocaleString(), 'with warnings');
 }
 </script>
 </body>
