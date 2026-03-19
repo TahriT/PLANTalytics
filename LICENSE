@@ -1,6 +1,12 @@
 MIT License
 
-Copyright (c) 2024 BrazenGames
+Copyright (c) 2024-2026 BrazenGames
+
+This license applies to the application source code (HTML, CSS, JavaScript,
+Python scripts, and configuration files) in this repository.
+
+The compiled PLANTalytics dataset (CSV/data files) is licensed separately
+under the PLANTalytics Dataset License — see DATA_LICENSE.md.
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal

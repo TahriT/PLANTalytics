@@ -221,7 +221,23 @@
         </div>
     </div>
 
-    <!-- ROW 4: Hardiness zones heatmap -->
+    <!-- ROW 4: Climate + Light + Layer -->
+    <div class="row tri">
+        <div class="panel">
+            <div class="panel-title">Climate Classification (Kew)</div>
+            <div class="panel-body" id="climateDonut"></div>
+        </div>
+        <div class="panel">
+            <div class="panel-title">Light Requirements</div>
+            <div class="panel-body" id="lightBars"></div>
+        </div>
+        <div class="panel">
+            <div class="panel-title">Plant Layers</div>
+            <div class="panel-body" id="layerDonut"></div>
+        </div>
+    </div>
+
+    <!-- ROW 5: Hardiness zones heatmap -->
     <div class="row full">
         <div class="panel">
             <div class="panel-title">Hardiness Zone Coverage</div>
@@ -265,6 +281,9 @@ function init() {
     drawEdibilityDonut();
     drawGrowthDonut();
     drawZoneChart();
+    drawClimateDonut();
+    drawLightBars();
+    drawLayerDonut();
 }
 
 /* ── SOURCE DONUT ────────────────────────────────────────────────── */
@@ -539,6 +558,76 @@ function drawDonut(containerId, entries, palette, centerText, centerSub) {
         legend.appendChild(item);
     });
     container.appendChild(legend);
+}
+
+/* ── CLIMATE DONUT ───────────────────────────────────────────────── */
+function drawClimateDonut() {
+    const buckets = {};
+    DATA.forEach(r => {
+        const c = (r.kew_climate_description || '').trim();
+        if (c) buckets[c] = (buckets[c] || 0) + 1;
+    });
+    const sorted = Object.entries(buckets).sort((a,b) => b[1]-a[1]);
+    const palette = {
+        'temperate': '#4a90d9', 'subtropical': '#e8b830',
+        'wet tropical': '#2ecc71', 'seasonally dry tropical': '#e67e22',
+        'desert or dry shrubland': '#c0392b', 'subalpine or subarctic': '#8e44ad',
+        'montane tropical': '#1abc9c', 'subtropical or tropical': '#f39c12'
+    };
+    const total = sorted.reduce((s, e) => s + e[1], 0);
+    drawDonut('climateDonut', sorted, palette, total.toLocaleString(), 'species w/ climate');
+}
+
+/* ── LIGHT BARS ──────────────────────────────────────────────────── */
+function drawLightBars() {
+    const buckets = {};
+    DATA.forEach(r => {
+        const l = (r.pp_light_requirement || '').trim();
+        if (l) buckets[l] = (buckets[l] || 0) + 1;
+    });
+    const sorted = Object.entries(buckets).sort((a,b) => b[1]-a[1]).slice(0, 15);
+    const container = document.getElementById('lightBars');
+    const W = container.clientWidth || 400;
+    const barH = 18, gap = 4;
+    const H = sorted.length * (barH + gap) + 10;
+    const maxVal = sorted[0] ? sorted[0][1] : 1;
+
+    const svg = d3.select(container).append('svg')
+        .attr('viewBox', `0 0 ${W} ${H}`).attr('width', W).attr('height', H);
+
+    sorted.forEach(([name, ct], i) => {
+        const y = i * (barH + gap) + 5;
+        const barW = ((ct / maxVal) * (W - 160)) + 0;
+        svg.append('rect')
+            .attr('x', 140).attr('y', y)
+            .attr('width', barW).attr('height', barH)
+            .attr('rx', 3).attr('fill', '#6b9e3e').attr('opacity', .75);
+        svg.append('text')
+            .attr('x', 136).attr('y', y + barH / 2 + 4)
+            .attr('text-anchor', 'end').attr('font-size', 10).attr('fill', '#555')
+            .text(name.length > 20 ? name.slice(0,20) + '…' : name);
+        svg.append('text')
+            .attr('x', 144 + barW).attr('y', y + barH / 2 + 4)
+            .attr('font-size', 10).attr('fill', '#333')
+            .text(ct.toLocaleString());
+    });
+}
+
+/* ── LAYER DONUT ─────────────────────────────────────────────────── */
+function drawLayerDonut() {
+    const buckets = {};
+    DATA.forEach(r => {
+        const l = (r.pp_layer || '').trim();
+        if (l && !l.includes(',')) buckets[l] = (buckets[l] || 0) + 1;
+    });
+    const sorted = Object.entries(buckets).sort((a,b) => b[1]-a[1]);
+    const palette = {
+        'Shrubs': '#6b9e3e', 'Tall trees': '#2d5016', 'Trees': '#3d7a1e',
+        'Vines': '#9ec472', 'Herbs': '#c5e1a5', 'Roots': '#795548',
+        'Ground cover': '#8bc34a', 'Understory': '#388e3c'
+    };
+    const total = sorted.reduce((s, e) => s + e[1], 0);
+    drawDonut('layerDonut', sorted, palette, total.toLocaleString(), 'species w/ layer');
 }
 </script>
 </body>

@@ -474,6 +474,18 @@
             <div class="filter-chips" id="lifeformChips"></div>
         </div>
         <div class="sb-section">
+            <div class="sb-title">Plant Layer</div>
+            <div class="filter-chips" id="layerChips"></div>
+        </div>
+        <div class="sb-section">
+            <div class="sb-title">Life Cycle</div>
+            <div class="filter-chips" id="cycleChips"></div>
+        </div>
+        <div class="sb-section">
+            <div class="sb-title">Light Requirement</div>
+            <div class="filter-chips" id="lightChips"></div>
+        </div>
+        <div class="sb-section">
             <div class="sb-title">Data Sources</div>
             <div class="source-legend" id="sourceLegend"></div>
         </div>
@@ -511,7 +523,7 @@ let DATA = [];
 let LEVEL = 'family';          // 'family' | 'genus' | 'species'
 let CURRENT_FAMILY = null;
 let CURRENT_GENUS  = null;
-let FILTERS = { climate: null, lifeform: null, search: '' };
+let FILTERS = { climate: null, lifeform: null, search: '', layer: null, lifeCycle: null, light: null };
 
 const SOURCE_COLORS = {
     pfaf:       '#5fa030',
@@ -614,6 +626,69 @@ function buildFilters() {
             row.innerHTML = `<span class="source-dot" style="background:${color}"></span>${name} <span style="opacity:.4;margin-left:auto">${ct.toLocaleString()}</span>`;
             srcEl.appendChild(row);
         });
+
+    // Layer chips
+    const layers = {};
+    DATA.forEach(r => {
+        const l = (r.pp_layer || '').trim();
+        if (l && !l.includes(',')) layers[l] = (layers[l] || 0) + 1;
+    });
+    const layerEl = document.getElementById('layerChips');
+    layerEl.innerHTML = '';
+    Object.entries(layers).sort((a,b) => b[1]-a[1]).forEach(([name, ct]) => {
+        const chip = document.createElement('div');
+        chip.className = 'chip';
+        chip.innerHTML = `${name}<span class="ct">${ct}</span>`;
+        chip.addEventListener('click', () => {
+            FILTERS.layer = FILTERS.layer === name ? null : name;
+            layerEl.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+            if (FILTERS.layer) chip.classList.add('active');
+            renderLevel();
+        });
+        layerEl.appendChild(chip);
+    });
+
+    // Life Cycle chips
+    const cycles = {};
+    DATA.forEach(r => {
+        const c = (r.pp_life_cycle || '').trim();
+        if (c) cycles[c] = (cycles[c] || 0) + 1;
+    });
+    const cycleEl = document.getElementById('cycleChips');
+    cycleEl.innerHTML = '';
+    Object.entries(cycles).sort((a,b) => b[1]-a[1]).forEach(([name, ct]) => {
+        const chip = document.createElement('div');
+        chip.className = 'chip';
+        chip.innerHTML = `${name}<span class="ct">${ct}</span>`;
+        chip.addEventListener('click', () => {
+            FILTERS.lifeCycle = FILTERS.lifeCycle === name ? null : name;
+            cycleEl.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+            if (FILTERS.lifeCycle) chip.classList.add('active');
+            renderLevel();
+        });
+        cycleEl.appendChild(chip);
+    });
+
+    // Light requirement chips
+    const lights = {};
+    DATA.forEach(r => {
+        const l = (r.pp_light_requirement || '').trim();
+        if (l) lights[l] = (lights[l] || 0) + 1;
+    });
+    const lightEl = document.getElementById('lightChips');
+    lightEl.innerHTML = '';
+    Object.entries(lights).sort((a,b) => b[1]-a[1]).forEach(([name, ct]) => {
+        const chip = document.createElement('div');
+        chip.className = 'chip';
+        chip.innerHTML = `${name}<span class="ct">${ct}</span>`;
+        chip.addEventListener('click', () => {
+            FILTERS.light = FILTERS.light === name ? null : name;
+            lightEl.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+            if (FILTERS.light) chip.classList.add('active');
+            renderLevel();
+        });
+        lightEl.appendChild(chip);
+    });
 }
 
 function updateStats() {
@@ -641,6 +716,9 @@ function filtered() {
     return DATA.filter(r => {
         if (FILTERS.climate && (r.kew_climate_description || '').trim() !== FILTERS.climate) return false;
         if (FILTERS.lifeform && (r.kew_lifeform_description || '').trim() !== FILTERS.lifeform) return false;
+        if (FILTERS.layer && !(r.pp_layer || '').toLowerCase().includes(FILTERS.layer.toLowerCase())) return false;
+        if (FILTERS.lifeCycle && !(r.pp_life_cycle || '').toLowerCase().includes(FILTERS.lifeCycle.toLowerCase())) return false;
+        if (FILTERS.light && (r.pp_light_requirement || '').trim() !== FILTERS.light) return false;
         if (FILTERS.search) {
             const q = FILTERS.search;
             const hay = `${r.Family} ${r.Genus} ${r.Species} ${r.CommonName}`.toLowerCase();
@@ -850,10 +928,15 @@ function showDetail(r) {
         ${dsRow('Hardiness Zones', zone)}
         ${dsRow('Height', height)}
         ${dsRow('Growth Rate', r.GrowthRate)}
+        ${dsRow('Plant Layer', r.pp_layer)}
+        ${dsRow('Life Cycle', r.pp_life_cycle)}
+        ${dsRow('Light', r.pp_light_requirement)}
+        ${dsRow('Water', r.pp_water_requirement)}
         ${dsRow('Soils', r.Soils)}
         ${dsRow('pH', r.pH)}
         ${dsRow('Edibility', edibility)}
         ${dsRow('Medicinal', medicinal)}
+        ${dsRow('Tolerances', r.Tolerances)}
     </div>`;
 
     // Zenodo care data

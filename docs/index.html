@@ -1572,6 +1572,53 @@
                         <option value="heavy" data-i18n="filter.heavycite">Heavy (Clay)</option>
                     </select>
                 </div>
+                <div class="filter-group" style="margin-top:0.75rem">
+                    <label>Climate</label>
+                    <select id="climateFilter" onchange="setFilter('climate', this.value || null)">
+                        <option value="">All Climates</option>
+                    </select>
+                </div>
+                <div class="filter-group" style="margin-top:0.75rem">
+                    <label>Light Requirement</label>
+                    <select id="lightFilter" onchange="setFilter('light', this.value || null)">
+                        <option value="">Any Light</option>
+                    </select>
+                </div>
+                <div class="filter-group" style="margin-top:0.75rem">
+                    <label>Water Requirement</label>
+                    <select id="waterFilter" onchange="setFilter('water', this.value || null)">
+                        <option value="">Any Water</option>
+                    </select>
+                </div>
+                <div class="filter-group" style="margin-top:0.75rem">
+                    <label>Tolerance</label>
+                    <select id="toleranceFilter" onchange="setFilter('tolerance', this.value || null)">
+                        <option value="">Any</option>
+                        <option value="Drought">Drought</option>
+                        <option value="Maritime exposure">Maritime Exposure</option>
+                        <option value="Atmospheric pollution">Atmospheric Pollution</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Plant Layer & Life Cycle -->
+            <div>
+                <div class="filter-section-heading"><i class="fas fa-layer-group"></i> Plant Structure</div>
+                <div class="filter-group">
+                    <label>Plant Layer</label>
+                    <select id="layerFilter" onchange="setFilter('layer', this.value || null)">
+                        <option value="">All Layers</option>
+                    </select>
+                </div>
+                <div class="filter-group" style="margin-top:0.75rem">
+                    <label>Life Cycle</label>
+                    <select id="lifeCycleFilter" onchange="setFilter('lifeCycle', this.value || null)">
+                        <option value="">All</option>
+                        <option value="Perennial">Perennial</option>
+                        <option value="Annual">Annual</option>
+                        <option value="Biennial">Biennial</option>
+                    </select>
+                </div>
             </div>
 
             <!-- Edibility / Medicinal sliders -->
@@ -1831,6 +1878,12 @@ const filters = {
     month:       null,   // string (month name)
     pollinator:  null,   // string
     nameSearch:  '',     // common name or latin name text search
+    climate:     null,   // kew_climate_description
+    layer:       null,   // pp_layer
+    lifeCycle:   null,   // pp_life_cycle
+    light:       null,   // pp_light_requirement
+    water:       null,   // pp_water_requirement
+    tolerance:   null,   // Tolerances
 };
 
 // ─────────────────────────────────────────────
@@ -1950,6 +2003,24 @@ function getFilteredData() {
             const translated = tPlant(p).toLowerCase();
             if (!common.includes(q) && !latin.includes(q) && !translated.includes(q)) return false;
         }
+        if (filters.climate) {
+            if ((p.kew_climate_description || '').trim().toLowerCase() !== filters.climate.toLowerCase()) return false;
+        }
+        if (filters.layer) {
+            if (!(p.pp_layer || '').toLowerCase().includes(filters.layer.toLowerCase())) return false;
+        }
+        if (filters.lifeCycle) {
+            if (!(p.pp_life_cycle || '').toLowerCase().includes(filters.lifeCycle.toLowerCase())) return false;
+        }
+        if (filters.light) {
+            if ((p.pp_light_requirement || '').trim().toLowerCase() !== filters.light.toLowerCase()) return false;
+        }
+        if (filters.water) {
+            if ((p.pp_water_requirement || '').trim().toLowerCase() !== filters.water.toLowerCase()) return false;
+        }
+        if (filters.tolerance) {
+            if (!(p.Tolerances || '').toLowerCase().includes(filters.tolerance.toLowerCase())) return false;
+        }
         return true;
     });
 }
@@ -1978,6 +2049,12 @@ function clearFilter(key) {
     else if (key === 'month') { filters.month = null; }
     else if (key === 'pollinator') { filters.pollinator = null; }
     else if (key === 'nameSearch') { filters.nameSearch = ''; const el = document.getElementById('nameSearchInput'); if (el) el.value = ''; }
+    else if (key === 'climate') { filters.climate = null; document.getElementById('climateFilter').value = ''; }
+    else if (key === 'layer') { filters.layer = null; document.getElementById('layerFilter').value = ''; }
+    else if (key === 'lifeCycle') { filters.lifeCycle = null; document.getElementById('lifeCycleFilter').value = ''; }
+    else if (key === 'light') { filters.light = null; document.getElementById('lightFilter').value = ''; }
+    else if (key === 'water') { filters.water = null; document.getElementById('waterFilter').value = ''; }
+    else if (key === 'tolerance') { filters.tolerance = null; document.getElementById('toleranceFilter').value = ''; }
     else if (key === 'zone') {
         filters.zone = null;
         syncZoneUI(null);
@@ -1997,6 +2074,12 @@ function clearAllFilters() {
     document.getElementById('growthFilter').value = '';
     document.getElementById('foliageFilter').value = '';
     document.getElementById('soilFilter').value = '';
+    document.getElementById('climateFilter').value = '';
+    document.getElementById('lightFilter').value = '';
+    document.getElementById('waterFilter').value = '';
+    document.getElementById('toleranceFilter').value = '';
+    document.getElementById('layerFilter').value = '';
+    document.getElementById('lifeCycleFilter').value = '';
     document.getElementById('edibilitySlider').value = 0;
     document.getElementById('medicinalSlider').value = 0;
     document.getElementById('edBadge').textContent = '0';
@@ -2033,6 +2116,12 @@ function updateChips() {
         { key: 'nameSearch',  label: () => `"${filters.nameSearch}"`, show: filters.nameSearch !== '' },
         { key: 'minEdibility', label: () => `Edible ≥${filters.minEdibility}`, show: filters.minEdibility > 0 },
         { key: 'minMedicinal', label: () => `Med ≥${filters.minMedicinal}`,   show: filters.minMedicinal > 0 },
+        { key: 'climate',     label: () => `Climate: ${filters.climate}` },
+        { key: 'layer',       label: () => `Layer: ${filters.layer}` },
+        { key: 'lifeCycle',   label: () => `Cycle: ${filters.lifeCycle}` },
+        { key: 'light',       label: () => `Light: ${filters.light}` },
+        { key: 'water',       label: () => `Water: ${filters.water}` },
+        { key: 'tolerance',   label: () => `Tol: ${filters.tolerance}` },
     ];
 
     const active = chipDefs.filter(d => {
@@ -3052,6 +3141,12 @@ function renderTypeMap(data, page) {
     if (filters.minMedicinal > 0) activeFilters.push(`Med ≥${filters.minMedicinal}`);
     if (filters.growthRate)      activeFilters.push(filters.growthRate);
     if (filters.nameSearch)      activeFilters.push(`"${filters.nameSearch}"`);
+    if (filters.climate)         activeFilters.push(filters.climate);
+    if (filters.layer)           activeFilters.push(filters.layer);
+    if (filters.lifeCycle)       activeFilters.push(filters.lifeCycle);
+    if (filters.light)           activeFilters.push(filters.light);
+    if (filters.water)           activeFilters.push(filters.water);
+    if (filters.tolerance)       activeFilters.push(filters.tolerance);
 
     if (activeFilters.length > 0) {
         const banner = document.createElement('div');
@@ -3322,6 +3417,64 @@ function populateTypeDropdown() {
     });
 }
 
+function populateNewFilterDropdowns() {
+    // Climate (kew_climate_description)
+    const climates = {};
+    allPlants.forEach(p => {
+        const c = (p.kew_climate_description || '').trim();
+        if (c) climates[c] = (climates[c] || 0) + 1;
+    });
+    const climSel = document.getElementById('climateFilter');
+    Object.entries(climates).sort((a,b) => b[1]-a[1]).forEach(([name, ct]) => {
+        const opt = document.createElement('option');
+        opt.value = name;
+        opt.textContent = `${name} (${ct.toLocaleString()})`;
+        climSel.appendChild(opt);
+    });
+
+    // Light requirement
+    const lights = {};
+    allPlants.forEach(p => {
+        const l = (p.pp_light_requirement || '').trim();
+        if (l) lights[l] = (lights[l] || 0) + 1;
+    });
+    const lightSel = document.getElementById('lightFilter');
+    Object.entries(lights).sort((a,b) => b[1]-a[1]).forEach(([name, ct]) => {
+        const opt = document.createElement('option');
+        opt.value = name;
+        opt.textContent = `${name} (${ct.toLocaleString()})`;
+        lightSel.appendChild(opt);
+    });
+
+    // Water requirement
+    const waters = {};
+    allPlants.forEach(p => {
+        const w = (p.pp_water_requirement || '').trim();
+        if (w && w.length < 40) waters[w] = (waters[w] || 0) + 1;
+    });
+    const waterSel = document.getElementById('waterFilter');
+    Object.entries(waters).sort((a,b) => b[1]-a[1]).forEach(([name, ct]) => {
+        const opt = document.createElement('option');
+        opt.value = name;
+        opt.textContent = `${name} (${ct.toLocaleString()})`;
+        waterSel.appendChild(opt);
+    });
+
+    // Plant Layer
+    const layers = {};
+    allPlants.forEach(p => {
+        const l = (p.pp_layer || '').trim();
+        if (l && !l.includes(',')) layers[l] = (layers[l] || 0) + 1;
+    });
+    const layerSel = document.getElementById('layerFilter');
+    Object.entries(layers).sort((a,b) => b[1]-a[1]).forEach(([name, ct]) => {
+        const opt = document.createElement('option');
+        opt.value = name;
+        opt.textContent = `${name} (${ct.toLocaleString()})`;
+        layerSel.appendChild(opt);
+    });
+}
+
 // ─────────────────────────────────────────────
 // FULLSCREEN
 // ─────────────────────────────────────────────
@@ -3422,6 +3575,7 @@ async function loadData() {
 
     try {
         populateTypeDropdown();
+        populateNewFilterDropdowns();
         buildZoneBar();
         buildQfZoneBar();
         refreshAll();
