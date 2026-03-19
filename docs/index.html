@@ -950,6 +950,10 @@
             position: sticky;
             top: 0;
         }
+        .picks-table th.sortable { cursor: pointer; user-select: none; transition: background 0.15s; }
+        .picks-table th.sortable:hover { background: #e8f0dc; }
+        .picks-table th.sortable i.fa-sort, .picks-table th.sortable i.fa-sort-up, .picks-table th.sortable i.fa-sort-down { font-size: 0.65rem; opacity: 0.4; margin-left: 0.2rem; }
+        .picks-table th.sortable.active-sort i { opacity: 1; color: var(--primary); }
 
         .picks-table td {
             padding: 0.45rem 0.75rem;
@@ -1495,7 +1499,6 @@
 <!-- Tab navigation -->
 <div class="tab-bar" id="tabBar">
     <button class="tab-btn active" data-tab="explorer" onclick="switchTab('explorer')"><i class="fas fa-leaf"></i><span> Explorer</span></button>
-    <button class="tab-btn" data-tab="species" onclick="switchTab('species')"><i class="fas fa-sitemap"></i><span> Species</span></button>
     <button class="tab-btn" data-tab="geo" onclick="switchTab('geo')"><i class="fas fa-globe"></i><span> Geographic</span></button>
     <button class="tab-btn" data-tab="insights" onclick="switchTab('insights')"><i class="fas fa-chart-pie"></i><span> Insights</span></button>
     <button class="tab-btn" data-tab="dashboard" onclick="switchTab('dashboard')"><i class="fas fa-project-diagram"></i><span> Dashboard</span></button>
@@ -1589,6 +1592,28 @@
                 </div>
             </div>
 
+            <!-- Safety & Light — prominently placed -->
+            <div>
+                <div class="filter-section-heading"><i class="fas fa-shield-alt"></i> Safety &amp; Light</div>
+                <div class="filter-group">
+                    <label>🐾 Safety / Toxicity</label>
+                    <select id="hazardFilter" onchange="setFilter('hazard', this.value || null)">
+                        <option value="">Any</option>
+                        <option value="none">🐾 No Warnings (Pet-Safe)</option>
+                        <option value="toxic">☠️ Toxic / Poisonous</option>
+                        <option value="weed">⚠️ Weed Potential</option>
+                        <option value="invasive">⚠️ Invasive</option>
+                        <option value="any_warning">⚠️ Any Warning</option>
+                    </select>
+                </div>
+                <div class="filter-group" style="margin-top:0.75rem">
+                    <label>☀️ Light Requirement</label>
+                    <select id="lightFilter" onchange="setFilter('light', this.value || null)">
+                        <option value="">Any Light</option>
+                    </select>
+                </div>
+            </div>
+
             <!-- Hardiness Zone visual bar -->
             <div class="sidebar-zone-section">
                 <div class="filter-section-heading"><i class="fas fa-thermometer-half"></i> <span data-i18n="filter.hardinesszone">Hardiness Zone</span></div>
@@ -1652,12 +1677,6 @@
                     </select>
                 </div>
                 <div class="filter-group" style="margin-top:0.75rem">
-                    <label>Light Requirement</label>
-                    <select id="lightFilter" onchange="setFilter('light', this.value || null)">
-                        <option value="">Any Light</option>
-                    </select>
-                </div>
-                <div class="filter-group" style="margin-top:0.75rem">
                     <label>Water Requirement</label>
                     <select id="waterFilter" onchange="setFilter('water', this.value || null)">
                         <option value="">Any Water</option>
@@ -1670,22 +1689,6 @@
                         <option value="Drought">Drought</option>
                         <option value="Maritime exposure">Maritime Exposure</option>
                         <option value="Atmospheric pollution">Atmospheric Pollution</option>
-                    </select>
-                </div>
-            </div>
-
-            <!-- Hazard / Toxicity -->
-            <div>
-                <div class="filter-section-heading"><i class="fas fa-exclamation-triangle"></i> Hazards &amp; Toxicity</div>
-                <div class="filter-group">
-                    <label>Hazard Warning</label>
-                    <select id="hazardFilter" onchange="setFilter('hazard', this.value || null)">
-                        <option value="">Any</option>
-                        <option value="none">No Warnings</option>
-                        <option value="toxic">Toxic / Poisonous</option>
-                        <option value="weed">Weed Potential</option>
-                        <option value="invasive">Invasive</option>
-                        <option value="any_warning">Any Warning</option>
                     </select>
                 </div>
             </div>
@@ -1932,25 +1935,25 @@
                         <table class="picks-table">
                             <thead>
                                 <tr>
-                                    <th data-i18n="table.rank">#</th>
-                                    <th data-i18n="table.commonname">Common Name</th>
-                                    <th data-i18n="table.familyspecies">Family / Species</th>
-                                    <th data-i18n="table.type">Type</th>
-                                    <th data-i18n="table.zone" title="USDA Hardiness Zone range this plant can survive in">Zone</th>
-                                    <th title="Safety: pet-friendly, toxic, or weed/invasive warning">Safety</th>
-                                    <th title="Light requirements: ☀ Full Sun, ⛅ Partial, ● Shade">Light</th>
-                                    <th data-i18n="table.edibility" title="PFAF edibility rating 1–5: 1=mildly edible, 3=good food plant, 5=staple crop">Edibility</th>
-                                    <th data-i18n="table.medicinal" title="PFAF medicinal rating 1–5: 1=minor uses, 3=used in herbalism, 5=major medicinal plant">Medicinal</th>
-                                    <th data-i18n="table.otheruses" title="Other practical uses: fiber, timber, dye, soap, biofuel, fencing, paper and more — rated 1–5">Other Uses</th>
-                                    <th data-i18n="table.utilityscore" title="Sum of Edibility + Medicinal + Other Uses (max 15). Higher = more versatile plant.">Utility Score</th>
-                                    <th data-i18n="table.link">Link</th>
+                                    <th class="sortable" data-sort="rank" onclick="sortTopPicks('rank')">#</th>
+                                    <th class="sortable" data-sort="name" onclick="sortTopPicks('name')">Common Name <i class="fas fa-sort"></i></th>
+                                    <th class="sortable" data-sort="family" onclick="sortTopPicks('family')">Family <i class="fas fa-sort"></i></th>
+                                    <th class="sortable" data-sort="type" onclick="sortTopPicks('type')">Type <i class="fas fa-sort"></i></th>
+                                    <th class="sortable" data-sort="zone" onclick="sortTopPicks('zone')" title="USDA Hardiness Zone">Zone <i class="fas fa-sort"></i></th>
+                                    <th class="sortable" data-sort="safety" onclick="sortTopPicks('safety')" title="Safety: 🐾 pet-safe, ☠️ toxic, ⚠️ caution">Safety <i class="fas fa-sort"></i></th>
+                                    <th class="sortable" data-sort="light" onclick="sortTopPicks('light')" title="Light: ☀️ Sun, ⛅ Partial, 🌑 Shade">Light <i class="fas fa-sort"></i></th>
+                                    <th class="sortable" data-sort="edibility" onclick="sortTopPicks('edibility')" title="PFAF edibility 1–5">Edibility <i class="fas fa-sort"></i></th>
+                                    <th class="sortable" data-sort="medicinal" onclick="sortTopPicks('medicinal')" title="PFAF medicinal 1–5">Medicinal <i class="fas fa-sort"></i></th>
+                                    <th class="sortable" data-sort="otheruses" onclick="sortTopPicks('otheruses')" title="Other uses 1–5">Other Uses <i class="fas fa-sort"></i></th>
+                                    <th class="sortable active-sort" data-sort="score" onclick="sortTopPicks('score')" title="Utility = Edibility+Medicinal+OtherUses">Score <i class="fas fa-sort-down"></i></th>
+                                    <th>Link</th>
                                 </tr>
                             </thead>
                             <tbody id="topPicksBody"></tbody>
                         </table>
                     </div>
                 </div>
-                <div class="card-footer"><i class="fas fa-info-circle"></i> <span data-i18n="foot.toppickshint">Sorted by Utility Score (Edibility + Medicinal + OtherUses). Showing top 50 from filtered set.</span></div>
+                <div class="card-footer"><i class="fas fa-info-circle"></i> <span data-i18n="foot.toppickshint">Click any column header to sort. Showing top 50 from filtered set.</span></div>
             </div>
 
         </div><!-- /charts-grid -->
@@ -1966,11 +1969,6 @@
 </footer>
 
 </div><!-- /tabExplorer -->
-
-<!-- ═══ TAB: Species (iframe) ═══ -->
-<div class="tab-panel" id="tabSpecies">
-    <iframe id="iframeSpecies" title="Species Explorer"></iframe>
-</div>
 
 <!-- ═══ TAB: Geographic (iframe) ═══ -->
 <div class="tab-panel" id="tabGeo">
@@ -1997,7 +1995,6 @@
 // TAB SWITCHING
 // ─────────────────────────────────────────────
 const TAB_SRC = {
-    species:   'explorer.html?embed=1',
     geo:       'distributions.html?embed=1',
     insights:  'insights.html?embed=1',
     dashboard: 'dashboard.html?embed=1',
@@ -2716,10 +2713,44 @@ function renderHazard(data) {
 }
 
 // ─────────────────────────────────────────────
-// TABLE: Top Picks
+// TABLE: Top Picks (sortable)
 // ─────────────────────────────────────────────
-function renderTopPicks(data) {
-    const sorted = [...data].sort((a,b) => utilityScore(b) - utilityScore(a)).slice(0, 50);
+let topPicksSort = { col: 'score', dir: 'desc' };
+let topPicksData = [];
+
+function safetyRank(p) {
+    const c = ((p.pp_warning || '') + ' ' + (p.zn_Toxicity || '')).toLowerCase();
+    if (/toxic|poison/.test(c)) return 3;
+    if (/invasive/.test(c)) return 2;
+    if (/weed/.test(c)) return 2;
+    if ((p.pp_warning || '').trim() || (p.zn_Toxicity || '').trim()) return 1;
+    return 0; // safe
+}
+
+function lightRank(p) {
+    const lv = (p.pp_light_requirement || '').toLowerCase();
+    if (lv.includes('full shade')) return 1;
+    if (lv.includes('partial'))    return 2;
+    if (lv.includes('full sun'))   return 3;
+    return 0; // unknown
+}
+
+function sortTopPicks(col) {
+    if (topPicksSort.col === col) {
+        topPicksSort.dir = topPicksSort.dir === 'asc' ? 'desc' : 'asc';
+    } else {
+        topPicksSort.col = col;
+        topPicksSort.dir = (col === 'name' || col === 'family' || col === 'type') ? 'asc' : 'desc';
+    }
+    renderTopPicks(null, true);
+}
+
+function renderTopPicks(data, reSortOnly) {
+    if (data) {
+        topPicksData = [...data].sort((a,b) => utilityScore(b) - utilityScore(a)).slice(0, 50);
+    }
+    if (!reSortOnly && !data) return;
+    const sorted = [...topPicksData];
     const maxScore = Math.max(...sorted.map(utilityScore), 1);
 
     const tbody = document.getElementById('topPicksBody');
@@ -2729,6 +2760,37 @@ function renderTopPicks(data) {
             No plants match current filters</td></tr>`;
         return;
     }
+
+    // Sort
+    const { col, dir } = topPicksSort;
+    const m = dir === 'asc' ? 1 : -1;
+    sorted.sort((a, b) => {
+        let va, vb;
+        switch (col) {
+            case 'name':     va = (a.CommonName || a.Species || '').toLowerCase(); vb = (b.CommonName || b.Species || '').toLowerCase(); return m * va.localeCompare(vb);
+            case 'family':   va = (a.Family || '').toLowerCase(); vb = (b.Family || '').toLowerCase(); return m * va.localeCompare(vb);
+            case 'type':     va = (a.Type || '').toLowerCase(); vb = (b.Type || '').toLowerCase(); return m * va.localeCompare(vb);
+            case 'zone':     va = (plantZoneRange(a) || [0])[0]; vb = (plantZoneRange(b) || [0])[0]; return m * (va - vb);
+            case 'safety':   return m * (safetyRank(a) - safetyRank(b));
+            case 'light':    return m * (lightRank(a) - lightRank(b));
+            case 'edibility': return m * ((parseInt(a.Edibility)||0) - (parseInt(b.Edibility)||0));
+            case 'medicinal': return m * ((parseInt(a.Medicinal)||0) - (parseInt(b.Medicinal)||0));
+            case 'otheruses': return m * ((parseInt(a.OtherUses)||0) - (parseInt(b.OtherUses)||0));
+            case 'score':    return m * (utilityScore(a) - utilityScore(b));
+            default:         return 0;
+        }
+    });
+
+    // Update header icons
+    document.querySelectorAll('.picks-table th.sortable').forEach(th => {
+        const s = th.dataset.sort;
+        const icon = th.querySelector('i');
+        if (!icon) return;
+        th.classList.toggle('active-sort', s === col);
+        icon.className = s === col
+            ? (dir === 'asc' ? 'fas fa-sort-up' : 'fas fa-sort-down')
+            : 'fas fa-sort';
+    });
 
     const ratingBadge = (score, max=5, color='#6b9e3e') => {
         if (!score) return `<span style="color:#ccc;font-size:0.78rem">—</span>`;
