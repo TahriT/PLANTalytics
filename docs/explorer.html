@@ -297,6 +297,17 @@
             color: var(--coral);
             border: 1px solid rgba(224,96,80,.15);
         }
+        .tag-safe {
+            background: rgba(46,125,50,.08);
+            color: #2e7d32;
+            border: 1px solid rgba(46,125,50,.18);
+        }
+        .tag-light {
+            background: rgba(255,235,59,.1);
+            color: #f57f17;
+            border: 1px solid rgba(255,235,59,.25);
+            letter-spacing: -0.5px;
+        }
 
         .card-count {
             position: absolute;
@@ -873,15 +884,26 @@ function renderSpecies() {
             const hasToxic = toxic && toxic !== 'No Incriminating Information Has Been Discovered';
             const warning = (r.pp_warning || '').trim();
             const srcs = (r.sources || '').split('+').filter(Boolean);
+            const lightLv = (r.pp_light_requirement || '').trim().toLowerCase();
+            let lightIcons = '';
+            if (lightLv.includes('full sun'))   lightIcons += '☀️';
+            if (lightLv.includes('partial'))    lightIcons += '⛅';
+            if (lightLv.includes('full shade')) lightIcons += '🌑';
+            const hazCom = ((r.pp_warning || '') + ' ' + (r.zn_Toxicity || '')).toLowerCase();
+            const isToxic = /toxic|poison/.test(hazCom);
+            const isWarn = /invasive|weed/.test(hazCom) || warning;
+            const safetyTag = isToxic ? `<span class="tag tag-toxic">☠️ Toxic</span>`
+                            : isWarn ? `<span class="tag tag-toxic">⚠️ ${escHtml(warning || 'Warning')}</span>`
+                            : `<span class="tag tag-safe">🐾 Safe</span>`;
 
             card.innerHTML = `
                 <div class="card-name">${escHtml(r.CommonName || r.Species || '—')}</div>
                 <div class="card-sci">${escHtml(r.Genus)} ${escHtml(r.Species)}</div>
                 <div class="card-meta">
+                    ${safetyTag}
+                    ${lightIcons ? `<span class="tag tag-light" title="${escHtml(r.pp_light_requirement || '')}">${lightIcons}</span>` : ''}
                     ${climate ? `<span class="tag tag-climate">${escHtml(climate)}</span>` : ''}
                     ${lifeform ? `<span class="tag tag-lifeform">${escHtml(lifeform)}</span>` : ''}
-                    ${hasToxic ? `<span class="tag tag-toxic"><i class="fas fa-exclamation-triangle"></i> Toxic</span>` : ''}
-                    ${warning ? `<span class="tag tag-toxic"><i class="fas fa-exclamation-triangle"></i> ${escHtml(warning)}</span>` : ''}
                     ${srcs.map(s => `<span class="tag tag-source">${s}</span>`).join('')}
                 </div>
             `;
@@ -903,12 +925,25 @@ function showDetail(r) {
     const toxic = (r.zn_Toxicity || '').trim();
     const hasToxic = toxic && toxic !== 'No Incriminating Information Has Been Discovered';
     const warning = (r.pp_warning || '').trim();
+    const hazCom = ((r.pp_warning || '') + ' ' + (r.zn_Toxicity || '')).toLowerCase();
     const tags = document.getElementById('detailTags');
     tags.innerHTML = '';
+    // Safety icon — first and prominent
+    if (/toxic|poison/.test(hazCom))
+        tags.innerHTML += `<span class="tag tag-toxic">☠️ Toxic</span>`;
+    else if (/invasive|weed/.test(hazCom) || warning)
+        tags.innerHTML += `<span class="tag tag-toxic">⚠️ ${escHtml(warning || 'Warning')}</span>`;
+    else
+        tags.innerHTML += `<span class="tag tag-safe">🐾 No known warnings</span>`;
+    // Light level icon
+    const lightLv = (r.pp_light_requirement || '').trim().toLowerCase();
+    let lightIcons = '';
+    if (lightLv.includes('full sun'))   lightIcons += '☀️';
+    if (lightLv.includes('partial'))    lightIcons += '⛅';
+    if (lightLv.includes('full shade')) lightIcons += '🌑';
+    if (lightIcons) tags.innerHTML += `<span class="tag tag-light" title="${escHtml(r.pp_light_requirement || '')}">${lightIcons}</span>`;
     if (climate) tags.innerHTML += `<span class="tag tag-climate">${escHtml(climate)}</span>`;
     if (lifeform) tags.innerHTML += `<span class="tag tag-lifeform">${escHtml(lifeform)}</span>`;
-    if (hasToxic) tags.innerHTML += `<span class="tag tag-toxic"><i class="fas fa-exclamation-triangle"></i> ${escHtml(toxic)}</span>`;
-    if (warning) tags.innerHTML += `<span class="tag tag-toxic"><i class="fas fa-exclamation-triangle"></i> ${escHtml(warning)}</span>`;
 
     let body = '';
 

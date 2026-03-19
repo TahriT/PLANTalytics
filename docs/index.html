@@ -1123,6 +1123,16 @@
         .plant-card-badge.ed  { background: #fff3cd; color: #8d6200; }
         .plant-card-badge.med { background: #f3e5f5; color: #6a1b9a; }
         .plant-card-badge.oth { background: #e3f2fd; color: #1565c0; }
+        .plant-card-badge.safe { background: #e8f5e9; color: #2e7d32; }
+        .plant-card-badge.warn { background: #fff3e0; color: #e65100; }
+        .plant-card-badge.toxic { background: #fce4ec; color: #c62828; }
+        .plant-card-badge.light { background: #fffde7; color: #f57f17; font-weight: 600; letter-spacing: -0.5px; }
+        .safety-icon { font-size: 0.85rem; vertical-align: middle; }
+        .light-icons { font-size: 0.72rem; letter-spacing: -1px; }
+        .ov-chip.light { background: rgba(255,253,100,0.22); color: #ffe082; }
+        .ov-chip.warn-chip { background: rgba(255,100,80,0.25); color: #ffab91; }
+        .picks-safety { white-space: nowrap; font-size: 0.85rem; }
+        .picks-light { white-space: nowrap; font-size: 0.78rem; letter-spacing: -0.5px; }
         .photo-grid-msg { grid-column: 1 / -1; text-align: center; padding: 1.2rem 0.75rem; color: #999; font-size: 0.82rem; }
         /* Pagination */
         .grid-pager { grid-column: 1 / -1; display: flex; align-items: center; justify-content: space-between; padding: 0.6rem 0.25rem 0.35rem; flex-wrap: wrap; gap: 0.4rem; }
@@ -1927,6 +1937,8 @@
                                     <th data-i18n="table.familyspecies">Family / Species</th>
                                     <th data-i18n="table.type">Type</th>
                                     <th data-i18n="table.zone" title="USDA Hardiness Zone range this plant can survive in">Zone</th>
+                                    <th title="Safety: pet-friendly, toxic, or weed/invasive warning">Safety</th>
+                                    <th title="Light requirements: ☀ Full Sun, ⛅ Partial, ● Shade">Light</th>
                                     <th data-i18n="table.edibility" title="PFAF edibility rating 1–5: 1=mildly edible, 3=good food plant, 5=staple crop">Edibility</th>
                                     <th data-i18n="table.medicinal" title="PFAF medicinal rating 1–5: 1=minor uses, 3=used in herbalism, 5=major medicinal plant">Medicinal</th>
                                     <th data-i18n="table.otheruses" title="Other practical uses: fiber, timber, dye, soap, biofuel, fencing, paper and more — rated 1–5">Other Uses</th>
@@ -2712,7 +2724,7 @@ function renderTopPicks(data) {
 
     const tbody = document.getElementById('topPicksBody');
     if (sorted.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="10" style="text-align:center;color:#bbb;padding:2rem">
+        tbody.innerHTML = `<tr><td colspan="12" style="text-align:center;color:#bbb;padding:2rem">
             <i class="fas fa-seedling" style="font-size:2rem;display:block;margin-bottom:0.5rem"></i>
             No plants match current filters</td></tr>`;
         return;
@@ -2740,6 +2752,8 @@ function renderTopPicks(data) {
             <td><div style="font-size:0.78rem;color:#888">${p.Family}</div><em style="font-size:0.8rem">${sp}</em></td>
             <td style="font-size:0.8rem">${p.Type || '—'}</td>
             <td><span style="background:#e8f5e9;color:#2e7d32;padding:0.2rem 0.45rem;border-radius:4px;font-size:0.78rem;font-weight:600">${zoneStr}</span></td>
+            <td class="picks-safety">${getSafetyIcon(p)}</td>
+            <td class="picks-light">${getLightIcons(p)}</td>
             <td>${ratingBadge(ed, 5, '#f9a825')}</td>
             <td>${ratingBadge(med, 5, '#7b1fa2')}</td>
             <td>${ratingBadge(oth, 5, '#1565c0')}</td>
@@ -2752,6 +2766,53 @@ function renderTopPicks(data) {
             <td><a class="pfaf-link" href="${p.PFAF || '#'}" target="_blank" title="PFAF entry"><i class="fas fa-external-link-alt"></i></a></td>
         </tr>`;
     }).join('');
+}
+
+// ─────────────────────────────────────────────
+// SAFETY & LIGHT HELPERS
+// ─────────────────────────────────────────────
+function getSafetyIcon(p) {
+    const combined = ((p.pp_warning || '') + ' ' + (p.zn_Toxicity || '')).toLowerCase();
+    if (/toxic|poison/i.test(combined))
+        return `<span class="safety-icon" title="Toxic / Poisonous">☠️</span>`;
+    if (/invasive/i.test(combined))
+        return `<span class="safety-icon" title="Invasive species">⚠️</span>`;
+    if (/weed/i.test(combined))
+        return `<span class="safety-icon" title="Weed potential">⚠️</span>`;
+    if ((p.pp_warning || '').trim() || (p.zn_Toxicity || '').trim())
+        return `<span class="safety-icon" title="Has warnings">⚠️</span>`;
+    return `<span class="safety-icon" title="No known warnings">🐾</span>`;
+}
+
+function getLightIcons(p) {
+    const lv = (p.pp_light_requirement || '').toLowerCase();
+    if (!lv) return `<span style="color:#ccc">—</span>`;
+    let icons = '';
+    if (lv.includes('full sun'))   icons += '<span title="Full Sun">☀️</span>';
+    if (lv.includes('partial'))    icons += '<span title="Partial Sun/Shade">⛅</span>';
+    if (lv.includes('full shade')) icons += '<span title="Full Shade (Indoor OK)">🌑</span>';
+    return icons || `<span style="color:#ccc">—</span>`;
+}
+
+function getSafetyBadge(p) {
+    const combined = ((p.pp_warning || '') + ' ' + (p.zn_Toxicity || '')).toLowerCase();
+    if (/toxic|poison/i.test(combined))
+        return `<span class="plant-card-badge toxic" title="Toxic / Poisonous">☠️</span>`;
+    if (/invasive|weed/i.test(combined))
+        return `<span class="plant-card-badge warn" title="Weed / Invasive">⚠️</span>`;
+    if ((p.pp_warning || '').trim() || (p.zn_Toxicity || '').trim())
+        return `<span class="plant-card-badge warn" title="Has warnings">⚠️</span>`;
+    return `<span class="plant-card-badge safe" title="No known warnings">🐾</span>`;
+}
+
+function getLightBadge(p) {
+    const lv = (p.pp_light_requirement || '').toLowerCase();
+    if (!lv) return '';
+    let icons = '';
+    if (lv.includes('full sun'))   icons += '☀️';
+    if (lv.includes('partial'))    icons += '⛅';
+    if (lv.includes('full shade')) icons += '🌑';
+    return icons ? `<span class="plant-card-badge light" title="${(p.pp_light_requirement || '').trim()}">${icons}</span>` : '';
 }
 
 // ─────────────────────────────────────────────
@@ -3413,6 +3474,9 @@ function renderTypeMap(data, page) {
         card.title = name;
 
         const badges = [];
+        badges.push(getSafetyBadge(p));
+        const lightB = getLightBadge(p);
+        if (lightB) badges.push(lightB);
         if (ed  >= 1) badges.push(`<span class="plant-card-badge ed"  title="Edibility">🌿 ${ed}</span>`);
         if (med >= 1) badges.push(`<span class="plant-card-badge med" title="Medicinal">💊 ${med}</span>`);
         if (oth >= 1) badges.push(`<span class="plant-card-badge oth" title="Other Uses">🔧 ${oth}</span>`);
@@ -3429,6 +3493,19 @@ function renderTypeMap(data, page) {
         if (htStr)   ovChips.push(`<span class="ov-chip">↕ ${htStr}</span>`);
         if (grStr)   ovChips.push(`<span class="ov-chip">${grStr}</span>`);
         if (group.name !== 'Other / Unknown') ovChips.push(`<span class="ov-chip">${group.name}</span>`);
+        // Light level chip
+        const lightLv = (p.pp_light_requirement || '').trim();
+        if (lightLv) {
+            let lIcons = '';
+            if (lightLv.toLowerCase().includes('full sun'))   lIcons += '☀️';
+            if (lightLv.toLowerCase().includes('partial'))    lIcons += '⛅';
+            if (lightLv.toLowerCase().includes('full shade')) lIcons += '🌑';
+            if (lIcons) ovChips.push(`<span class="ov-chip light">${lIcons}</span>`);
+        }
+        // Safety chip
+        const hazardCombined = ((p.pp_warning || '') + ' ' + (p.zn_Toxicity || '')).toLowerCase();
+        if (/toxic|poison/.test(hazardCombined)) ovChips.push(`<span class="ov-chip warn-chip">☠️ Toxic</span>`);
+        else if (/invasive|weed/.test(hazardCombined)) ovChips.push(`<span class="ov-chip warn-chip">⚠️ Caution</span>`);
 
         card.innerHTML =
             `<div class="plant-card-img" style="border-top:3px solid ${group.color}">`
